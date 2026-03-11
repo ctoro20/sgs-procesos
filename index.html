@@ -2168,6 +2168,11 @@ function renderRichTextHtml(value){
 return sanitizeRichTextHtml(value);
 }
 
+function isEmptyRichTextValue(value){
+const normalized = sanitizeRichTextHtml(value || "").replace(/&nbsp;/g, " ").trim();
+return !normalized || normalized === "<p></p>" || normalized === "<ul></ul>" || normalized === "<ol></ol>";
+}
+
 function renderRichTextEditor(editorId, value, placeholder){
 return `
 <div class="rich-editor" data-editor-id="${editorId}">
@@ -2206,22 +2211,50 @@ function buildDefaultItemDetails(){
 return {
 main: {
 title: "CONEMI",
-description: normalizeRichTextField("Nodo principal del macroproceso. Representa el dominio de negocio desde el cual se articulan las áreas y procesos asociados.", "paragraph"),
+description: normalizeRichTextField(`
+<p>Macroproceso principal que articula la operación de CONEMI y entrega el marco de gobernanza para las áreas Comercial, Operaciones y Área Técnica.</p>
+<ul>
+<li>Define el dominio de negocio y su propuesta de valor.</li>
+<li>Orquesta la trazabilidad entre captación comercial, ejecución del servicio y emisión técnica.</li>
+<li>Sirve como punto de navegación para procesos, archivos y workflows asociados.</li>
+</ul>
+`, "paragraph"),
 link: ""
 },
 "area-a": {
 title: "COMERCIAL",
-description: "<p></p>",
+description: normalizeRichTextField(`
+<p>Área responsable de la relación con el cliente y del ingreso formal de oportunidades al sistema.</p>
+<ul>
+<li>Recibe requerimientos, valida antecedentes iniciales y prepara ofertas.</li>
+<li>Coordina expectativas, alcances y condiciones comerciales.</li>
+<li>Actúa como puerta de entrada del proceso operacional.</li>
+</ul>
+`, "paragraph"),
 link: ""
 },
 "area-b": {
 title: "OPERACIONES",
-description: "<p></p>",
+description: normalizeRichTextField(`
+<p>Área encargada de planificar, coordinar y ejecutar los servicios comprometidos, integrando terreno y laboratorios cuando corresponde.</p>
+<ul>
+<li>Convierte el alcance comercial en un plan operativo ejecutable.</li>
+<li>Administra recursos, tiempos, logística y trazabilidad de la ejecución.</li>
+<li>Conecta los resultados operativos con el control técnico posterior.</li>
+</ul>
+`, "paragraph"),
 link: ""
 },
 "area-c": {
 title: "ÁREA TÉCNICA",
-description: "<p></p>",
+description: normalizeRichTextField(`
+<p>Área responsable del aseguramiento técnico, la revisión de consistencia y la emisión de informes finales del servicio.</p>
+<ul>
+<li>Controla calidad técnica y cumplimiento del alcance contratado.</li>
+<li>Gestiona observaciones, validaciones y cierre documental.</li>
+<li>Entrega informes y respaldos finales al cliente u otras áreas internas.</li>
+</ul>
+`, "paragraph"),
 link: ""
 }
 };
@@ -2269,7 +2302,7 @@ const fallback = defaultItemDetails[itemId];
 const current = parsed[itemId] || {};
 acc[itemId] = {
 title: current.title || fallback.title,
-description: normalizeRichTextField(current.description || fallback.description, "paragraph"),
+description: normalizeRichTextField(isEmptyRichTextValue(current.description) ? fallback.description : current.description, "paragraph"),
 link: current.link || fallback.link || ""
 };
 return acc;
@@ -2498,6 +2531,36 @@ ${renderRichTextEditor("itemEditDescription", detail.description, "Agrega una de
 `;
 }
 
+function renderItemView(itemId){
+const sourceItem = getItemById(itemId);
+const item = getEditorTargetItem(sourceItem);
+const badgeItem = sourceItem ? getGroupBadgeItem(sourceItem) : null;
+const detail = item ? getItemDetail(item.id) : null;
+if(!item || !detail){
+return "<h2>Sin detalle</h2>";
+}
+
+const link = detail.link ? `<div><h3>Workflow asociado</h3><a class="action-link" href="${detail.link}">Abrir workflow asociado</a></div>` : "";
+const modeAction = isEditingDiagram
+? `<div class="content-panel-actions"><button class="diagram-button" id="closeItemPanelViewButton" type="button">Cerrar</button><div class="content-panel-actions-right"><button class="diagram-button" id="editItemDetailButton" type="button">Modo edición</button></div></div>`
+: "";
+
+return `
+<div class="content-title" data-item-id="${item.id}">
+<div class="content-title-main">
+${badgeItem ? `<span class="content-process-badge">${escapeHtml(badgeItem.text || "")}</span>` : ""}
+<h2>${escapeHtml(detail.title || item.text || item.id)}</h2>
+</div>
+</div>
+<h3>Descripción</h3>
+${renderRichTextHtml(detail.description)}
+<h3>Archivos asociados</h3>
+<div class="process-files" id="itemFilesList"><div class="process-editor-note">Cargando archivos...</div></div>
+${link}
+${modeAction}
+`;
+}
+
 function escapeHtml(value){
 return String(value)
 .replace(/&/g, "&amp;")
@@ -2541,6 +2604,31 @@ closeButton.addEventListener("click", closePanel);
 document.getElementById("panel").classList.add("is-open");
 document.body.classList.add("panel-open");
 await renderProcessFiles(processId, "processFilesList", false);
+}
+
+async function openItemView(itemId){
+const sourceItem = getItemById(itemId);
+const item = getEditorTargetItem(sourceItem);
+if(!item){
+return;
+}
+
+document.querySelector(".panel-content").classList.remove("is-editor-mode");
+document.getElementById("content").innerHTML = renderItemView(item.id);
+document.querySelector(".panel-title").textContent = "Detalle del Nodo";
+const editButton = document.getElementById("editItemDetailButton");
+if(editButton){
+editButton.addEventListener("click", function(){
+openTextEditor(item.id);
+});
+}
+const closeButton = document.getElementById("closeItemPanelViewButton");
+if(closeButton){
+closeButton.addEventListener("click", closePanel);
+}
+document.getElementById("panel").classList.add("is-open");
+document.body.classList.add("panel-open");
+await renderProcessFiles(item.id, "itemFilesList", false);
 }
 
 function closePanel(event){
@@ -3029,10 +3117,25 @@ event.stopPropagation();
 openProcess(item.processId);
 });
 el.appendChild(button);
-}else if(item.html){
-el.innerHTML = item.html;
 }else{
-el.textContent = item.text || "";
+const label = document.createElement("span");
+label.className = "process-label";
+label.innerHTML = item.html || escapeHtml(item.text || "");
+el.appendChild(label);
+
+const button = document.createElement("button");
+button.className = "process-panel-trigger";
+button.type = "button";
+button.setAttribute("aria-label", "Ver detalle de " + (getItemDetail(item.id).title || item.text || item.id));
+button.addEventListener("pointerdown", function(event){
+event.stopPropagation();
+});
+button.addEventListener("click", function(event){
+event.preventDefault();
+event.stopPropagation();
+openItemView(item.id);
+});
+el.appendChild(button);
 }
 
 if(itemHasAttachedFiles(item) || itemHasWorkflow(item)){
