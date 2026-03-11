@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proceso Comercial - Mapa Navegable</title>
+<style>
+:root{
+--bg:#ececec;
+--line:#6c6c6c;
+--text:#616161;
+--muted:#8b8b8b;
+--card:#f7f2ed;
+--panel:#ffffff;
+--orange:#eb7a07;
+--orange-soft:#f3a454;
+--yellow:#f2d54b;
+}
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:var(--bg);
+color:var(--text);
+min-height:100vh;
+}
+
+body.panel-open{
+overflow:hidden;
+}
+
+.app-shell{
+display:flex;
+min-height:100vh;
+}
+
+.sidebar{
+width:280px;
+padding:24px 18px;
+background:linear-gradient(180deg, #20303d 0%, #18242d 100%);
+color:#dce4ea;
+border-right:1px solid rgba(255,255,255,.08);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+padding:0 8px 18px;
+margin-bottom:18px;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.brand-logo{
+width:52px;
+height:52px;
+padding:8px;
+border-radius:14px;
+background:rgba(255,255,255,.96);
+object-fit:contain;
+box-shadow:0 8px 18px rgba(0,0,0,.16);
+}
+
+.brand-copy strong{
+display:block;
+font-size:16px;
+color:#fff;
+}
+
+.brand-copy span{
+font-size:12px;
+color:#a9b7c1;
+}
+
+.nav-section{
+margin-bottom:24px;
+}
+
+.nav-title{
+padding:0 8px;
+margin:0 0 10px;
+font-size:11px;
+letter-spacing:.12em;
+text-transform:uppercase;
+color:#8ea0ad;
+}
+
+.nav-list{
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.nav-tree{
+display:flex;
+flex-direction:column;
+gap:14px;
+}
+
+.nav-group{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+.nav-group-label{
+display:flex;
+align-items:center;
+gap:10px;
+padding:4px 4px 4px 0;
+color:#f3f7fa;
+font-size:12px;
+font-weight:700;
+letter-spacing:.04em;
+}
+
+.nav-group-children{
+display:flex;
+flex-direction:column;
+gap:4px;
+padding-left:14px;
+border-left:1px solid rgba(255,255,255,.06);
+margin-left:16px;
+}
+
+.nav-subtree{
+display:flex;
+flex-direction:column;
+gap:2px;
+padding-left:12px;
+border-left:1px dashed rgba(255,217,179,.14);
+margin-left:10px;
+}
+
+.nav-subtree.is-collapsed{
+display:none;
+}
+
+.nav-process-row{
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.nav-toggle{
+width:24px;
+height:24px;
+border:none;
+border-radius:999px;
+background:transparent;
+color:#dce4ea;
+cursor:pointer;
+font-size:10px;
+line-height:1;
+flex:0 0 auto;
+opacity:.8;
+}
+
+.nav-toggle:hover{
+background:rgba(255,255,255,.08);
+}
+
+.nav-toggle.is-collapsed{
+transform:rotate(-90deg);
+}
+
+.nav-link.sub{
+font-size:12px;
+padding:5px 8px;
+color:#bcc9d2;
+gap:8px;
+border-radius:8px;
+}
+
+.nav-link.sub .nav-index{
+min-width:28px;
+color:#ffd9b3;
+font-size:10px;
+font-weight:600;
+letter-spacing:.03em;
+}
+
+.nav-group .nav-pill{
+min-width:26px;
+height:20px;
+padding:0 6px;
+font-size:11px;
+background:rgba(255,255,255,.08);
+color:#fff;
+}
+
+.nav-group .nav-link{
+padding:8px 10px;
+border-radius:10px;
+font-size:13px;
+color:#cfd9df;
+}
+
+.nav-group .nav-link:hover,
+.nav-group .nav-link.active{
+background:rgba(255,255,255,.06);
+}
+
+.nav-link.sub:hover{
+background:rgba(255,255,255,.04);
+}
+
+.nav-link{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 12px;
+border-radius:12px;
+color:#dce4ea;
+text-decoration:none;
+font-size:14px;
+}
+
+.nav-link:hover,
+.nav-link.active{
+background:rgba(255,255,255,.08);
+color:#fff;
+}
+
+.nav-pill{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:32px;
+height:24px;
+padding:0 8px;
+border-radius:999px;
+background:rgba(235,122,7,.18);
+color:#ffd9b3;
+font-size:12px;
+font-weight:700;
+}
+
+.sidebar-footer{
+margin-top:auto;
+padding:16px 8px 0;
+font-size:12px;
+line-height:1.5;
+color:#99a8b2;
+}
+
+.app-main{
+flex:1;
+min-width:0;
+display:flex;
+flex-direction:column;
+}
+
+.topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:16px;
+padding:18px 26px 20px;
+background:linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.78) 100%);
+backdrop-filter:blur(14px);
+border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.topbar-copy h1{
+margin:0;
+font-size:20px;
+font-weight:700;
+color:#253441;
+}
+
+.topbar-copy p{
+margin:4px 0 0;
+font-size:13px;
+color:#71808a;
+}
+
+
+.topbar-tools{
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.status-chip,
+.user-chip{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 14px;
+border-radius:14px;
+background:#fff;
+border:1px solid rgba(0,0,0,.06);
+}
+
+.status-dot{
+width:10px;
+height:10px;
+border-radius:50%;
+background:#2fa36b;
+box-shadow:0 0 0 4px rgba(47,163,107,.14);
+}
+
+.status-chip span,
+.user-meta span{
+display:block;
+font-size:12px;
+color:#80909b;
+}
+
+.status-chip strong,
+.user-meta strong{
+display:block;
+font-size:13px;
+color:#31424f;
+}
+
+.user-avatar{
+width:36px;
+height:36px;
+border-radius:50%;
+background:linear-gradient(135deg, #344a5a 0%, #50687a 100%);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+}
+
+.workspace{
+flex:1;
+overflow:auto;
+}
+
+.page{
+padding:20px 18px 28px;
+}
+
+.top-link{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:10px 14px;
+margin:0 0 16px;
+border-radius:999px;
+background:#fff;
+border:1px solid #d8d8d8;
+text-decoration:none;
+color:#6d6d6d;
+font-size:14px;
+}
+
+.diagram-shell{
+overflow:auto;
+border-radius:18px;
+}
+
+.diagram{
+position:relative;
+width:1520px;
+height:930px;
+margin:0 auto;
+background:var(--bg);
+}
+
+.diagram svg{
+position:absolute;
+inset:0;
+overflow:visible;
+}
+
+.label{
+position:absolute;
+font-size:13px;
+line-height:1.15;
+color:var(--text);
+text-align:center;
+}
+
+.muted{
+color:var(--muted);
+}
+
+.actor{
+position:absolute;
+width:150px;
+font-size:12px;
+line-height:1.15;
+text-align:center;
+color:#777;
+}
+
+.actor::before{
+content:"";
+display:block;
+width:18px;
+height:18px;
+margin:0 auto 4px;
+border:3px solid #ababab;
+border-radius:50%;
+box-shadow:0 22px 0 -9px #ababab;
+}
+
+.flow-card{
+position:absolute;
+width:102px;
+min-height:38px;
+padding:8px 10px;
+background:var(--card);
+border:1px solid var(--orange-soft);
+border-radius:6px;
+font-size:12px;
+line-height:1.15;
+text-align:center;
+cursor:pointer;
+transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.flow-card:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 16px rgba(0,0,0,.10);
+background:#fdf8f3;
+}
+
+.badge{
+position:absolute;
+top:-18px;
+left:-18px;
+width:30px;
+height:30px;
+border-radius:50%;
+background:var(--orange);
+color:#fff;
+font-size:16px;
+font-weight:700;
+display:flex;
+align-items:center;
+justify-content:center;
+box-shadow:0 4px 10px rgba(235,122,7,.25);
+}
+
+.badge.small{
+font-size:14px;
+}
+
+.decision{
+position:absolute;
+width:18px;
+height:18px;
+border:2px solid var(--orange-soft);
+background:#fff;
+transform:rotate(45deg);
+}
+
+.decision-label{
+position:absolute;
+font-size:12px;
+color:var(--text);
+text-align:center;
+line-height:1.1;
+}
+
+.tag{
+position:absolute;
+padding:2px 8px;
+background:var(--yellow);
+font-size:10px;
+line-height:1;
+color:#4a4a4a;
+}
+
+.note{
+position:absolute;
+max-width:220px;
+font-size:11px;
+line-height:1.2;
+color:var(--orange);
+font-weight:700;
+}
+
+.mini-icon{
+position:absolute;
+font-size:12px;
+color:#888;
+line-height:1.2;
+text-align:center;
+}
+
+.start-dot,
+.end-dot{
+position:absolute;
+width:14px;
+height:14px;
+border-radius:50%;
+background:#5c5c5c;
+}
+
+.end-dot{
+background:#fff;
+border:2px solid var(--orange);
+box-shadow:inset 0 0 0 2px #8f8f8f;
+}
+
+.dashed-box{
+position:absolute;
+width:145px;
+padding:14px 14px 10px;
+border:1px dashed var(--orange-soft);
+border-radius:4px;
+font-size:12px;
+line-height:1.45;
+text-align:center;
+color:var(--text);
+}
+
+.soft-icon{
+position:absolute;
+font-size:11px;
+line-height:1.1;
+color:#7b7b7b;
+text-align:center;
+}
+
+.side-panel{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.24);
+opacity:0;
+pointer-events:none;
+transition:opacity .25s ease;
+}
+
+.side-panel.is-open{
+opacity:1;
+pointer-events:auto;
+}
+
+.panel-content{
+position:absolute;
+top:0;
+right:0;
+width:min(690px, 100%);
+height:100%;
+padding:28px 30px 34px;
+background:var(--panel);
+box-shadow:-12px 0 28px rgba(0,0,0,.14);
+transform:translateX(100%);
+transition:transform .3s ease;
+overflow-y:auto;
+}
+
+.side-panel.is-open .panel-content{
+transform:translateX(0);
+}
+
+.panel-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin-bottom:20px;
+}
+
+.panel-title{
+font-size:14px;
+font-weight:700;
+letter-spacing:.08em;
+color:#777;
+text-transform:uppercase;
+}
+
+.close{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:36px;
+height:36px;
+border:none;
+background:#f1f1f1;
+border-radius:50%;
+cursor:pointer;
+font-size:18px;
+}
+
+#content .content-title{
+display:flex;
+align-items:center;
+gap:12px;
+margin:0 0 12px;
+}
+
+#content .content-step-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:40px;
+height:40px;
+padding:0 10px;
+border-radius:999px;
+background:var(--orange);
+color:#fff;
+font-size:18px;
+font-weight:700;
+box-shadow:0 4px 10px rgba(235,122,7,.22);
+}
+
+#content h2{
+margin:0;
+font-size:22px;
+color:#333;
+}
+
+#content h3{
+margin:18px 0 8px;
+font-size:15px;
+color:#444;
+}
+
+#content p,
+#content li{
+font-size:14px;
+line-height:1.5;
+color:#585858;
+}
+
+#content ol{
+margin:0;
+padding-left:18px;
+}
+
+#content .pill{
+display:inline-block;
+padding:4px 10px;
+margin:0 6px 8px 0;
+border-radius:999px;
+background:#fff3e3;
+border:1px solid #f1c892;
+font-size:12px;
+color:#8a5b11;
+}
+
+#content .doc-links{
+display:flex;
+flex-direction:column;
+gap:8px;
+margin-top:10px;
+}
+
+#content .doc-link{
+display:inline-flex;
+align-items:center;
+gap:8px;
+width:fit-content;
+padding:8px 12px;
+border-radius:10px;
+background:#f7f7f7;
+border:1px solid #dddddd;
+color:#5a5a5a;
+text-decoration:none;
+font-size:13px;
+}
+
+#content .doc-link::before{
+content:"";
+width:14px;
+height:16px;
+border:1.4px solid #9b9b9b;
+border-radius:2px;
+background:
+linear-gradient(#9b9b9b,#9b9b9b) 3px 4px/7px 1px no-repeat,
+linear-gradient(#9b9b9b,#9b9b9b) 3px 7px/7px 1px no-repeat,
+linear-gradient(#9b9b9b,#9b9b9b) 3px 10px/7px 1px no-repeat;
+}
+
+@media (max-width: 900px){
+.app-shell{
+display:block;
+}
+
+.sidebar{
+width:auto;
+}
+
+.topbar{
+padding:16px;
+}
+
+.page{
+padding:8px 0 16px;
+}
+
+.diagram-shell{
+border-radius:0;
+}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+<div class="brand">
+<img class="brand-logo" src="logo.png" alt="CONEMI">
+<div class="brand-copy">
+<strong>Portal de Procesos</strong>
+<span>Publicacion institucional CONEMI</span>
+</div>
+</div>
+
+<div class="nav-section">
+<p class="nav-title">Mapa General</p>
+<div class="nav-list">
+<a class="nav-link" href="index.html"><span class="nav-pill">00</span>Macroprocesos</a>
+</div>
+</div>
+
+<div class="nav-section">
+<p class="nav-title">Arbol de Procesos</p>
+<div class="nav-tree">
+<div class="nav-group">
+<div class="nav-group-label"><span class="nav-pill">A</span>Comercial</div>
+<div class="nav-group-children">
+<div class="nav-process-row">
+<a class="nav-link active" data-process-nav="P1" href="cotizaciones.html"><span class="nav-pill">P1</span>Cotizaciones</a>
+<button class="nav-toggle is-collapsed" type="button" aria-label="Expandir actividades de Cotizaciones" aria-expanded="false" onclick="toggleNavSubtree(this, 'cotizaciones-subtree')">▼</button>
+</div>
+<div class="nav-subtree is-collapsed" id="cotizaciones-subtree">
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('1')"><span class="nav-index">1.</span><span>Recepcionar Requerimiento</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('1.1')"><span class="nav-index">1.1</span><span>Validacion Tecnica</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('2')"><span class="nav-index">2.</span><span>Elaborar Cotizacion</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('3')"><span class="nav-index">3.</span><span>Aprobar Cotizacion</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('4')"><span class="nav-index">4.</span><span>Notificar Cliente</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('5')"><span class="nav-index">5.</span><span>Seguimiento</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('6')"><span class="nav-index">6.</span><span>Negociacion</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('6.1')"><span class="nav-index">6.1</span><span>Rechazar Cotizacion</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('6.2')"><span class="nav-index">6.2</span><span>Aceptar Cotizacion</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('7')"><span class="nav-index">7.</span><span>Crear o Actualizar OL</span></a>
+</div>
+</div>
+</div>
+<div class="nav-group">
+<div class="nav-group-label"><span class="nav-pill">B</span>Operaciones</div>
+<div class="nav-group-children">
+<a class="nav-link" data-process-nav="P2" href="index.html"><span class="nav-pill">P2</span>Planificacion</a>
+<a class="nav-link" data-process-nav="P3" href="index.html"><span class="nav-pill">P3</span>Ejecucion Servicios en Terreno</a>
+<a class="nav-link" data-process-nav="P4" href="index.html"><span class="nav-pill">P4</span>Integracion con Laboratorios</a>
+</div>
+</div>
+<div class="nav-group">
+<div class="nav-group-label"><span class="nav-pill">C</span>Area Tecnica</div>
+<div class="nav-group-children">
+<a class="nav-link" data-process-nav="P5" href="index.html"><span class="nav-pill">P5</span>Control y Seguimiento Tecnico</a>
+<a class="nav-link" data-process-nav="P6" href="index.html"><span class="nav-pill">P6</span>Elaboracion de Informes</a>
+</div>
+</div>
+</div>
+</div>
+
+<div class="sidebar-footer">
+Proceso publicado para consulta interna.
+<br>
+Ambiente de demostracion de procesos.
+</div>
+</aside>
+
+<div class="app-main">
+<header class="topbar">
+<div class="topbar-copy">
+<h1>Proceso P1 Cotizaciones</h1>
+<p>Visualizacion navegable de actividades, decisiones y registros asociados al flujo comercial.</p>
+</div>
+<div class="topbar-tools">
+<div class="status-chip">
+<span class="status-dot"></span>
+<div>
+<span>Estado</span>
+<strong>Publicado y vigente</strong>
+</div>
+</div>
+<div class="user-chip">
+<div class="user-avatar">CR</div>
+<div class="user-meta">
+<span>Usuario conectado</span>
+<strong>Cristian Rojas</strong>
+</div>
+</div>
+</div>
+</header>
+
+<main class="workspace">
+<div class="page">
+<a class="top-link" href="index.html">← Volver a macroprocesos</a>
+<div class="diagram-shell">
+<div class="diagram">
+<svg viewBox="0 0 1520 930" aria-hidden="true">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M 0 0 L 10 5 L 0 10 z" fill="#6c6c6c"></path>
+</marker>
+</defs>
+<line x1="54" y1="110" x2="125" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="222" y1="110" x2="262" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="334" y1="110" x2="415" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="433" y1="120" x2="433" y2="180" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="442" y1="110" x2="575" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="659" y1="110" x2="742" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="842" y1="110" x2="922" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="940" y1="110" x2="1038" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1124" y1="110" x2="1162" y2="110" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1200" y1="148" x2="1200" y2="195" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1200" y1="232" x2="1200" y2="286" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1200" y1="322" x2="1200" y2="389" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1200" y1="425" x2="1200" y2="553" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1200" y1="589" x2="1200" y2="652" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1200" y1="688" x2="1200" y2="736" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1200" y1="773" x2="1200" y2="816" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1209" y1="553" x2="1282" y2="553" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1302" y1="553" x2="1470" y2="553" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1209" y1="652" x2="1292" y2="652" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1388" y1="652" x2="1440" y2="652" stroke="#6c6c6c" stroke-width="1.3"></line>
+<line x1="1440" y1="652" x2="1440" y2="726" stroke="#6c6c6c" stroke-width="1.3"></line>
+<line x1="1440" y1="726" x2="1289" y2="726" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1209" y1="736" x2="1146" y2="736" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="1270" y1="736" x2="1282" y2="736" stroke="#6c6c6c" stroke-width="1.3"></line>
+<line x1="540" y1="220" x2="540" y2="418" stroke="#6c6c6c" stroke-width="1.3"></line>
+<line x1="435" y1="220" x2="435" y2="360" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+<line x1="438" y1="398" x2="438" y2="420" stroke="#6c6c6c" stroke-width="1.3"></line>
+<line x1="438" y1="420" x2="540" y2="420" stroke="#6c6c6c" stroke-width="1.3"></line>
+<line x1="540" y1="420" x2="540" y2="148" stroke="#6c6c6c" stroke-width="1.3"></line>
+<line x1="915" y1="120" x2="915" y2="175" stroke="#6c6c6c" stroke-width="1.3" marker-end="url(#arrow)"></line>
+</svg>
+
+<div class="start-dot" style="left:48px;top:103px;"></div>
+<div class="label" style="left:12px;top:120px;width:90px;">Necesidad del<br>Cliente</div>
+
+<div class="actor" style="left:124px;top:30px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:128px;top:92px;" onclick="openStep('1')">
+<div class="badge">1</div>
+Recepcionar<br>Requerimiento
+</div>
+<div class="mini-icon" style="left:142px;top:145px;">Llamado telefónico</div>
+<div class="mini-icon" style="left:142px;top:168px;">Email</div>
+<div class="mini-icon" style="left:142px;top:191px;">Portal Licitaciones</div>
+
+<div class="mini-icon" style="left:264px;top:90px;">Documentos<br>de soporte</div>
+
+<div class="decision-label" style="left:389px;top:74px;width:110px;">¿Requerimiento<br>corresponde a Licitación?</div>
+<div class="decision" style="left:424px;top:101px;"></div>
+<div class="decision-label" style="left:405px;top:138px;width:50px;">Si</div>
+<div class="decision-label" style="left:470px;top:105px;width:44px;">No</div>
+
+<div class="actor" style="left:301px;top:204px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:387px;top:182px;" onclick="openStep('1.1')">
+<div class="badge small">1.1</div>
+Validar Técnica y<br>Operativamente
+</div>
+<div class="soft-icon" style="left:382px;top:278px;width:118px;">Consultas a las áreas</div>
+<div class="dashed-box" style="left:225px;top:313px;">
+Laboratorios/ETFA<br>
+Permisología<br>
+Inspectores/Otros<br>
+Equipos/Insumos<br>
+Logística
+</div>
+<div class="soft-icon" style="left:486px;top:266px;width:82px;">Operaciones</div>
+<div class="soft-icon" style="left:486px;top:286px;width:82px;">Técnicas</div>
+<div class="soft-icon" style="left:391px;top:377px;width:108px;">Entrega de la información</div>
+<div class="soft-icon" style="left:505px;top:332px;width:92px;">Jefe<br>Operaciones</div>
+<div class="soft-icon" style="left:505px;top:362px;width:92px;">Jefe Técnico</div>
+
+<div class="actor" style="left:542px;top:32px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:575px;top:92px;" onclick="openStep('2')">
+<div class="badge">2</div>
+Elaborar<br>Cotización
+</div>
+<div class="tag" style="left:671px;top:116px;">Qcotizador</div>
+<div class="tag" style="left:683px;top:136px;">QETFA</div>
+<div class="note" style="left:620px;top:145px;width:165px;">
+Se adjunta archivo de costeo y se especifican los servicios ETFA, el sistema realiza la validación.
+</div>
+
+<div class="actor" style="left:738px;top:26px;width:180px;">Gerente de Desarrollo de<br>Negocios</div>
+<div class="flow-card" style="left:742px;top:92px;" onclick="openStep('3')">
+<div class="badge">3</div>
+Aprobar<br>Cotización
+</div>
+<div class="tag" style="left:796px;top:136px;">Qcotizador</div>
+
+<div class="decision-label" style="left:866px;top:74px;width:110px;">¿Se aprueba la<br>Cotización?</div>
+<div class="decision" style="left:906px;top:101px;"></div>
+<div class="decision-label" style="left:892px;top:138px;width:46px;">No</div>
+<div class="decision-label" style="left:964px;top:105px;width:44px;">Si</div>
+
+<div class="mini-icon" style="left:866px;top:182px;width:92px;">Corregir</div>
+<div class="mini-icon" style="left:900px;top:202px;width:85px;">Solicitar<br>Correcciones</div>
+<div class="mini-icon" style="left:970px;top:205px;width:70px;">Email</div>
+
+<div class="mini-icon" style="left:1044px;top:90px;width:82px;">Cotización<br>Aprobada</div>
+
+<div class="actor" style="left:1115px;top:30px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:1148px;top:92px;" onclick="openStep('4')">
+<div class="badge">4</div>
+Notificar al<br>Cliente
+</div>
+<div class="tag" style="left:1254px;top:116px;">Qcotizador</div>
+<div class="note" style="left:1201px;top:147px;width:155px;">
+Se realiza correo personalizado al Cliente.
+</div>
+<div class="mini-icon" style="left:1146px;top:196px;width:108px;">Cotización<br>Enviada</div>
+<div class="mini-icon" style="left:1220px;top:208px;width:54px;">Email</div>
+
+<div class="actor" style="left:1244px;top:275px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:1148px;top:286px;" onclick="openStep('5')">
+<div class="badge">5</div>
+Realizar seguimiento
+</div>
+<div class="note" style="left:1200px;top:349px;width:180px;">
+Al tercer día si no se obtiene respuesta aún.
+</div>
+
+<div class="actor" style="left:1244px;top:381px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:1148px;top:389px;" onclick="openStep('6')">
+<div class="badge">6</div>
+Realizar Negociación
+</div>
+<div class="note" style="left:1200px;top:452px;width:192px;">
+Ajustar precios, plazos y condiciones según las necesidades del cliente.
+</div>
+
+<div class="decision-label" style="left:1088px;top:543px;width:95px;">¿Cotización<br>aceptada?</div>
+<div class="decision" style="left:1191px;top:545px;"></div>
+<div class="decision-label" style="left:1178px;top:584px;width:45px;">Si</div>
+<div class="decision-label" style="left:1247px;top:548px;width:44px;">No</div>
+
+<div class="actor" style="left:1294px;top:493px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:1282px;top:535px;" onclick="openStep('6.1')">
+<div class="badge small">6.1</div>
+Rechazar Cotización
+</div>
+<div class="tag" style="left:1357px;top:576px;">Qcotizador</div>
+<div class="end-dot" style="left:1468px;top:548px;"></div>
+<div class="label" style="left:1428px;top:566px;width:92px;">Cotización<br>Rechazada</div>
+
+<div class="decision-label" style="left:1080px;top:640px;width:110px;">¿Cotización de<br>Cliente prospecto?</div>
+<div class="decision" style="left:1191px;top:645px;"></div>
+<div class="decision-label" style="left:1177px;top:684px;width:45px;">No</div>
+<div class="decision-label" style="left:1246px;top:648px;width:44px;">Si</div>
+
+<div class="flow-card" style="left:1304px;top:626px;width:92px;cursor:default;">
+Creación de<br>Cliente en<br>BOSS
+</div>
+<div class="note" style="left:1348px;top:684px;width:160px;">
+Se debe tener el cliente creado en BOSS para aceptar la cotización en sistema.
+</div>
+
+<div class="actor" style="left:1046px;top:698px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:1148px;top:718px;" onclick="openStep('6.2')">
+<div class="badge small">6.2</div>
+Aceptar Cotización
+</div>
+<div class="tag" style="left:1201px;top:759px;">Qcotizador</div>
+
+<div class="actor" style="left:1257px;top:798px;">Ejecutivo<br>Comercial</div>
+<div class="flow-card" style="left:1148px;top:816px;" onclick="openStep('7')">
+<div class="badge">7</div>
+Crear o Actualizar<br>OL
+</div>
+<div class="tag" style="left:1201px;top:857px;">Qcotizador</div>
+<div class="end-dot" style="left:1193px;top:889px;"></div>
+<div class="label" style="left:1142px;top:907px;width:118px;">OL creada o<br>actualizada</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+<div class="side-panel" id="modal" onclick="closeModal(event)">
+<div class="panel-content" onclick="event.stopPropagation()">
+<div class="panel-header">
+<div class="panel-title">Detalle de Actividad</div>
+<button class="close" type="button" onclick="closeModal()">X</button>
+</div>
+<div id="content"></div>
+</div>
+</div>
+
+<script>
+const stepContent = {
+"1": `
+<h2>Recepción de Requerimiento</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: QCotizador</span></p>
+<h3>Objetivo</h3>
+<p>Establecer el proceso mediante el cual el área comercial de CONEMI recibe y revisa preliminarmente los requerimientos de servicios solicitados por los clientes, con el fin de identificar la información básica necesaria para iniciar el proceso de evaluación y elaboración de cotizaciones.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Recibir el requerimiento del cliente a través de los distintos canales disponibles.</li>
+<li>Revisar preliminarmente la información proporcionada por el cliente.</li>
+<li>Solicitar antecedentes adicionales cuando la información sea insuficiente.</li>
+<li>Registrar el requerimiento en el sistema comercial (QCotizador).</li>
+<li>Clasificar el requerimiento según su naturaleza: servicio estándar, complejo o licitación.</li>
+</ol>
+<h3>Descripción de actividades</h3>
+<ol>
+<li>El Ejecutivo Comercial recibe el requerimiento del cliente por correo electrónico, llamada telefónica, portal de licitaciones u otros medios de contacto disponibles.</li>
+<li>Se realiza una revisión preliminar de la información entregada para comprender el alcance general del servicio solicitado.</li>
+<li>Se verifica que el requerimiento incluya al menos: tipo de servicio solicitado, ubicación del servicio, matriz ambiental, parámetros requeridos y plazos estimados de ejecución.</li>
+<li>Si la información es insuficiente o incompleta, se solicitan al cliente los antecedentes adicionales necesarios para continuar con la evaluación.</li>
+<li>Una vez revisada la información preliminar, el requerimiento queda disponible para avanzar a la etapa de validación técnica y operativa del servicio solicitado.</li>
+</ol>
+<h3>Políticas y reglas</h3>
+<ol>
+<li>No se deben elaborar cotizaciones basadas en información incompleta, ambigua o únicamente verbal.</li>
+<li>Toda comunicación relevante con el cliente debe quedar respaldada por correo electrónico u otro medio formal con trazabilidad.</li>
+<li>Los colaboradores deben actuar con imparcialidad, objetividad y transparencia, evitando conflictos de interés.</li>
+<li>Si se identifica un posible conflicto de interés, este debe informarse oportunamente a la jefatura directa.</li>
+<li>No se deben aceptar beneficios, incentivos o ventajas indebidas de clientes o terceros.</li>
+<li>Toda la información entregada por el cliente debe tratarse de manera confidencial y usarse solo para la evaluación del servicio y la cotización.</li>
+</ol>
+<h3>Registros</h3>
+<ol>
+<li>Correos electrónicos asociados a la solicitud del cliente.</li>
+<li>Documentación de licitación, cuando corresponda.</li>
+</ol>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-001 Solicitud de Cliente</a>
+<a class="doc-link" href="#" download>RG-CC-002 Respaldo de Comunicaciones Comerciales</a>
+<a class="doc-link" href="#" download>RG-CC-003 Carpeta de Licitación</a>
+</div>
+`,
+"1.1": `
+<h2>Validar Técnica y Operativamente</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span></p>
+<h3>Consultas</h3>
+<ol>
+<li>Operaciones y áreas técnicas.</li>
+<li>Laboratorios / ETFA.</li>
+<li>Permisología, inspectores, equipos, insumos y logística.</li>
+</ol>
+<h3>Objetivo</h3>
+<p>Levantar la factibilidad técnica y operativa antes de elaborar la cotización.</p>
+<h3>Salida</h3>
+<p>Información consolidada para construcción de la oferta.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-004 Matriz de Validación Técnica</a>
+<a class="doc-link" href="#" download>RG-CC-005 Respuesta de Áreas de Apoyo</a>
+</div>
+`,
+"2": `
+<h2>Elaborar Cotización</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistemas: Qcotizador / QETFA</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Analizar el requerimiento y la información levantada.</li>
+<li>Seleccionar servicios ETFA aplicables.</li>
+<li>Adjuntar el archivo de costeo.</li>
+<li>Registrar la propuesta y validar su estructura en sistema.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-006 Archivo de Costeo</a>
+<a class="doc-link" href="#" download>RG-CC-007 Borrador de Cotización</a>
+</div>
+`,
+"3": `
+<h2>Aprobar Cotización</h2>
+<p><span class="pill">Responsable: Gerente de Desarrollo de Negocios</span></p>
+<h3>Revisión</h3>
+<ol>
+<li>Validar estructura técnica y comercial.</li>
+<li>Revisar precios, alcances y condiciones.</li>
+<li>Aprobar o devolver para corrección.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-008 Registro de Aprobación Comercial</a>
+<a class="doc-link" href="#" download>RG-CC-009 Observaciones de Revisión</a>
+</div>
+`,
+"4": `
+<h2>Notificar al Cliente</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+<h3>Acciones</h3>
+<ol>
+<li>Enviar correo personalizado al cliente.</li>
+<li>Adjuntar la cotización aprobada.</li>
+<li>Dejar registro del envío.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-010 Cotización Emitida al Cliente</a>
+<a class="doc-link" href="#" download>RG-CC-011 Comprobante de Envío</a>
+</div>
+`,
+"5": `
+<h2>Realizar Seguimiento</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span></p>
+<h3>Regla</h3>
+<p>Se ejecuta seguimiento si al tercer día aún no existe respuesta del cliente.</p>
+<h3>Acciones</h3>
+<ol>
+<li>Confirmar recepción de la cotización.</li>
+<li>Resolver dudas comerciales y técnicas.</li>
+<li>Detectar interés o necesidad de ajuste.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-012 Bitácora de Seguimiento Comercial</a>
+<a class="doc-link" href="#" download>RG-CC-013 Respuesta del Cliente</a>
+</div>
+`,
+"6": `
+<h2>Realizar Negociación</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span></p>
+<h3>Objetivo</h3>
+<p>Ajustar precios, plazos y condiciones comerciales según la necesidad del cliente.</p>
+<h3>Resultado</h3>
+<p>La cotización puede ser aceptada o rechazada.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-014 Registro de Negociación</a>
+<a class="doc-link" href="#" download>RG-CC-015 Condiciones Comerciales Ajustadas</a>
+</div>
+`,
+"6.1": `
+<h2>Rechazar Cotización</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+<h3>Acción</h3>
+<p>Registrar el rechazo de la propuesta cuando el cliente no acepta la cotización.</p>
+<h3>Salida</h3>
+<p>Cotización rechazada y cerrada en el flujo.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-016 Registro de Rechazo de Cotización</a>
+</div>
+`,
+"6.2": `
+<h2>Aceptar Cotización</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+<h3>Validación previa</h3>
+<p>Si el cliente es prospecto, primero debe existir en BOSS antes de aceptar la cotización en sistema.</p>
+<h3>Salida</h3>
+<p>Cotización aceptada para crear o actualizar la OL.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-017 Aceptación de Cotización</a>
+<a class="doc-link" href="#" download>RG-CC-018 Creación de Cliente Prospecto en BOSS</a>
+</div>
+`,
+"7": `
+<h2>Crear o Actualizar OL</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Confirmar aceptación comercial.</li>
+<li>Crear o actualizar la OL.</li>
+<li>Dejar la orden lista para continuar el proceso.</li>
+</ol>
+<h3>Salida</h3>
+<p>OL creada o actualizada.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-019 Orden de Laboratorio</a>
+<a class="doc-link" href="#" download>RG-CC-020 Confirmación de Actualización de OL</a>
+</div>
+`
+};
+
+function openStep(step){
+const content = stepContent[step] || "<h2>Sin detalle</h2>";
+const titleMatch = content.match(/<h2>(.*?)<\/h2>/);
+let rendered = content;
+
+if(titleMatch){
+rendered = content.replace(
+titleMatch[0],
+`<div class="content-title"><span class="content-step-badge">${step}</span><h2>${titleMatch[1]}</h2></div>`
+);
+}
+
+document.getElementById("content").innerHTML = rendered;
+document.getElementById("modal").dataset.currentStep = step;
+document.getElementById("modal").classList.add("is-open");
+document.body.classList.add("panel-open");
+}
+
+function closeModal(event){
+if(event){
+event.stopPropagation();
+}
+document.getElementById("modal").classList.remove("is-open");
+document.body.classList.remove("panel-open");
+}
+
+function toggleNavSubtree(button, subtreeId){
+const subtree = document.getElementById(subtreeId);
+const isCollapsed = subtree.classList.toggle("is-collapsed");
+button.classList.toggle("is-collapsed", isCollapsed);
+button.setAttribute("aria-expanded", String(!isCollapsed));
+}
+
+function applyProcessNavigationLinks(){
+const storageKey = "conemi-process-details-v1";
+let processDetails = {};
+try{
+const raw = window.localStorage.getItem(storageKey);
+processDetails = raw ? JSON.parse(raw) : {};
+}catch(error){
+processDetails = {};
+}
+document.querySelectorAll("[data-process-nav]").forEach(function(linkEl){
+const processId = linkEl.dataset.processNav;
+if(!processId){
+return;
+}
+const detail = processDetails[processId] || {};
+linkEl.href = detail.link || (processId === "P1" ? "cotizaciones.html" : "index.html");
+});
+}
+
+document.addEventListener("keydown", function(event){
+if(event.key === "Escape"){
+closeModal();
+}
+});
+
+document.getElementById("content").addEventListener("click", function(event){
+const link = event.target.closest(".doc-link");
+
+if(!link){
+return;
+}
+
+event.preventDefault();
+
+const fullName = link.textContent.trim();
+const firstSpace = fullName.indexOf(" ");
+const code = firstSpace > -1 ? fullName.slice(0, firstSpace) : fullName;
+const documentName = firstSpace > -1 ? fullName.slice(firstSpace + 1) : "Documento";
+const activityTitle = this.querySelector("h2") ? this.querySelector("h2").textContent.trim() : "Actividad";
+const stepId = document.getElementById("modal").dataset.currentStep || "";
+const downloadedAt = new Date().toLocaleString("es-CL");
+const fileContent = [
+"SGS CONEMI - Registro Simulado",
+"",
+`Codigo: ${code}`,
+`Nombre: ${documentName}`,
+`Actividad: ${stepId} - ${activityTitle}`,
+`Fecha de descarga: ${downloadedAt}`,
+"",
+"Este archivo es una simulacion del documento descargable del sistema de calidad."
+].join("\r\n");
+const blob = new Blob([fileContent], { type: "text/plain;charset=utf-8" });
+const url = URL.createObjectURL(blob);
+const downloadLink = document.createElement("a");
+const safeName = fullName.replace(/[\\/:*?\"<>|]+/g, "-").replace(/\s+/g, "_");
+
+downloadLink.href = url;
+downloadLink.download = `${safeName}.txt`;
+document.body.appendChild(downloadLink);
+downloadLink.click();
+downloadLink.remove();
+URL.revokeObjectURL(url);
+});
+
+applyProcessNavigationLinks();
+</script>
+</body>
+</html>

@@ -1,0 +1,3951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macroprocesos CONEMI</title>
+<style>
+:root{
+--bg:#ececec;
+--line:#8b8b8b;
+--text:#444;
+--muted:#6d6d6d;
+--orange:#eb7a07;
+--orange-soft:#e9c59d;
+--gray:#7c7c7c;
+--card:#f4f4f4;
+}
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:var(--bg);
+color:var(--text);
+min-height:100vh;
+}
+
+body.panel-open{
+overflow:hidden;
+}
+
+.app-shell{
+display:flex;
+min-height:100vh;
+}
+
+.sidebar{
+width:280px;
+padding:24px 18px;
+background:linear-gradient(180deg, #20303d 0%, #18242d 100%);
+color:#dce4ea;
+border-right:1px solid rgba(255,255,255,.08);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+padding:0 8px 18px;
+margin-bottom:18px;
+border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.brand-logo{
+width:52px;
+height:52px;
+padding:8px;
+border-radius:14px;
+background:rgba(255,255,255,.96);
+object-fit:contain;
+box-shadow:0 8px 18px rgba(0,0,0,.16);
+}
+
+.brand-copy strong{
+display:block;
+font-size:16px;
+color:#fff;
+}
+
+.brand-copy span{
+font-size:12px;
+color:#a9b7c1;
+}
+
+.nav-section{
+margin-bottom:24px;
+}
+
+.nav-title{
+padding:0 8px;
+margin:0 0 10px;
+font-size:11px;
+letter-spacing:.12em;
+text-transform:uppercase;
+color:#8ea0ad;
+}
+
+.nav-list{
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.nav-tree{
+display:flex;
+flex-direction:column;
+gap:14px;
+}
+
+.nav-group{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+.nav-group-label{
+display:flex;
+align-items:center;
+gap:10px;
+padding:4px 4px 4px 0;
+color:#f3f7fa;
+font-size:12px;
+font-weight:700;
+letter-spacing:.04em;
+}
+
+.nav-group-children{
+display:flex;
+flex-direction:column;
+gap:4px;
+padding-left:14px;
+border-left:1px solid rgba(255,255,255,.06);
+margin-left:16px;
+}
+
+.nav-group .nav-pill{
+min-width:26px;
+height:20px;
+padding:0 6px;
+font-size:11px;
+background:rgba(255,255,255,.08);
+color:#fff;
+}
+
+.nav-group .nav-link{
+padding:8px 10px;
+border-radius:10px;
+font-size:13px;
+color:#cfd9df;
+}
+
+.nav-group .nav-link:hover,
+.nav-group .nav-link.active{
+background:rgba(255,255,255,.06);
+}
+
+.nav-link{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 12px;
+border-radius:12px;
+color:#dce4ea;
+text-decoration:none;
+font-size:14px;
+}
+
+.nav-link:hover,
+.nav-link.active{
+background:rgba(255,255,255,.08);
+color:#fff;
+}
+
+.nav-pill{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:32px;
+height:24px;
+padding:0 8px;
+border-radius:999px;
+background:rgba(235,122,7,.18);
+color:#ffd9b3;
+font-size:12px;
+font-weight:700;
+}
+
+.sidebar-footer{
+margin-top:auto;
+padding:16px 8px 0;
+font-size:12px;
+line-height:1.5;
+color:#99a8b2;
+}
+
+.app-main{
+flex:1;
+min-width:0;
+display:flex;
+flex-direction:column;
+}
+
+.topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:16px;
+padding:18px 26px 20px;
+background:linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.78) 100%);
+backdrop-filter:blur(14px);
+border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.topbar-copy h1{
+margin:0;
+font-size:20px;
+font-weight:700;
+color:#253441;
+}
+
+.topbar-copy p{
+margin:4px 0 0;
+font-size:13px;
+color:#71808a;
+}
+
+
+.topbar-tools{
+display:flex;
+align-items:center;
+gap:14px;
+}
+
+.status-chip,
+.user-chip{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 14px;
+border-radius:14px;
+background:#fff;
+border:1px solid rgba(0,0,0,.06);
+}
+
+.status-dot{
+width:10px;
+height:10px;
+border-radius:50%;
+background:#2fa36b;
+box-shadow:0 0 0 4px rgba(47,163,107,.14);
+}
+
+.status-chip span,
+.user-meta span{
+display:block;
+font-size:12px;
+color:#80909b;
+}
+
+.status-chip strong,
+.user-meta strong{
+display:block;
+font-size:13px;
+color:#31424f;
+}
+
+.user-avatar{
+width:36px;
+height:36px;
+border-radius:50%;
+background:linear-gradient(135deg, #344a5a 0%, #50687a 100%);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+}
+
+.workspace{
+flex:1;
+overflow:auto;
+position:relative;
+}
+
+.page{
+padding:28px 22px 34px;
+}
+
+.page-modebar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin:0 0 14px;
+}
+
+.page-modechip{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:9px 12px;
+border-radius:999px;
+background:rgba(32,48,61,.08);
+color:#32434f;
+font-size:13px;
+font-weight:700;
+}
+
+.page-modechip::before{
+content:"";
+width:9px;
+height:9px;
+border-radius:50%;
+background:#2fa36b;
+box-shadow:0 0 0 4px rgba(47,163,107,.14);
+}
+
+.diagram-shell{
+display:flex;
+flex-direction:column;
+gap:14px;
+overflow:hidden;
+}
+
+.diagram{
+position:relative;
+width:100%;
+height:auto;
+margin:0 auto;
+border-radius:0;
+background:transparent;
+box-shadow:none;
+user-select:none;
+}
+
+.diagram svg{
+position:absolute;
+inset:0;
+overflow:visible;
+z-index:0;
+}
+
+.diagram-toolbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:18px 18px 0;
+position:relative;
+z-index:3;
+}
+
+.diagram[data-editing="false"] .diagram-toolbar,
+.diagram[data-editing="false"] .diagram-status{
+display:none;
+}
+
+.diagram[data-editing="true"]{
+border-radius:26px;
+background:linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(247,247,247,.96) 100%);
+box-shadow:inset 0 0 0 1px rgba(0,0,0,.05), 0 14px 34px rgba(25,42,53,.08);
+}
+
+.diagram-canvas-shell{
+position:relative;
+height:auto;
+overflow:visible;
+}
+
+.diagram[data-editing="true"] .diagram-canvas-shell{
+height:min(70vh, 760px);
+overflow:auto;
+margin:12px 18px 18px;
+border:1px solid rgba(32,48,61,.08);
+border-radius:18px;
+background:
+linear-gradient(180deg, rgba(255,255,255,.62) 0%, rgba(250,250,250,.84) 100%);
+scrollbar-gutter:stable both-edges;
+}
+
+.diagram-zoom-value{
+min-width:56px;
+text-align:center;
+font-size:12px;
+font-weight:700;
+color:#31424f;
+}
+
+.diagram-zoom-button{
+width:34px;
+height:34px;
+padding:0;
+border:1px solid rgba(32,48,61,.12);
+border-radius:10px;
+background:#fff;
+color:#31424f;
+font-size:18px;
+line-height:1;
+cursor:pointer;
+}
+
+.diagram-zoom-button:hover{
+background:#f6f8f9;
+}
+
+.diagram-zoom-layer{
+position:relative;
+transform-origin:top left;
+}
+
+.diagram-canvas{
+position:relative;
+width:1200px;
+height:380px;
+margin:0 auto;
+}
+
+.diagram[data-editing="true"] .diagram-canvas{
+width:2200px;
+height:1400px;
+margin:0;
+}
+
+.diagram-toolbar-copy{
+font-size:13px;
+color:#6b7983;
+}
+
+.diagram-toolbar-copy strong{
+display:block;
+margin-bottom:3px;
+font-size:14px;
+color:#2f3f4b;
+}
+
+.diagram-actions{
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.diagram-button{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+min-height:38px;
+padding:0 14px;
+border:1px solid rgba(32,48,61,.12);
+border-radius:12px;
+background:#fff;
+color:#31424f;
+font-size:13px;
+font-weight:600;
+cursor:pointer;
+}
+
+.diagram-button:hover{
+background:#f6f8f9;
+}
+
+.diagram-button.is-active{
+background:#20303d;
+border-color:#20303d;
+color:#fff;
+}
+
+.floating-map-tools{
+display:flex;
+align-items:center;
+gap:8px;
+padding:6px;
+border-radius:14px;
+background:rgba(255,255,255,.96);
+border:1px solid rgba(32,48,61,.1);
+box-shadow:0 14px 28px rgba(25,42,53,.18);
+z-index:1100;
+}
+
+.floating-map-tools .diagram-zoom-value{
+min-width:46px;
+font-size:11px;
+}
+
+.floating-map-button{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:30px;
+height:30px;
+padding:0;
+border:1px solid rgba(32,48,61,.12);
+border-radius:9px;
+background:#fff;
+color:#31424f;
+font-size:14px;
+line-height:1;
+cursor:pointer;
+}
+
+.floating-map-button:hover{
+background:#f6f8f9;
+}
+
+.floating-map-button.is-active{
+background:#20303d;
+border-color:#20303d;
+color:#fff;
+}
+
+#zoomResetButton{
+font-size:10px;
+font-weight:700;
+letter-spacing:.01em;
+}
+
+.text-editor-modal{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+padding:24px;
+background:rgba(16,24,30,.32);
+z-index:1200;
+}
+
+.text-editor-modal.is-open{
+display:flex;
+}
+
+.text-editor-card{
+width:min(480px, 100%);
+padding:18px;
+border-radius:18px;
+background:#fff;
+box-shadow:0 18px 38px rgba(25,42,53,.22);
+}
+
+.text-editor-card h3{
+margin:0 0 8px;
+font-size:16px;
+color:#243541;
+}
+
+.text-editor-card p{
+margin:0 0 12px;
+font-size:13px;
+color:#70808b;
+}
+
+.text-editor-field{
+width:100%;
+min-height:120px;
+padding:12px 14px;
+border:1px solid #cfd7dc;
+border-radius:12px;
+font:inherit;
+font-size:14px;
+color:#243541;
+resize:vertical;
+}
+
+.text-editor-actions{
+display:flex;
+justify-content:flex-end;
+gap:10px;
+margin-top:14px;
+}
+
+.editor-panel-field{
+width:100%;
+min-height:220px;
+padding:12px 14px;
+border:1px solid #cfd7dc;
+border-radius:12px;
+font:inherit;
+font-size:14px;
+color:#243541;
+resize:vertical;
+}
+
+.process-editor{
+display:flex;
+flex-direction:column;
+gap:0;
+background:transparent;
+}
+
+.process-editor-head{
+display:none;
+}
+
+.process-editor-head-copy{
+display:none;
+}
+
+.process-editor-head-copy h2{
+display:none;
+}
+
+.process-editor-body{
+display:flex;
+flex-direction:column;
+gap:14px;
+padding:4px 0 0;
+}
+
+.process-editor-actions{
+display:flex;
+justify-content:flex-end;
+gap:10px;
+padding:14px 0 0;
+}
+
+.process-editor-group{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+.process-editor-group label{
+display:block;
+margin-bottom:6px;
+font-size:11px;
+font-weight:700;
+letter-spacing:.04em;
+text-transform:uppercase;
+color:#6d7b85;
+}
+
+.process-editor-input,
+.process-editor-textarea{
+width:100%;
+padding:10px 12px;
+border:1px solid #d4dbe0;
+border-radius:12px;
+font:inherit;
+font-size:13px;
+line-height:1.4;
+color:#243541;
+background:#fff;
+}
+
+.process-editor-input.is-numeral{
+width:100px;
+max-width:100px;
+}
+
+.rich-editor{
+display:flex;
+flex-direction:column;
+gap:0;
+border:1px solid #d4dbe0;
+border-radius:14px;
+background:#fff;
+overflow:hidden;
+transition:border-color .18s ease, box-shadow .18s ease;
+}
+
+.rich-editor-toolbar{
+display:flex;
+align-items:center;
+gap:6px;
+padding:8px;
+border-bottom:1px solid #e3e8eb;
+background:#f8fafb;
+flex-wrap:wrap;
+max-height:0;
+padding-top:0;
+padding-bottom:0;
+border-bottom-width:0;
+opacity:0;
+overflow:hidden;
+pointer-events:none;
+transition:max-height .18s ease, padding .18s ease, opacity .14s ease, border-color .18s ease;
+}
+
+.rich-editor:hover,
+.rich-editor:focus-within{
+border-color:#c1cbd2;
+box-shadow:0 0 0 3px rgba(208, 218, 224, .28);
+}
+
+.rich-editor:hover .rich-editor-toolbar,
+.rich-editor:focus-within .rich-editor-toolbar{
+max-height:56px;
+padding-top:8px;
+padding-bottom:8px;
+border-bottom-width:1px;
+opacity:1;
+pointer-events:auto;
+}
+
+.rich-editor-button{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:30px;
+height:30px;
+padding:0 8px;
+border:1px solid transparent;
+border-radius:8px;
+background:transparent;
+font-size:12px;
+font-weight:700;
+color:#4e5b64;
+cursor:pointer;
+}
+
+.rich-editor-button:hover,
+.rich-editor-button.is-active{
+background:#eef2f4;
+border-color:#d9e0e4;
+}
+
+.rich-editor-divider{
+width:1px;
+height:20px;
+background:#d9e0e4;
+margin:0 2px;
+}
+
+.rich-editor-content{
+min-height:130px;
+padding:12px 14px;
+font-size:13px;
+line-height:1.55;
+color:#243541;
+outline:none;
+}
+
+.rich-editor-content:empty::before{
+content:attr(data-placeholder);
+color:#93a0a8;
+}
+
+.rich-editor-content p{
+margin:0 0 10px;
+}
+
+.rich-editor-content p:last-child,
+.rich-editor-content ul:last-child,
+.rich-editor-content ol:last-child{
+margin-bottom:0;
+}
+
+.rich-editor-content ul,
+.rich-editor-content ol{
+margin:0 0 10px 18px;
+padding:0;
+}
+
+.rich-editor-content li + li{
+margin-top:4px;
+}
+
+.process-editor-textarea{
+min-height:110px;
+resize:vertical;
+}
+
+.process-editor-note{
+font-size:12px;
+color:#7b8790;
+}
+
+.process-files{
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.process-files.is-empty{
+display:block;
+}
+
+.process-files-empty{
+padding:16px 18px;
+border:1px dashed #d5dde3;
+border-radius:16px;
+background:#fbfcfd;
+font-size:12px;
+color:#7b8790;
+}
+
+.process-file-dropzone{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:14px;
+min-height:72px;
+padding:14px 16px;
+border:1px dashed #cfd8de;
+border-radius:16px;
+background:linear-gradient(180deg, #fbfcfd 0%, #f6f9fa 100%);
+}
+
+.process-file-dropzone-copy{
+min-width:0;
+display:flex;
+flex-direction:column;
+gap:3px;
+}
+
+.process-file-dropzone-copy strong{
+font-size:13px;
+color:#273843;
+}
+
+.process-file-dropzone-copy span{
+font-size:12px;
+color:#7c8891;
+}
+
+.process-file-input{
+position:absolute;
+width:1px;
+height:1px;
+padding:0;
+margin:-1px;
+overflow:hidden;
+clip:rect(0, 0, 0, 0);
+white-space:nowrap;
+border:0;
+}
+
+.process-file-picker{
+display:inline-grid;
+place-items:center;
+align-self:center;
+height:34px;
+padding:0 12px;
+border:1px solid #d5dde3;
+border-radius:10px;
+background:#fff;
+font-size:12px;
+font-weight:700;
+letter-spacing:.03em;
+color:#4f5d66;
+cursor:pointer;
+white-space:nowrap;
+line-height:1;
+padding-top:2px;
+}
+
+.process-file-picker:hover{
+background:#f4f7f8;
+}
+
+.process-file-dropzone.is-editor{
+padding:12px 14px;
+border-radius:14px;
+background:#fbfcfd;
+}
+
+.process-file-dropzone.is-editor:has(.process-file-picker:only-child),
+.process-file-dropzone.is-editor.is-compact{
+justify-content:center;
+}
+
+.process-file-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:12px 14px;
+border:1px solid #e1e7eb;
+border-radius:14px;
+background:#fff;
+min-width:0;
+}
+
+.process-file-meta{
+min-width:0;
+display:flex;
+align-items:center;
+gap:10px;
+flex:1 1 auto;
+overflow:hidden;
+}
+
+.process-file-display-shell{
+min-width:0;
+display:flex;
+align-items:center;
+gap:10px;
+flex:1 1 auto;
+overflow:hidden;
+}
+
+.process-file-name{
+font-size:14px;
+font-weight:700;
+line-height:1.3;
+color:#263743;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+flex:0 1 auto;
+}
+
+.process-file-rename-shell{
+display:flex;
+align-items:center;
+gap:8px;
+flex:1 1 auto;
+min-width:0;
+}
+
+.process-file-rename-shell[hidden]{
+display:none !important;
+}
+
+.process-file-name-input{
+flex:1 1 auto;
+width:auto;
+min-width:0;
+padding:8px 10px;
+border:1px solid #d5dde3;
+border-radius:10px;
+font:inherit;
+font-size:13px;
+color:#243541;
+background:#fff;
+}
+
+.process-file-actions{
+display:flex;
+align-items:center;
+gap:6px;
+flex:0 0 auto;
+}
+
+.process-file-actions[hidden],
+.process-file-display-shell[hidden]{
+display:none !important;
+}
+
+.process-file-action{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:30px;
+height:30px;
+border:1px solid transparent;
+border-radius:9px;
+background:transparent;
+font-size:13px;
+color:#67757d;
+cursor:pointer;
+}
+
+.process-file-action:hover{
+background:#eef2f4;
+border-color:#dae1e6;
+color:#31414c;
+}
+
+.process-file-meta-line{
+font-size:12px;
+color:#87939b;
+white-space:nowrap;
+flex:0 0 auto;
+}
+
+.process-files[data-editable="true"] .process-file-row{
+padding:10px 12px;
+}
+
+.process-files[data-editable="true"] .process-file-action{
+width:26px;
+height:26px;
+border-radius:8px;
+font-size:12px;
+}
+
+.process-files[data-editable="true"] .process-file-actions{
+gap:4px;
+}
+
+.diagram-status{
+font-size:12px;
+color:#7d8a93;
+padding:8px 18px 0;
+position:relative;
+z-index:3;
+}
+
+.diagram-grid{
+position:absolute;
+left:0;
+right:0;
+top:0;
+bottom:0;
+border-radius:26px;
+background-image:
+linear-gradient(rgba(124,124,124,.08) 1px, transparent 1px),
+linear-gradient(90deg, rgba(124,124,124,.08) 1px, transparent 1px);
+background-size:24px 24px;
+pointer-events:none;
+opacity:0;
+}
+
+.diagram-viewport,
+.diagram-items,
+.diagram-arrows,
+.diagram-handles{
+position:absolute;
+left:0;
+right:0;
+top:0;
+bottom:0;
+}
+
+.diagram-arrows{
+pointer-events:none;
+z-index:1;
+}
+
+.diagram-arrows svg{
+width:100%;
+height:100%;
+}
+
+.diagram-arrows .arrow-hit,
+.diagram-arrows .arrow-line{
+fill:none;
+stroke-linecap:round;
+stroke-linejoin:round;
+pointer-events:stroke;
+}
+
+.diagram-arrows .arrow-hit{
+stroke:transparent;
+stroke-width:12;
+}
+
+.diagram-arrows .arrow-line{
+stroke:#7d7d7d;
+stroke-width:1.3;
+marker-end:url(#arrow);
+}
+
+.diagram[data-editing="true"] .diagram-arrows{
+pointer-events:auto;
+}
+
+.diagram[data-editing="true"] .diagram-grid{
+opacity:1;
+}
+
+.diagram-item{
+position:absolute;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+pointer-events:auto;
+}
+
+.node{
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+text-decoration:none;
+color:var(--text);
+border-radius:22px;
+background:#efefef;
+border:2px solid #ababab;
+font-size:15px;
+line-height:1.15;
+padding:9px 12px;
+z-index:1;
+}
+
+.node.main{
+width:150px;
+height:64px;
+left:522px;
+top:24px;
+font-size:17px;
+border-radius:14px;
+background:#d4d4d4;
+border-color:#9a9a9a;
+}
+
+.node.area{
+width:145px;
+height:66px;
+font-size:15px;
+}
+
+.node.process{
+width:150px;
+height:62px;
+border-color:var(--orange-soft);
+font-size:13px;
+background:#f5f5f5;
+transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+cursor:pointer;
+}
+
+.node.process:hover{
+transform:translateY(-2px);
+box-shadow:0 8px 18px rgba(0,0,0,.10);
+background:#fbf7f2;
+}
+
+.diagram[data-editing="true"] .node.process:hover{
+transform:none;
+box-shadow:none;
+background:#f5f5f5;
+}
+
+.diagram[data-editing="true"] .diagram-item{
+cursor:grab;
+}
+
+.diagram-item.is-dragging{
+cursor:grabbing;
+z-index:20;
+}
+
+.diagram-item.is-selected{
+box-shadow:0 0 0 4px rgba(47,163,107,.18);
+}
+
+.process-label{
+display:block;
+}
+
+.process-panel-trigger{
+position:absolute;
+top:9px;
+right:9px;
+width:18px;
+height:18px;
+border:none;
+background:transparent;
+cursor:pointer;
+padding:0;
+z-index:4;
+opacity:0;
+transition:opacity .15s ease;
+}
+
+.process-panel-trigger::before{
+content:"";
+display:block;
+width:13px;
+height:15px;
+margin:0 auto;
+border:1.3px solid #9b9b9b;
+border-radius:2px;
+background:
+linear-gradient(#9b9b9b,#9b9b9b) 3px 4px/7px 1px no-repeat,
+linear-gradient(#9b9b9b,#9b9b9b) 3px 7px/7px 1px no-repeat,
+linear-gradient(#9b9b9b,#9b9b9b) 3px 10px/7px 1px no-repeat;
+}
+
+.diagram-item:hover .process-panel-trigger,
+.diagram-item:focus-within .process-panel-trigger{
+opacity:1;
+}
+
+.diagram[data-editing="true"] .process-panel-trigger{
+display:none;
+}
+
+.item-edit-trigger{
+position:absolute;
+top:8px;
+right:8px;
+width:18px;
+height:18px;
+border:none;
+border-radius:6px;
+background:rgba(255,255,255,.78);
+color:#6d7b85;
+font-size:12px;
+line-height:18px;
+text-align:center;
+cursor:pointer;
+padding:0;
+z-index:4;
+opacity:0;
+pointer-events:none;
+transition:opacity .15s ease, background .15s ease, color .15s ease;
+}
+
+.item-edit-trigger:hover{
+background:#fff;
+color:#2f3f4b;
+}
+
+.diagram[data-editing="true"] .diagram-item:hover .item-edit-trigger,
+.diagram[data-editing="true"] .diagram-item:focus-within .item-edit-trigger{
+opacity:1;
+pointer-events:auto;
+}
+
+.item-indicator{
+position:absolute;
+bottom:8px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:12px;
+height:12px;
+line-height:1;
+color:#7a8790;
+pointer-events:none;
+z-index:3;
+}
+
+.item-indicator.is-action{
+pointer-events:auto;
+border:none;
+background:transparent;
+padding:0;
+cursor:pointer;
+}
+
+.item-indicator svg{
+width:12px;
+height:12px;
+display:block;
+stroke:currentColor;
+fill:none;
+stroke-width:1.8;
+stroke-linecap:round;
+stroke-linejoin:round;
+}
+
+.workflow-link-actions{
+display:flex;
+align-items:center;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.badge{
+position:absolute;
+width:34px;
+height:34px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+font-size:15px;
+color:#fff;
+z-index:3;
+}
+
+.badge.gray{
+background:var(--gray);
+}
+
+.badge.orange{
+background:var(--orange);
+}
+
+.arrow-handle{
+position:absolute;
+width:14px;
+height:14px;
+margin:-7px 0 0 -7px;
+border-radius:50%;
+background:#fff;
+border:2px solid #2fa36b;
+box-shadow:0 4px 10px rgba(0,0,0,.12);
+cursor:grab;
+z-index:5;
+}
+
+.arrow-handle.is-dragging{
+cursor:grabbing;
+}
+
+.home-link{
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:10px 14px;
+border-radius:999px;
+background:#fff;
+color:var(--muted);
+text-decoration:none;
+font-size:14px;
+margin-bottom:18px;
+border:1px solid #d8d8d8;
+}
+
+.hint{
+margin:0 0 16px;
+font-size:14px;
+color:#777;
+}
+
+.side-panel{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.24);
+opacity:0;
+pointer-events:none;
+transition:opacity .25s ease;
+z-index:1000;
+}
+
+.side-panel.is-open{
+opacity:1;
+pointer-events:auto;
+}
+
+.panel-content{
+position:absolute;
+top:0;
+right:0;
+width:min(690px, 100%);
+height:100%;
+padding:28px 30px 34px;
+background:#fff;
+box-shadow:-12px 0 28px rgba(0,0,0,.14);
+transform:translateX(100%);
+transition:transform .3s ease;
+overflow-y:auto;
+z-index:1001;
+}
+
+.side-panel.is-open .panel-content{
+transform:translateX(0);
+}
+
+.panel-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+margin-bottom:18px;
+}
+
+.panel-content.is-editor-mode .panel-header{
+margin:-28px -30px 18px;
+padding:16px 22px;
+background:#eef1f3;
+border-bottom:1px solid #dde4e8;
+}
+
+.panel-content.is-editor-mode .panel-title{
+font-size:13px;
+font-weight:700;
+letter-spacing:.04em;
+color:#60676c;
+text-transform:none;
+}
+
+.panel-title{
+font-size:14px;
+font-weight:700;
+letter-spacing:.08em;
+color:#777;
+text-transform:uppercase;
+flex:1 1 auto;
+}
+
+.close{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:36px;
+height:36px;
+border:none;
+background:#f1f1f1;
+border-radius:50%;
+cursor:pointer;
+font-size:18px;
+}
+
+#content h2{
+margin:0 0 12px;
+font-size:26px;
+color:#333;
+}
+
+#content .content-title{
+display:flex;
+align-items:center;
+gap:12px;
+justify-content:space-between;
+}
+
+#content .content-process-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:42px;
+height:42px;
+border-radius:50%;
+background:var(--orange);
+color:#fff;
+font-size:18px;
+font-weight:700;
+flex:0 0 auto;
+}
+
+.content-title-main{
+display:flex;
+align-items:center;
+gap:12px;
+min-width:0;
+}
+
+.content-title-main h2{
+margin:0;
+}
+
+.content-title-actions{
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.content-panel-actions{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+margin-top:18px;
+}
+
+.content-panel-actions-right{
+display:flex;
+justify-content:flex-end;
+gap:10px;
+margin-left:auto;
+}
+
+.content-edit-icon{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:28px;
+height:28px;
+padding:0;
+border:none;
+border-radius:8px;
+background:transparent;
+color:#7a8891;
+font-size:14px;
+cursor:pointer;
+}
+
+.content-edit-icon:hover{
+background:rgba(32,48,61,.06);
+color:#2f3f4b;
+}
+
+.content-edit-actions{
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.inline-title-input{
+width:100%;
+max-width:320px;
+padding:4px 0;
+border:none;
+border-radius:0;
+background:transparent;
+font:inherit;
+font-size:22px;
+font-weight:700;
+color:#243541;
+}
+
+.inline-title-input:focus,
+.inline-badge-input:focus{
+outline:none;
+}
+
+.inline-badge-input{
+width:42px;
+padding:0;
+border:none;
+background:transparent;
+text-align:center;
+font:inherit;
+font-size:18px;
+font-weight:700;
+color:#fff;
+}
+
+#content h3{
+margin:18px 0 8px;
+font-size:15px;
+color:#444;
+}
+
+#content p,
+#content li{
+font-size:14px;
+line-height:1.5;
+color:#585858;
+}
+
+#content ol{
+margin:0;
+padding-left:18px;
+}
+
+#content .pill{
+display:inline-block;
+padding:4px 10px;
+margin:0 6px 8px 0;
+border-radius:999px;
+background:#fff3e3;
+border:1px solid #f1c892;
+font-size:12px;
+color:#8a5b11;
+}
+
+#content .action-link{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+margin-top:18px;
+padding:10px 14px;
+border-radius:999px;
+background:#eb7a07;
+color:#fff;
+text-decoration:none;
+font-size:14px;
+}
+
+@media (max-width: 900px){
+.app-shell{
+display:block;
+}
+
+.sidebar{
+width:auto;
+}
+
+.topbar{
+padding:16px;
+}
+
+.page{
+padding:14px 0 20px;
+}
+
+.hint{
+margin-left:16px;
+}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+<div class="brand">
+<img class="brand-logo" src="logo.png" alt="CONEMI">
+<div class="brand-copy">
+<strong>Portal de Procesos</strong>
+<span>Publicacion institucional CONEMI</span>
+</div>
+</div>
+
+<div class="nav-section">
+<p class="nav-title">Mapa General</p>
+<div class="nav-list">
+<a class="nav-link active" href="index.html"><span class="nav-pill">00</span>Macroprocesos</a>
+</div>
+</div>
+
+<div class="nav-section">
+<p class="nav-title">Arbol de Procesos</p>
+<div class="nav-tree">
+<div class="nav-group">
+<div class="nav-group-label"><span class="nav-pill">A</span>Comercial</div>
+<div class="nav-group-children">
+<a class="nav-link" data-process-nav="P1" href="cotizaciones.html"><span class="nav-pill">P1</span>Cotizaciones</a>
+</div>
+</div>
+<div class="nav-group">
+<div class="nav-group-label"><span class="nav-pill">B</span>Operaciones</div>
+<div class="nav-group-children">
+<a class="nav-link" data-process-nav="P2" href="index.html"><span class="nav-pill">P2</span>Planificacion</a>
+<a class="nav-link" data-process-nav="P3" href="index.html"><span class="nav-pill">P3</span>Ejecucion Servicios en Terreno</a>
+<a class="nav-link" data-process-nav="P4" href="index.html"><span class="nav-pill">P4</span>Integracion con Laboratorios</a>
+</div>
+</div>
+<div class="nav-group">
+<div class="nav-group-label"><span class="nav-pill">C</span>Area Tecnica</div>
+<div class="nav-group-children">
+<a class="nav-link" data-process-nav="P5" href="index.html"><span class="nav-pill">P5</span>Control y Seguimiento Tecnico</a>
+<a class="nav-link" data-process-nav="P6" href="index.html"><span class="nav-pill">P6</span>Elaboracion de Informes</a>
+</div>
+</div>
+</div>
+</div>
+
+<div class="sidebar-footer">
+Repositorio de procesos vigente.
+<br>
+Version publicada: Marzo 2026
+</div>
+</aside>
+
+<div class="app-main">
+<header class="topbar">
+<div class="topbar-copy">
+<h1>Publicacion de Procesos</h1>
+<p>Consulta navegable de macroprocesos, trazabilidad y acceso a detalle operativo.</p>
+</div>
+<div class="topbar-tools">
+<div class="status-chip">
+<span class="status-dot"></span>
+<div>
+<span>Estado</span>
+<strong>Publicacion activa</strong>
+</div>
+</div>
+<div class="user-chip">
+<div class="user-avatar">CR</div>
+<div class="user-meta">
+<span>Usuario conectado</span>
+<strong>Cristian Rojas</strong>
+</div>
+</div>
+</div>
+</header>
+
+<main class="workspace">
+<div class="page">
+<div class="page-modebar">
+<div class="page-modechip" id="pageModeChip">Modo publicación</div>
+<div class="floating-map-tools" id="floatingMapTools">
+<button class="floating-map-button" id="floatingEditModeButton" type="button" title="Entrar a edición" aria-label="Entrar a edición">✎</button>
+<button class="floating-map-button" id="zoomOutButton" type="button" title="Reducir zoom" aria-label="Reducir zoom">-</button>
+<button class="floating-map-button" id="zoomResetButton" type="button" title="Volver a 100%" aria-label="Volver a 100%">100</button>
+<button class="floating-map-button" id="zoomInButton" type="button" title="Aumentar zoom" aria-label="Aumentar zoom">+</button>
+<div class="diagram-zoom-value" id="zoomValue">100%</div>
+</div>
+</div>
+<p class="hint">Selecciona un macroproceso para ver su explicación. En `P1 Cotizaciones` también puedes abrir el flujo detallado.</p>
+<div class="diagram-shell">
+<div class="diagram">
+<div class="diagram-toolbar">
+<div class="diagram-toolbar-copy">
+<strong>Mapa editable</strong>
+<span>Activa edición para mover cajas, textos y flechas. El layout se guarda localmente como simulación persistente.</span>
+</div>
+<div class="diagram-actions">
+<button class="diagram-button" id="toggleEditButton" type="button">Editar mapa</button>
+<button class="diagram-button" id="copyLayoutButton" type="button">Copiar JSON</button>
+<button class="diagram-button" id="resetLayoutButton" type="button">Restablecer</button>
+</div>
+</div>
+<div class="diagram-status" id="diagramStatus">Vista en modo consulta.</div>
+<div class="diagram-canvas-shell" id="diagramCanvasShell">
+<div class="diagram-zoom-layer" id="diagramZoomLayer">
+<div class="diagram-canvas" id="diagramCanvas">
+<div class="diagram-grid" aria-hidden="true"></div>
+<div class="diagram-viewport" id="diagramViewport">
+<div class="diagram-arrows" id="diagramArrows"></div>
+<div class="diagram-items" id="diagramItems"></div>
+<div class="diagram-handles" id="diagramHandles"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="text-editor-modal" id="textEditorModal" onclick="closeTextEditor(event)">
+<div class="text-editor-card" onclick="event.stopPropagation()">
+<h3>Editar texto</h3>
+<p>Usa una nueva línea para forzar saltos dentro de la caja.</p>
+<textarea class="text-editor-field" id="textEditorField"></textarea>
+<div class="text-editor-actions">
+<button class="diagram-button" id="cancelTextEditorButton" type="button">Cancelar</button>
+<button class="diagram-button" id="saveTextEditorButton" type="button">Guardar</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+<div class="side-panel" id="panel" onclick="closePanel(event)">
+<div class="panel-content" onclick="event.stopPropagation()">
+<div class="panel-header">
+<div class="panel-title">Detalle del Macroproceso</div>
+<button class="close" type="button" onclick="closePanel()">X</button>
+</div>
+<div id="content"></div>
+</div>
+</div>
+<script>
+const DIAGRAM_STORAGE_KEY = "conemi-map-layout-v1";
+const DIAGRAM_ZOOM_STORAGE_KEY = "conemi-map-zoom-v1";
+const PROCESS_DETAILS_STORAGE_KEY = "conemi-process-details-v1";
+const ITEM_DETAILS_STORAGE_KEY = "conemi-item-details-v1";
+const WORKFLOW_CATALOG_STORAGE_KEY = "conemi-workflow-catalog-v1";
+const PROCESS_FILES_DB_NAME = "conemi-process-files-db";
+const PROCESS_FILES_STORE = "files";
+const PUBLICATION_WIDTH = 1200;
+const PUBLICATION_HEIGHT = 380;
+const EDITOR_WIDTH = 2200;
+const EDITOR_HEIGHT = 1400;
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+const ZOOM_STEP = 0.1;
+
+const defaultDiagramState = {
+items: [
+{ id: "main", kind: "node", className: "node main", x: 522, y: 24, width: 150, height: 64, text: "CONEMI" },
+{ id: "badge-a", groupId: "grp-area-a", kind: "badge", className: "badge gray", x: 63, y: 145, width: 34, height: 34, text: "A" },
+{ id: "area-a", groupId: "grp-area-a", kind: "node", className: "node area", x: 80, y: 160, width: 145, height: 66, text: "COMERCIAL" },
+{ id: "badge-b", groupId: "grp-area-b", kind: "badge", className: "badge gray", x: 505, y: 145, width: 34, height: 34, text: "B" },
+{ id: "area-b", groupId: "grp-area-b", kind: "node", className: "node area", x: 523, y: 160, width: 145, height: 66, text: "OPERACIONES" },
+{ id: "badge-c", groupId: "grp-area-c", kind: "badge", className: "badge gray", x: 950, y: 145, width: 34, height: 34, text: "C" },
+{ id: "area-c", groupId: "grp-area-c", kind: "node", className: "node area", x: 968, y: 160, width: 145, height: 66, text: "ÁREA TÉCNICA" },
+{ id: "badge-p1", groupId: "grp-proc-p1", kind: "badge", className: "badge orange", x: 54, y: 255, width: 34, height: 34, text: "P1" },
+{ id: "proc-p1", groupId: "grp-proc-p1", kind: "process", className: "node process", x: 70, y: 272, width: 150, height: 62, html: "Cotizaciones", processId: "P1", href: "cotizaciones.html" },
+{ id: "badge-p2", groupId: "grp-proc-p2", kind: "badge", className: "badge orange", x: 314, y: 255, width: 34, height: 34, text: "P2" },
+{ id: "proc-p2", groupId: "grp-proc-p2", kind: "process", className: "node process", x: 330, y: 272, width: 150, height: 62, html: "Planificación", processId: "P2" },
+{ id: "badge-p3", groupId: "grp-proc-p3", kind: "badge", className: "badge orange", x: 494, y: 255, width: 34, height: 34, text: "P3" },
+{ id: "proc-p3", groupId: "grp-proc-p3", kind: "process", className: "node process", x: 510, y: 272, width: 150, height: 62, html: "Ejecución Servicios en<br>Terreno", processId: "P3" },
+{ id: "badge-p4", groupId: "grp-proc-p4", kind: "badge", className: "badge orange", x: 674, y: 255, width: 34, height: 34, text: "P4" },
+{ id: "proc-p4", groupId: "grp-proc-p4", kind: "process", className: "node process", x: 690, y: 272, width: 150, height: 62, html: "Integración con<br>Laboratorios", processId: "P4" },
+{ id: "badge-p5", groupId: "grp-proc-p5", kind: "badge", className: "badge orange", x: 844, y: 255, width: 34, height: 34, text: "P5" },
+{ id: "proc-p5", groupId: "grp-proc-p5", kind: "process", className: "node process", x: 860, y: 272, width: 150, height: 62, html: "Control y Seguimiento<br>Técnico", processId: "P5" },
+{ id: "badge-p6", groupId: "grp-proc-p6", kind: "badge", className: "badge orange", x: 1024, y: 255, width: 34, height: 34, text: "P6" },
+{ id: "proc-p6", groupId: "grp-proc-p6", kind: "process", className: "node process", x: 1040, y: 272, width: 150, height: 62, html: "Elaboración de<br>Informes", processId: "P6" }
+],
+arrows: [
+{ id: "arrow-1", auto: true, axis: "vertical", from: { itemId: "main", side: "bottom" }, to: { itemId: "area-a", side: "top" } },
+{ id: "arrow-2", auto: true, axis: "vertical", from: { itemId: "main", side: "bottom" }, to: { itemId: "area-b", side: "top" } },
+{ id: "arrow-3", auto: true, axis: "vertical", from: { itemId: "main", side: "bottom" }, to: { itemId: "area-c", side: "top" } },
+{ id: "arrow-4", auto: true, axis: "vertical", from: { itemId: "area-a", side: "bottom" }, to: { itemId: "proc-p1", side: "top" } },
+{ id: "arrow-5", auto: true, axis: "vertical", from: { itemId: "area-b", side: "bottom" }, to: { itemId: "proc-p2", side: "top" } },
+{ id: "arrow-6", auto: true, axis: "vertical", from: { itemId: "area-b", side: "bottom" }, to: { itemId: "proc-p3", side: "top" } },
+{ id: "arrow-7", auto: true, axis: "vertical", from: { itemId: "area-b", side: "bottom" }, to: { itemId: "proc-p4", side: "top" } },
+{ id: "arrow-8", auto: true, axis: "vertical", from: { itemId: "area-c", side: "bottom" }, to: { itemId: "proc-p5", side: "top" } },
+{ id: "arrow-9", auto: true, axis: "vertical", from: { itemId: "area-c", side: "bottom" }, to: { itemId: "proc-p6", side: "top" } }
+]
+};
+let itemsWithAttachedFiles = new Set();
+
+let diagramState = loadDiagramState();
+let isEditingDiagram = false;
+let activeDrag = null;
+let diagramZoom = loadDiagramZoom();
+let activeTextEditItemId = null;
+
+const processContent = {
+P1: `
+<h2>Cotizaciones</h2>
+<p><span class="pill">Área: Comercial</span><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: QCotizador</span></p>
+<h3>Objetivo</h3>
+<p>Gestionar la recepción, análisis y formalización de requerimientos comerciales para transformarlos en cotizaciones claras, trazables y técnicamente evaluables.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Recibir el requerimiento del cliente por los distintos canales habilitados.</li>
+<li>Revisar preliminarmente la información entregada.</li>
+<li>Solicitar antecedentes faltantes cuando la información no sea suficiente.</li>
+<li>Registrar y clasificar la solicitud en el sistema comercial.</li>
+<li>Coordinar el avance hacia validación técnica, elaboración y aprobación de la cotización.</li>
+</ol>
+<h3>Descripción de actividades</h3>
+<ol>
+<li>Recepcionar el requerimiento y verificar su contexto general.</li>
+<li>Identificar si corresponde a servicio estándar, complejo o licitación.</li>
+<li>Levantar antecedentes mínimos para continuar.</li>
+<li>Derivar a validación técnica y operativa cuando aplique.</li>
+<li>Preparar la cotización y gestionar su aprobación y envío.</li>
+</ol>
+<h3>Políticas y reglas</h3>
+<ol>
+<li>No se elaboran cotizaciones sobre información incompleta, ambigua o solo verbal.</li>
+<li>Toda interacción relevante debe quedar respaldada en un medio formal.</li>
+<li>La información del cliente se trata de forma confidencial.</li>
+<li>Se debe actuar con objetividad, transparencia y sin conflictos de interés.</li>
+</ol>
+<h3>Registros generados</h3>
+<ol>
+<li>Correos asociados a la solicitud y seguimiento comercial.</li>
+<li>Archivos de costeo y documentación técnica de respaldo.</li>
+<li>Cotización emitida y aprobaciones del proceso.</li>
+</ol>
+<a class="action-link" href="cotizaciones.html">Ver flujo detallado</a>
+`,
+P2: `
+<h2>Planificación</h2>
+<p><span class="pill">Área: Operaciones</span><span class="pill">Responsable: Coordinación Operacional</span></p>
+<h3>Objetivo</h3>
+<p>Organizar recursos, fechas, alcances y dependencias para ejecutar los servicios comprometidos con el cliente en condiciones controladas.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Revisar la orden comercial y el alcance contratado.</li>
+<li>Definir recursos humanos, materiales y logísticos requeridos.</li>
+<li>Programar fechas y secuencia de actividades.</li>
+<li>Coordinar con áreas técnicas y de soporte.</li>
+</ol>
+<h3>Descripción de actividades</h3>
+<ol>
+<li>Analizar requerimientos operativos del servicio.</li>
+<li>Confirmar disponibilidad de equipos, personal y accesos.</li>
+<li>Generar programación operativa.</li>
+<li>Comunicar el plan de ejecución a las partes involucradas.</li>
+</ol>
+<h3>Políticas y reglas</h3>
+<ol>
+<li>No iniciar servicios sin validación previa de recursos críticos.</li>
+<li>Toda programación debe mantenerse actualizada y trazable.</li>
+<li>Los cambios de alcance o fecha deben quedar formalmente registrados.</li>
+</ol>
+<h3>Registros generados</h3>
+<ol>
+<li>Plan de trabajo o programación operacional.</li>
+<li>Asignación de recursos y agenda de ejecución.</li>
+</ol>
+`,
+P3: `
+<h2>Ejecución Servicios en Terreno</h2>
+<p><span class="pill">Área: Operaciones</span><span class="pill">Responsable: Equipo de Terreno</span></p>
+<h3>Objetivo</h3>
+<p>Ejecutar las actividades comprometidas en terreno conforme al alcance aprobado, asegurando cumplimiento técnico, operacional y documental.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Ejecutar el servicio de acuerdo con la planificación.</li>
+<li>Aplicar controles operacionales y de seguridad.</li>
+<li>Registrar evidencias y resultados levantados en terreno.</li>
+<li>Informar desvíos o contingencias durante la ejecución.</li>
+</ol>
+<h3>Descripción de actividades</h3>
+<ol>
+<li>Movilizar personal y recursos al punto de servicio.</li>
+<li>Realizar inspecciones, muestreos o actividades comprometidas.</li>
+<li>Documentar hallazgos, mediciones y evidencias.</li>
+<li>Cerrar la actividad en terreno y entregar antecedentes para la siguiente etapa.</li>
+</ol>
+<h3>Políticas y reglas</h3>
+<ol>
+<li>La ejecución debe respetar el alcance aprobado y las condiciones de seguridad.</li>
+<li>Todo desvío operativo debe informarse y escalarse oportunamente.</li>
+<li>La evidencia levantada debe ser íntegra y trazable.</li>
+</ol>
+<h3>Registros generados</h3>
+<ol>
+<li>Registros de terreno, formularios y evidencias fotográficas.</li>
+<li>Resultados preliminares y reportes operativos.</li>
+</ol>
+`,
+P4: `
+<h2>Integración con Laboratorios</h2>
+<p><span class="pill">Área: Operaciones</span><span class="pill">Responsable: Coordinación con Laboratorio</span></p>
+<h3>Objetivo</h3>
+<p>Asegurar la correcta derivación, recepción y seguimiento de muestras o antecedentes requeridos para el análisis de laboratorio asociado al servicio.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Coordinar la entrega de muestras y antecedentes técnicos.</li>
+<li>Verificar condiciones de identificación y trazabilidad.</li>
+<li>Hacer seguimiento del estado de análisis y resultados.</li>
+<li>Resolver observaciones con laboratorio y operación.</li>
+</ol>
+<h3>Descripción de actividades</h3>
+<ol>
+<li>Preparar la documentación y cadena de custodia cuando corresponda.</li>
+<li>Entregar o derivar muestras al laboratorio.</li>
+<li>Monitorear recepción, análisis y tiempos comprometidos.</li>
+<li>Consolidar resultados para las etapas siguientes.</li>
+</ol>
+<h3>Políticas y reglas</h3>
+<ol>
+<li>Toda muestra debe mantener identificación y trazabilidad completas.</li>
+<li>No se deben liberar resultados sin validación formal del laboratorio.</li>
+</ol>
+<h3>Registros generados</h3>
+<ol>
+<li>Cadenas de custodia y comprobantes de entrega.</li>
+<li>Resultados analíticos y comunicaciones de seguimiento.</li>
+</ol>
+`,
+P5: `
+<h2>Control y Seguimiento Técnico</h2>
+<p><span class="pill">Área: Área Técnica</span><span class="pill">Responsable: Revisión Técnica</span></p>
+<h3>Objetivo</h3>
+<p>Controlar la calidad técnica del servicio ejecutado y dar seguimiento a la consistencia de resultados, observaciones y cumplimiento del alcance contratado.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Revisar antecedentes técnicos provenientes de operación y laboratorio.</li>
+<li>Detectar observaciones, brechas o inconsistencias.</li>
+<li>Solicitar aclaraciones o ajustes cuando sea necesario.</li>
+<li>Validar la información previa a la emisión del informe.</li>
+</ol>
+<h3>Descripción de actividades</h3>
+<ol>
+<li>Consolidar la información técnica del servicio.</li>
+<li>Aplicar controles de calidad y revisión de consistencia.</li>
+<li>Gestionar correcciones o complementos técnicos.</li>
+<li>Liberar antecedentes para elaboración de informe.</li>
+</ol>
+<h3>Políticas y reglas</h3>
+<ol>
+<li>No avanzar a emisión de informe con observaciones críticas pendientes.</li>
+<li>Toda corrección debe quedar respaldada y trazable.</li>
+</ol>
+<h3>Registros generados</h3>
+<ol>
+<li>Checklists de revisión y observaciones técnicas.</li>
+<li>Versiones controladas de antecedentes revisados.</li>
+</ol>
+`,
+P6: `
+<h2>Elaboración de Informes</h2>
+<p><span class="pill">Área: Área Técnica</span><span class="pill">Responsable: Emisión Técnica</span></p>
+<h3>Objetivo</h3>
+<p>Emitir informes técnicos claros, completos y consistentes con la evidencia del servicio, cumpliendo requisitos contractuales y normativos aplicables.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Redactar el informe técnico con base en antecedentes validados.</li>
+<li>Incorporar resultados, conclusiones y anexos de respaldo.</li>
+<li>Aplicar revisión formal antes de la emisión.</li>
+<li>Entregar el documento final conforme al canal definido.</li>
+</ol>
+<h3>Descripción de actividades</h3>
+<ol>
+<li>Recopilar y ordenar antecedentes validados.</li>
+<li>Construir el informe técnico y sus anexos.</li>
+<li>Revisar formato, consistencia y completitud.</li>
+<li>Emitir la versión final y dejar registro documental.</li>
+</ol>
+<h3>Políticas y reglas</h3>
+<ol>
+<li>El informe debe emitirse solo con información aprobada y controlada.</li>
+<li>Las versiones deben mantenerse bajo control documental.</li>
+</ol>
+<h3>Registros generados</h3>
+<ol>
+<li>Informes emitidos y versiones de revisión.</li>
+<li>Anexos, resultados y respaldos documentales del servicio.</li>
+</ol>
+`
+};
+
+const defaultProcessDetails = buildDefaultProcessDetails();
+let processDetails = loadProcessDetails();
+const defaultItemDetails = buildDefaultItemDetails();
+let itemDetails = loadItemDetails();
+const defaultWorkflowCatalog = [
+{ id: "wf-cotizaciones", title: "Workflow Cotizaciones", pageName: "cotizaciones.html", url: "cotizaciones.html" }
+];
+let workflowCatalog = loadWorkflowCatalog();
+
+function stripTags(value){
+return String(value || "").replace(/<[^>]+>/g, "").trim();
+}
+
+function slugify(value){
+return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "workflow";
+}
+
+function normalizeWorkflowPageName(value){
+const trimmed = String(value || "").trim();
+if(!trimmed){
+return "workflow";
+}
+return trimmed.toLowerCase().endsWith(".html") ? trimmed : (trimmed + ".html");
+}
+
+function loadWorkflowCatalog(){
+try{
+const raw = window.localStorage.getItem(WORKFLOW_CATALOG_STORAGE_KEY);
+const parsed = raw ? JSON.parse(raw) : [];
+const merged = defaultWorkflowCatalog.concat(Array.isArray(parsed) ? parsed : []);
+const unique = [];
+const seen = new Set();
+merged.forEach(function(entry){
+if(!entry || !entry.id || seen.has(entry.id)){
+return;
+}
+seen.add(entry.id);
+unique.push({
+id: entry.id,
+title: entry.title || entry.id,
+pageName: entry.pageName || "workflow.html",
+url: entry.url || `workflow.html?workflow=${encodeURIComponent(entry.id)}`
+});
+});
+return unique;
+}catch(error){
+return structuredClone(defaultWorkflowCatalog);
+}
+}
+
+function saveWorkflowCatalog(){
+window.localStorage.setItem(WORKFLOW_CATALOG_STORAGE_KEY, JSON.stringify(workflowCatalog));
+}
+
+function findWorkflowByUrl(url){
+return workflowCatalog.find(function(entry){
+return entry.url === url;
+}) || null;
+}
+
+function createWorkflowEntry(title, pageName){
+const normalizedPageName = normalizeWorkflowPageName(pageName);
+const id = `wf-${slugify(normalizedPageName.replace(/\.html$/i, ""))}-${Date.now().toString(36)}`;
+const entry = {
+id: id,
+title: title || normalizedPageName.replace(/\.html$/i, ""),
+pageName: normalizedPageName,
+url: `workflow.html?workflow=${encodeURIComponent(id)}`
+};
+workflowCatalog.push(entry);
+saveWorkflowCatalog();
+return entry;
+}
+
+function clearWorkflowAssociationsByUrl(url){
+Object.keys(processDetails).forEach(function(processId){
+if((processDetails[processId] || {}).link === url){
+processDetails[processId].link = "";
+}
+});
+Object.keys(itemDetails).forEach(function(itemId){
+if((itemDetails[itemId] || {}).link === url){
+itemDetails[itemId].link = "";
+}
+});
+saveProcessDetails();
+saveItemDetails();
+}
+
+function deleteWorkflowEntryByUrl(url){
+const target = findWorkflowByUrl(url);
+if(!target || target.url === "cotizaciones.html"){
+return false;
+}
+workflowCatalog = workflowCatalog.filter(function(entry){
+return entry.id !== target.id;
+});
+saveWorkflowCatalog();
+clearWorkflowAssociationsByUrl(url);
+return true;
+}
+
+function renderWorkflowOptions(selectedUrl){
+const baseOption = `<option value="">Sin workflow asociado</option>`;
+const selectedEntry = selectedUrl ? findWorkflowByUrl(selectedUrl) : null;
+const legacyOption = selectedUrl && !selectedEntry
+? `<option value="${escapeHtmlAttribute(selectedUrl)}" selected>Workflow vinculado actual · ${escapeHtml(selectedUrl)}</option>`
+: "";
+const options = workflowCatalog.map(function(entry){
+return `<option value="${escapeHtmlAttribute(entry.url)}"${entry.url === selectedUrl ? " selected" : ""}>${escapeHtml(entry.title)} · ${escapeHtml(entry.pageName)}</option>`;
+}).join("");
+return baseOption + legacyOption + options;
+}
+
+function extractSectionList(content, title){
+const match = content.match(new RegExp(`<h3>${title}<\\/h3>\\s*<ol>([\\s\\S]*?)<\\/ol>`));
+if(!match){
+return [];
+}
+return Array.from(match[1].matchAll(/<li>([\s\S]*?)<\/li>/g)).map(function(entry){
+return stripTags(entry[1]);
+});
+}
+
+function extractSectionText(content, title){
+const match = content.match(new RegExp(`<h3>${title}<\\/h3>\\s*<p>([\\s\\S]*?)<\\/p>`));
+return match ? stripTags(match[1]) : "";
+}
+
+function extractPills(content){
+const firstParagraph = content.match(/^<h2>[\s\S]*?<\/h2>\s*<p>([\s\S]*?)<\/p>/);
+if(!firstParagraph){
+return [];
+}
+return Array.from(firstParagraph[1].matchAll(/<span class="pill">([\s\S]*?)<\/span>/g)).map(function(entry){
+return stripTags(entry[1]);
+});
+}
+
+function escapeHtmlAttribute(value){
+return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
+function convertPlainTextToParagraphs(value){
+return String(value || "").split(/\n+/).map(function(line){
+const trimmed = line.trim();
+return trimmed ? `<p>${escapeHtml(trimmed)}</p>` : "";
+}).join("") || "<p></p>";
+}
+
+function convertListToHtml(value){
+const items = Array.isArray(value) ? value : String(value || "").split("\n").map(function(line){ return line.trim(); }).filter(Boolean);
+if(!items.length){
+return "<ul><li></li></ul>";
+}
+return `<ul>${items.map(function(item){ return `<li>${escapeHtml(item)}</li>`; }).join("")}</ul>`;
+}
+
+function sanitizeRichTextHtml(value){
+const template = document.createElement("template");
+template.innerHTML = String(value || "");
+const allowedTags = {
+P: true,
+BR: true,
+STRONG: true,
+B: true,
+EM: true,
+I: true,
+U: true,
+UL: true,
+OL: true,
+LI: true
+};
+
+function cleanNode(node){
+Array.from(node.childNodes).forEach(function(child){
+if(child.nodeType === Node.TEXT_NODE){
+return;
+}
+if(child.nodeType !== Node.ELEMENT_NODE){
+child.remove();
+return;
+}
+if(!allowedTags[child.tagName]){
+const fragment = document.createDocumentFragment();
+while(child.firstChild){
+fragment.appendChild(child.firstChild);
+}
+child.replaceWith(fragment);
+cleanNode(node);
+return;
+}
+Array.from(child.attributes).forEach(function(attr){
+child.removeAttribute(attr.name);
+});
+cleanNode(child);
+});
+}
+
+cleanNode(template.content);
+const normalized = template.innerHTML.trim();
+return normalized || "<p></p>";
+}
+
+function normalizeRichTextField(value, mode){
+if(Array.isArray(value)){
+return convertListToHtml(value);
+}
+if(typeof value !== "string"){
+return mode === "list" ? "<ul><li></li></ul>" : "<p></p>";
+}
+const trimmed = value.trim();
+if(!trimmed){
+return mode === "list" ? "<ul><li></li></ul>" : "<p></p>";
+}
+if(trimmed.indexOf("<") !== -1 && trimmed.indexOf(">") !== -1){
+return sanitizeRichTextHtml(trimmed);
+}
+return mode === "list" ? convertListToHtml(trimmed) : convertPlainTextToParagraphs(trimmed);
+}
+
+function renderRichTextHtml(value){
+return sanitizeRichTextHtml(value);
+}
+
+function renderRichTextEditor(editorId, value, placeholder){
+return `
+<div class="rich-editor" data-editor-id="${editorId}">
+<div class="rich-editor-toolbar">
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="bold" title="Negrita" aria-label="Negrita"><strong>B</strong></button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="italic" title="Cursiva" aria-label="Cursiva"><em>I</em></button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="underline" title="Subrayado" aria-label="Subrayado"><u>U</u></button>
+<span class="rich-editor-divider" aria-hidden="true"></span>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="insertUnorderedList" title="Lista" aria-label="Lista">• List</button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="insertOrderedList" title="Lista numerada" aria-label="Lista numerada">1.</button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="formatBlock" data-value="p" title="Párrafo" aria-label="Párrafo">P</button>
+</div>
+<div class="rich-editor-content" id="${editorId}" contenteditable="true" data-placeholder="${escapeHtmlAttribute(placeholder)}">${renderRichTextHtml(value)}</div>
+</div>`;
+}
+
+function buildDefaultProcessDetails(){
+return Object.keys(processContent).reduce(function(acc, processId){
+const content = processContent[processId];
+const titleMatch = content.match(/<h2>(.*?)<\/h2>/);
+const actionLinkMatch = content.match(/<a class="action-link" href="(.*?)">/);
+acc[processId] = {
+title: titleMatch ? stripTags(titleMatch[1]) : processId,
+pills: extractPills(content),
+objective: normalizeRichTextField(extractSectionText(content, "Objetivo"), "paragraph"),
+description: normalizeRichTextField(extractSectionList(content, "Descripción de actividades"), "list"),
+policies: normalizeRichTextField(extractSectionList(content, "Políticas y reglas"), "list"),
+records: normalizeRichTextField(extractSectionList(content, "Registros generados"), "list"),
+link: actionLinkMatch ? actionLinkMatch[1] : ""
+};
+return acc;
+}, {});
+}
+
+function buildDefaultItemDetails(){
+return {
+main: {
+title: "CONEMI",
+description: normalizeRichTextField("Nodo principal del macroproceso. Representa el dominio de negocio desde el cual se articulan las áreas y procesos asociados.", "paragraph"),
+link: ""
+},
+"area-a": {
+title: "COMERCIAL",
+description: "<p></p>",
+link: ""
+},
+"area-b": {
+title: "OPERACIONES",
+description: "<p></p>",
+link: ""
+},
+"area-c": {
+title: "ÁREA TÉCNICA",
+description: "<p></p>",
+link: ""
+}
+};
+}
+
+function loadProcessDetails(){
+try{
+const raw = window.localStorage.getItem(PROCESS_DETAILS_STORAGE_KEY);
+if(!raw){
+return structuredClone(defaultProcessDetails);
+}
+const parsed = JSON.parse(raw);
+return Object.keys(defaultProcessDetails).reduce(function(acc, processId){
+const fallback = defaultProcessDetails[processId];
+const current = parsed[processId] || {};
+acc[processId] = {
+title: current.title || fallback.title,
+pills: Array.isArray(current.pills) ? current.pills : fallback.pills,
+objective: normalizeRichTextField(current.objective || fallback.objective, "paragraph"),
+description: normalizeRichTextField(current.description || fallback.description, "list"),
+policies: normalizeRichTextField(current.policies || fallback.policies, "list"),
+records: normalizeRichTextField(current.records || fallback.records, "list"),
+link: current.link || fallback.link
+};
+return acc;
+}, {});
+}catch(error){
+return structuredClone(defaultProcessDetails);
+}
+}
+
+function saveProcessDetails(){
+window.localStorage.setItem(PROCESS_DETAILS_STORAGE_KEY, JSON.stringify(processDetails));
+}
+
+function loadItemDetails(){
+try{
+const raw = window.localStorage.getItem(ITEM_DETAILS_STORAGE_KEY);
+if(!raw){
+return structuredClone(defaultItemDetails);
+}
+const parsed = JSON.parse(raw);
+return Object.keys(defaultItemDetails).reduce(function(acc, itemId){
+const fallback = defaultItemDetails[itemId];
+const current = parsed[itemId] || {};
+acc[itemId] = {
+title: current.title || fallback.title,
+description: normalizeRichTextField(current.description || fallback.description, "paragraph"),
+link: current.link || fallback.link || ""
+};
+return acc;
+}, {});
+}catch(error){
+return structuredClone(defaultItemDetails);
+}
+}
+
+function saveItemDetails(){
+window.localStorage.setItem(ITEM_DETAILS_STORAGE_KEY, JSON.stringify(itemDetails));
+}
+
+function getItemDetail(itemId){
+return itemDetails[itemId] || { title: (getItemById(itemId) || {}).text || itemId, description: "" };
+}
+
+function getEditorTargetItem(item){
+if(!item){
+return null;
+}
+if(!item.groupId){
+return item;
+}
+return diagramState.items.find(function(candidate){
+return candidate.groupId === item.groupId && candidate.kind !== "badge";
+}) || item;
+}
+
+function getGroupBadgeItem(item){
+if(!item || !item.groupId){
+return null;
+}
+return diagramState.items.find(function(candidate){
+return candidate.groupId === item.groupId && candidate.kind === "badge";
+}) || null;
+}
+
+function getProcessDetail(processId){
+return processDetails[processId] || defaultProcessDetails[processId] || null;
+}
+
+function getWorkflowLinkForProcess(processId){
+const detail = getProcessDetail(processId);
+return detail ? (detail.link || "").trim() : "";
+}
+
+function applyProcessNavigationLinks(){
+document.querySelectorAll("[data-process-nav]").forEach(function(linkEl){
+const processId = linkEl.dataset.processNav;
+if(!processId){
+return;
+}
+const detail = getProcessDetail(processId);
+const href = (detail && detail.link) || (processId === "P1" ? "cotizaciones.html" : "index.html");
+linkEl.href = href;
+});
+}
+
+function getWorkflowLinkForItem(itemId){
+const detail = getItemDetail(itemId);
+return detail ? (detail.link || "").trim() : "";
+}
+
+function buildWorkflowLink(processId){
+return `workflow.html?process=${encodeURIComponent(processId)}`;
+}
+
+function buildItemWorkflowLink(itemId){
+return `workflow.html?item=${encodeURIComponent(itemId)}`;
+}
+
+function renderProcessView(processId){
+const detail = getProcessDetail(processId);
+if(!detail){
+return "<h2>Sin detalle</h2>";
+}
+
+const pills = detail.pills.map(function(pill){
+return `<span class="pill">${escapeHtml(pill)}</span>`;
+}).join("");
+const link = detail.link ? `<div><h3>Workflow asociado</h3><a class="action-link" href="${detail.link}">Abrir workflow asociado</a></div>` : "";
+const modeAction = isEditingDiagram
+? `<div class="content-panel-actions"><button class="diagram-button" id="closePanelViewButton" type="button">Cerrar</button><div class="content-panel-actions-right"><button class="diagram-button" id="editProcessDetailButton" type="button">Modo edición</button></div></div>`
+: "";
+
+return `
+<div class="content-title" data-process-id="${processId}">
+<div class="content-title-main">
+<span class="content-process-badge">${escapeHtml((getBadgeItemByProcessId(processId) || {}).text || processId)}</span>
+<h2 id="processDetailTitle">${escapeHtml(detail.title)}</h2>
+</div>
+</div>
+<p>${pills}</p>
+<h3>Objetivo</h3>
+${renderRichTextHtml(detail.objective)}
+<h3>Descripción</h3>
+${renderRichTextHtml(detail.description)}
+<h3>Políticas y reglas</h3>
+${renderRichTextHtml(detail.policies)}
+<h3>Registros</h3>
+${renderRichTextHtml(detail.records)}
+<h3>Archivos asociados</h3>
+<div class="process-files" id="processFilesList"><div class="process-editor-note">Cargando archivos...</div></div>
+${link}
+${modeAction}
+`;
+}
+
+function renderProcessEditor(processId){
+const detail = getProcessDetail(processId);
+const badgeText = (getBadgeItemByProcessId(processId) || {}).text || processId;
+return `
+<div class="process-editor">
+<div class="process-editor-body">
+<div class="process-editor-group">
+<label for="processEditBadge">Numeral</label>
+<input class="process-editor-input is-numeral" id="processEditBadge" type="text" maxlength="4" value="${escapeHtml(badgeText)}">
+</div>
+<div class="process-editor-group">
+<label for="processEditTitle">Titulo</label>
+<input class="process-editor-input" id="processEditTitle" type="text" value="${escapeHtml(detail.title)}">
+</div>
+<div class="process-editor-group">
+<label for="processEditObjective">Objetivo</label>
+${renderRichTextEditor("processEditObjective", detail.objective, "Describe el objetivo")}
+</div>
+<div class="process-editor-group">
+<label for="processEditDescription">Descripción</label>
+${renderRichTextEditor("processEditDescription", detail.description, "Agrega pasos, bullets o numerales")}
+</div>
+<div class="process-editor-group">
+<label for="processEditPolicies">Políticas y reglas</label>
+${renderRichTextEditor("processEditPolicies", detail.policies, "Documenta políticas y reglas")}
+</div>
+<div class="process-editor-group">
+<label for="processEditRecords">Registros</label>
+${renderRichTextEditor("processEditRecords", detail.records, "Detalla registros o entregables")}
+</div>
+<div class="process-editor-group">
+<label for="processEditFiles">Archivos asociados</label>
+<div class="process-file-dropzone is-editor">
+<div class="process-file-dropzone-copy">
+<strong>Biblioteca de archivos</strong>
+<span>Sube, renombra y elimina archivos asociados a esta actividad.</span>
+</div>
+<label class="process-file-picker" for="processEditFiles">Seleccionar</label>
+</div>
+<input class="process-file-input" id="processEditFiles" type="file" multiple>
+<div class="process-files" id="processEditorFilesList"><div class="process-editor-note">Cargando archivos...</div></div>
+</div>
+<div class="process-editor-group">
+<label for="processEditWorkflowLink">Workflow asociado</label>
+<select class="process-editor-input" id="processEditWorkflowLink">${renderWorkflowOptions(detail.link || "")}</select>
+<div class="process-editor-note">Selecciona un workflow existente o crea uno nuevo para este proceso.</div>
+<div class="workflow-link-actions">
+<button class="diagram-button" id="createWorkflowLinkButton" type="button">Crear workflow</button>
+<button class="diagram-button" id="openWorkflowLinkButton" type="button"${detail.link ? "" : " disabled"}>Abrir workflow</button>
+<button class="diagram-button" id="clearWorkflowLinkButton" type="button">Desasociar</button>
+<button class="diagram-button" id="deleteWorkflowLinkButton" type="button"${detail.link && detail.link !== "cotizaciones.html" ? "" : " disabled"}>Eliminar workflow</button>
+</div>
+</div>
+<div class="process-editor-actions">
+<button class="diagram-button" id="closeProcessEditorButton" type="button">Cerrar</button>
+<div class="content-panel-actions-right">
+<button class="diagram-button" id="cancelProcessEditorButton" type="button">Modo lectura</button>
+<button class="diagram-button" id="saveProcessEditorButton" type="button">Guardar cambios</button>
+</div>
+</div>
+</div>
+`;
+}
+
+function renderItemEditor(itemId){
+const sourceItem = getItemById(itemId);
+const item = getEditorTargetItem(sourceItem);
+const badgeItem = getGroupBadgeItem(sourceItem);
+const detail = item ? getItemDetail(item.id) : null;
+if(!item || !detail){
+return "<h2>Sin detalle</h2>";
+}
+
+return `
+<div class="process-editor">
+<div class="process-editor-body">
+${badgeItem ? `<div class="process-editor-group"><label for="itemEditBadge">Numeral</label><input class="process-editor-input is-numeral" id="itemEditBadge" type="text" maxlength="4" value="${escapeHtml(badgeItem.text || "")}"></div>` : ""}
+<div class="process-editor-group">
+<label for="itemEditTitle">Titulo</label>
+<input class="process-editor-input" id="itemEditTitle" type="text" value="${escapeHtml(detail.title)}">
+</div>
+<div class="process-editor-group">
+<label for="itemEditDescription">Descripción</label>
+${renderRichTextEditor("itemEditDescription", detail.description, "Agrega una descripción con formato")}
+</div>
+<div class="process-editor-group">
+<label for="itemEditFiles">Archivos asociados</label>
+<div class="process-file-dropzone is-editor">
+<div class="process-file-dropzone-copy">
+<strong>Biblioteca de archivos</strong>
+<span>Sube, renombra y elimina archivos asociados a este nodo.</span>
+</div>
+<label class="process-file-picker" for="itemEditFiles">Seleccionar</label>
+</div>
+<input class="process-file-input" id="itemEditFiles" type="file" multiple>
+<div class="process-files" id="itemEditorFilesList"><div class="process-editor-note">Cargando archivos...</div></div>
+</div>
+<div class="process-editor-group">
+<label for="itemEditWorkflowLink">Workflow asociado</label>
+<select class="process-editor-input" id="itemEditWorkflowLink">${renderWorkflowOptions(detail.link || "")}</select>
+<div class="process-editor-note">Selecciona un workflow existente o crea uno nuevo para este nodo.</div>
+<div class="workflow-link-actions">
+<button class="diagram-button" id="createItemWorkflowLinkButton" type="button">Crear workflow</button>
+<button class="diagram-button" id="openItemWorkflowLinkButton" type="button"${detail.link ? "" : " disabled"}>Abrir workflow</button>
+<button class="diagram-button" id="clearItemWorkflowLinkButton" type="button">Desasociar</button>
+<button class="diagram-button" id="deleteItemWorkflowLinkButton" type="button"${detail.link && detail.link !== "cotizaciones.html" ? "" : " disabled"}>Eliminar workflow</button>
+</div>
+</div>
+<div class="content-panel-actions">
+<button class="diagram-button" id="closeItemEditorButton" type="button">Cerrar</button>
+<div class="content-panel-actions-right">
+<button class="diagram-button" id="saveItemEditorButton" type="button">Guardar cambios</button>
+</div>
+</div>
+</div>
+</div>
+`;
+}
+
+function escapeHtml(value){
+return String(value)
+.replace(/&/g, "&amp;")
+.replace(/</g, "&lt;")
+.replace(/>/g, "&gt;")
+.replace(/"/g, "&quot;")
+.replace(/'/g, "&#39;");
+}
+
+function getProcessItemByProcessId(processId){
+return diagramState.items.find(function(item){
+return item.processId === processId;
+}) || null;
+}
+
+function getBadgeItemByProcessId(processId){
+return diagramState.items.find(function(item){
+return item.id === ("badge-" + processId.toLowerCase());
+}) || null;
+}
+
+function getProcessDisplayTitle(processId, fallbackTitle){
+const detail = getProcessDetail(processId);
+return detail ? detail.title : fallbackTitle;
+}
+
+async function openProcess(processId){
+document.querySelector(".panel-content").classList.remove("is-editor-mode");
+document.getElementById("content").innerHTML = renderProcessView(processId);
+document.querySelector(".panel-title").textContent = "Detalle del Macroproceso";
+const editButton = document.getElementById("editProcessDetailButton");
+if(editButton){
+editButton.addEventListener("click", function(){
+openProcessEditor(processId);
+});
+}
+const closeButton = document.getElementById("closePanelViewButton");
+if(closeButton){
+closeButton.addEventListener("click", closePanel);
+}
+document.getElementById("panel").classList.add("is-open");
+document.body.classList.add("panel-open");
+await renderProcessFiles(processId, "processFilesList", false);
+}
+
+function closePanel(event){
+if(event){
+event.stopPropagation();
+}
+document.querySelector(".panel-content").classList.remove("is-editor-mode");
+document.getElementById("panel").classList.remove("is-open");
+document.body.classList.remove("panel-open");
+}
+
+document.addEventListener("keydown", function(event){
+if(event.key === "Escape"){
+closePanel();
+}
+});
+
+function loadDiagramState(){
+try{
+const raw = window.localStorage.getItem(DIAGRAM_STORAGE_KEY);
+if(!raw){
+return structuredClone(defaultDiagramState);
+}
+const parsed = JSON.parse(raw);
+if(!parsed || !Array.isArray(parsed.items) || !Array.isArray(parsed.arrows)){
+return structuredClone(defaultDiagramState);
+}
+if(parsed.arrows.some(function(arrow){ return Array.isArray(arrow.points); })){
+return migrateLegacyDiagramState(parsed);
+}
+return normalizeDiagramState(parsed);
+}catch(error){
+return structuredClone(defaultDiagramState);
+}
+}
+
+function migrateLegacyDiagramState(legacyState){
+return {
+items: Array.isArray(legacyState.items) ? legacyState.items : structuredClone(defaultDiagramState.items),
+arrows: structuredClone(defaultDiagramState.arrows)
+};
+}
+
+function normalizeDiagramState(state){
+const defaultArrowsById = Object.fromEntries(defaultDiagramState.arrows.map(function(arrow){
+return [arrow.id, arrow];
+}));
+const defaultItemsById = Object.fromEntries(defaultDiagramState.items.map(function(item){
+return [item.id, item];
+}));
+
+const normalizedArrows = (Array.isArray(state.arrows) ? state.arrows : []).map(function(arrow){
+const fallback = defaultArrowsById[arrow.id];
+if(!fallback){
+return arrow;
+}
+
+return {
+id: arrow.id,
+auto: typeof arrow.auto === "boolean" ? arrow.auto : fallback.auto,
+axis: arrow.axis || fallback.axis,
+from: {
+itemId: arrow.from && arrow.from.itemId ? arrow.from.itemId : fallback.from.itemId,
+side: arrow.from && arrow.from.side ? arrow.from.side : fallback.from.side
+},
+to: {
+itemId: arrow.to && arrow.to.itemId ? arrow.to.itemId : fallback.to.itemId,
+side: arrow.to && arrow.to.side ? arrow.to.side : fallback.to.side
+}
+};
+});
+
+return {
+items: (Array.isArray(state.items) ? state.items : structuredClone(defaultDiagramState.items)).map(function(item){
+const fallback = defaultItemsById[item.id] || {};
+return {
+...item,
+text: item.text,
+groupId: item.groupId || fallback.groupId || null
+};
+}),
+arrows: normalizedArrows.length ? normalizedArrows : structuredClone(defaultDiagramState.arrows)
+};
+}
+
+function saveDiagramState(){
+window.localStorage.setItem(DIAGRAM_STORAGE_KEY, JSON.stringify(diagramState));
+updateDiagramStatus("Cambios guardados en simulación local.");
+}
+
+function loadDiagramZoom(){
+try{
+const raw = Number(window.localStorage.getItem(DIAGRAM_ZOOM_STORAGE_KEY));
+if(Number.isFinite(raw) && raw >= ZOOM_MIN && raw <= ZOOM_MAX){
+return raw;
+}
+}catch(error){
+}
+return 1;
+}
+
+function saveDiagramZoom(){
+window.localStorage.setItem(DIAGRAM_ZOOM_STORAGE_KEY, String(diagramZoom));
+}
+
+function getEditableItemContent(item){
+if(item.html){
+return item.html.replace(/<br\s*\/?>/gi, "\n");
+}
+return item.text || "";
+}
+
+function setEditableItemContent(item, value){
+const normalized = value.replace(/\r\n/g, "\n").trim();
+if(item.kind === "badge"){
+item.text = normalized;
+delete item.html;
+return;
+}
+
+if(normalized.includes("\n")){
+item.html = normalized.split("\n").map(function(line){
+return line.trim();
+}).join("<br>");
+item.text = normalized;
+return;
+}
+
+item.text = normalized;
+delete item.html;
+}
+
+function updateDiagramStatus(message){
+const statusEl = document.getElementById("diagramStatus");
+if(statusEl){
+statusEl.textContent = message;
+}
+}
+
+function clamp(value, min, max){
+return Math.min(Math.max(value, min), max);
+}
+
+function getItemById(itemId){
+return diagramState.items.find(function(item){
+return item.id === itemId;
+}) || null;
+}
+
+function getAnchorPoint(item, side){
+if(!item){
+return { x: 0, y: 0 };
+}
+
+const centerX = item.x + (item.width / 2);
+const centerY = item.y + (item.height / 2);
+
+if(side === "top"){
+return { x: centerX, y: item.y };
+}
+if(side === "right"){
+return { x: item.x + item.width, y: centerY };
+}
+if(side === "bottom"){
+return { x: centerX, y: item.y + item.height };
+}
+return { x: item.x, y: centerY };
+}
+
+function getAnchorStemPoint(point, side, distance){
+if(side === "top"){
+return { x: point.x, y: point.y - distance };
+}
+if(side === "right"){
+return { x: point.x + distance, y: point.y };
+}
+if(side === "bottom"){
+return { x: point.x, y: point.y + distance };
+}
+return { x: point.x - distance, y: point.y };
+}
+
+function resolveArrowConnection(arrow){
+const fromItem = getItemById(arrow.from.itemId);
+const toItem = getItemById(arrow.to.itemId);
+let fromSide = arrow.from.side || "bottom";
+let toSide = arrow.to.side || "top";
+
+if(arrow.auto !== false && fromItem && toItem){
+const fromCenterX = fromItem.x + (fromItem.width / 2);
+const fromCenterY = fromItem.y + (fromItem.height / 2);
+const toCenterX = toItem.x + (toItem.width / 2);
+const toCenterY = toItem.y + (toItem.height / 2);
+const deltaX = toCenterX - fromCenterX;
+const deltaY = toCenterY - fromCenterY;
+
+if(arrow.axis === "horizontal"){
+fromSide = deltaX >= 0 ? "right" : "left";
+toSide = deltaX >= 0 ? "left" : "right";
+}else if(arrow.axis === "vertical"){
+fromSide = deltaY >= 0 ? "bottom" : "top";
+toSide = deltaY >= 0 ? "top" : "bottom";
+}else if(Math.abs(deltaX) > Math.abs(deltaY)){
+fromSide = deltaX >= 0 ? "right" : "left";
+toSide = deltaX >= 0 ? "left" : "right";
+}else{
+fromSide = deltaY >= 0 ? "bottom" : "top";
+toSide = deltaY >= 0 ? "top" : "bottom";
+}
+}
+
+return {
+fromItem: fromItem,
+toItem: toItem,
+fromSide: fromSide,
+toSide: toSide
+};
+}
+
+function getGroupedArrows(sourceArrow){
+return diagramState.arrows.filter(function(arrow){
+return arrow.id !== sourceArrow.id &&
+arrow.auto !== false &&
+arrow.axis === sourceArrow.axis &&
+arrow.from &&
+sourceArrow.from &&
+arrow.from.itemId === sourceArrow.from.itemId;
+}).concat(sourceArrow);
+}
+
+function buildVerticalBusConnectorPoints(arrow, connection){
+const groupedArrows = getGroupedArrows(arrow);
+if(groupedArrows.length < 2){
+return null;
+}
+
+const source = connection.fromItem;
+const target = connection.toItem;
+if(!source || !target){
+return null;
+}
+
+const sourceCenterY = source.y + (source.height / 2);
+const targets = groupedArrows.map(function(groupArrow){
+const groupConnection = resolveArrowConnection(groupArrow);
+return groupConnection.toItem;
+}).filter(Boolean);
+
+if(!targets.length){
+return null;
+}
+
+const targetTops = targets.map(function(item){ return item.y; });
+const targetBottoms = targets.map(function(item){ return item.y + item.height; });
+const targetsBelow = Math.min.apply(null, targetTops) >= sourceCenterY;
+const busOffset = 26;
+const busY = targetsBelow
+? Math.min.apply(null, targetTops) - busOffset
+: Math.max.apply(null, targetBottoms) + busOffset;
+
+const start = getAnchorPoint(source, targetsBelow ? "bottom" : "top");
+const end = getAnchorPoint(target, targetsBelow ? "top" : "bottom");
+
+return dedupeConnectorPoints([
+start,
+{ x: start.x, y: busY },
+{ x: end.x, y: busY },
+end
+]);
+}
+
+function buildConnectorPoints(arrow){
+const connection = resolveArrowConnection(arrow);
+if(arrow.auto !== false && arrow.axis === "vertical"){
+const verticalBusPoints = buildVerticalBusConnectorPoints(arrow, connection);
+if(verticalBusPoints){
+return verticalBusPoints;
+}
+}
+const start = getAnchorPoint(connection.fromItem, connection.fromSide);
+const end = getAnchorPoint(connection.toItem, connection.toSide);
+const stem = 28;
+const startStem = getAnchorStemPoint(start, connection.fromSide, stem);
+const endStem = getAnchorStemPoint(end, connection.toSide, stem);
+const points = [start, startStem];
+
+if(connection.fromSide === "left" || connection.fromSide === "right"){
+const midX = (startStem.x + endStem.x) / 2;
+points.push({ x: midX, y: startStem.y });
+points.push({ x: midX, y: endStem.y });
+}else{
+const midY = (startStem.y + endStem.y) / 2;
+points.push({ x: startStem.x, y: midY });
+points.push({ x: endStem.x, y: midY });
+}
+
+points.push(endStem, end);
+
+return dedupeConnectorPoints(points);
+}
+
+function dedupeConnectorPoints(points){
+return points.filter(function(point, index){
+if(index === 0){
+return true;
+}
+const previous = points[index - 1];
+return previous.x !== point.x || previous.y !== point.y;
+});
+}
+
+function getNearestAnchorTarget(pointer){
+let bestMatch = null;
+
+diagramState.items.forEach(function(item){
+if(item.kind === "badge"){
+return;
+}
+["top", "right", "bottom", "left"].forEach(function(side){
+const anchor = getAnchorPoint(item, side);
+const distance = Math.hypot(pointer.x - anchor.x, pointer.y - anchor.y);
+if(!bestMatch || distance < bestMatch.distance){
+bestMatch = {
+itemId: item.id,
+side: side,
+distance: distance
+};
+}
+});
+});
+
+return bestMatch;
+}
+
+function getGroupedItems(item){
+if(!item || !item.groupId){
+return [item].filter(Boolean);
+}
+
+const groupMembers = diagramState.items.filter(function(entry){
+return entry.groupId === item.groupId;
+});
+
+return groupMembers.length ? groupMembers : [item];
+}
+
+function getPublicationBounds(){
+let maxX = PUBLICATION_WIDTH;
+let maxY = PUBLICATION_HEIGHT;
+
+diagramState.items.forEach(function(item){
+maxX = Math.max(maxX, item.x + item.width + 36);
+maxY = Math.max(maxY, item.y + item.height + 36);
+});
+
+diagramState.arrows.forEach(function(arrow){
+buildConnectorPoints(arrow).forEach(function(point){
+maxX = Math.max(maxX, point.x + 36);
+maxY = Math.max(maxY, point.y + 36);
+});
+});
+
+return {
+width: Math.ceil(maxX),
+height: Math.ceil(maxY)
+};
+}
+
+function getCanvasBounds(){
+if(!isEditingDiagram){
+return getPublicationBounds();
+}
+
+return {
+width: EDITOR_WIDTH,
+height: EDITOR_HEIGHT
+};
+}
+
+function renderDiagram(){
+const diagramEl = document.querySelector(".diagram");
+const zoomLayerEl = document.getElementById("diagramZoomLayer");
+const canvasEl = document.getElementById("diagramCanvas");
+const canvasShellEl = document.getElementById("diagramCanvasShell");
+const itemsEl = document.getElementById("diagramItems");
+const arrowsEl = document.getElementById("diagramArrows");
+const handlesEl = document.getElementById("diagramHandles");
+const modeChipEl = document.getElementById("pageModeChip");
+const zoomValueEl = document.getElementById("zoomValue");
+const floatingEditModeButtonEl = document.getElementById("floatingEditModeButton");
+const bounds = getCanvasBounds();
+const scaledWidth = Math.ceil(bounds.width * diagramZoom);
+const scaledHeight = Math.ceil(bounds.height * diagramZoom);
+
+diagramEl.dataset.editing = isEditingDiagram ? "true" : "false";
+modeChipEl.textContent = isEditingDiagram ? "Modo edición" : "Modo publicación";
+zoomLayerEl.style.width = scaledWidth + "px";
+zoomLayerEl.style.height = scaledHeight + "px";
+canvasEl.style.width = bounds.width + "px";
+canvasEl.style.height = bounds.height + "px";
+canvasEl.style.transform = `scale(${diagramZoom})`;
+zoomValueEl.textContent = Math.round(diagramZoom * 100) + "%";
+floatingEditModeButtonEl.classList.toggle("is-active", isEditingDiagram);
+floatingEditModeButtonEl.title = isEditingDiagram ? "Volver a publicación" : "Entrar a edición";
+floatingEditModeButtonEl.setAttribute("aria-label", isEditingDiagram ? "Volver a publicación" : "Entrar a edición");
+canvasShellEl.style.height = isEditingDiagram ? "" : scaledHeight + "px";
+if(!isEditingDiagram){
+canvasShellEl.scrollLeft = 0;
+canvasShellEl.scrollTop = 0;
+}
+itemsEl.innerHTML = "";
+arrowsEl.innerHTML = renderArrowsMarkup();
+handlesEl.innerHTML = "";
+
+diagramState.items.forEach(function(item){
+itemsEl.appendChild(createDiagramItemElement(item));
+});
+
+if(isEditingDiagram){
+diagramState.arrows.forEach(function(arrow){
+const connection = resolveArrowConnection(arrow);
+[
+{ key: "from", item: connection.fromItem, side: connection.fromSide },
+{ key: "to", item: connection.toItem, side: connection.toSide }
+].forEach(function(endpoint){
+const point = getAnchorPoint(endpoint.item, endpoint.side);
+const handle = document.createElement("button");
+handle.type = "button";
+handle.className = "arrow-handle";
+handle.style.left = point.x + "px";
+handle.style.top = point.y + "px";
+handle.dataset.arrowId = arrow.id;
+handle.dataset.endpoint = endpoint.key;
+handle.title = endpoint.key === "from" ? "Mover origen del conector" : "Mover destino del conector";
+handle.setAttribute("aria-label", handle.title);
+handle.addEventListener("pointerdown", startArrowEndpointDrag);
+handlesEl.appendChild(handle);
+});
+});
+}
+}
+
+function renderArrowsMarkup(){
+const bounds = getCanvasBounds();
+const polylines = diagramState.arrows.map(function(arrow){
+const points = buildConnectorPoints(arrow).map(function(point){
+return point.x + "," + point.y;
+}).join(" ");
+
+return `<g data-arrow-id="${arrow.id}"><polyline class="arrow-hit" data-arrow-id="${arrow.id}" points="${points}"></polyline><polyline class="arrow-line" data-arrow-id="${arrow.id}" points="${points}"></polyline></g>`;
+}).join("");
+
+return `<svg viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7d7d7d"></path></marker></defs>${polylines}</svg>`;
+}
+
+function createDiagramItemElement(item){
+const itemLink = getItemNavigationLink(item);
+const el = itemLink ? document.createElement("a") : document.createElement("div");
+el.className = "diagram-item " + item.className;
+el.style.left = item.x + "px";
+el.style.top = item.y + "px";
+el.style.width = item.width + "px";
+el.style.height = item.height + "px";
+el.dataset.itemId = item.id;
+
+if(itemLink){
+ el.href = itemLink;
+}
+
+if(item.kind === "process"){
+const label = document.createElement("span");
+label.className = "process-label";
+label.innerHTML = item.html || escapeHtml(item.text || "");
+el.appendChild(label);
+
+const button = document.createElement("button");
+button.className = "process-panel-trigger";
+button.type = "button";
+button.setAttribute("aria-label", "Ver explicación de " + item.processId);
+button.addEventListener("pointerdown", function(event){
+event.stopPropagation();
+});
+button.addEventListener("click", function(event){
+event.preventDefault();
+event.stopPropagation();
+openProcess(item.processId);
+});
+el.appendChild(button);
+}else if(item.html){
+el.innerHTML = item.html;
+}else{
+el.textContent = item.text || "";
+}
+
+if(itemHasAttachedFiles(item) || itemHasWorkflow(item)){
+const indicators = [];
+if(itemHasAttachedFiles(item)){
+const attachmentIndicator = document.createElement("span");
+attachmentIndicator.className = "item-indicator";
+attachmentIndicator.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 5.5v5a2.5 2.5 0 0 0 5 0V4.75a3.25 3.25 0 0 0-6.5 0v6.25a4 4 0 0 0 8 0V6"/></svg>`;
+attachmentIndicator.title = "Tiene archivos asociados";
+attachmentIndicator.setAttribute("aria-label", "Tiene archivos asociados");
+indicators.push(attachmentIndicator);
+}
+if(itemHasWorkflow(item)){
+const workflowLink = item.kind === "process" && item.processId
+? getWorkflowLinkForProcess(item.processId)
+: getWorkflowLinkForItem(item.id);
+const workflowIndicator = document.createElement("button");
+workflowIndicator.type = "button";
+workflowIndicator.className = "item-indicator is-action";
+workflowIndicator.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="4" height="3" rx="1"></rect><rect x="9.5" y="10.5" width="4" height="3" rx="1"></rect><path d="M6.5 4h3v6.5M9.5 10.5H8"></path></svg>`;
+workflowIndicator.title = "Abrir workflow asociado";
+workflowIndicator.setAttribute("aria-label", "Abrir workflow asociado");
+workflowIndicator.addEventListener("pointerdown", function(event){
+event.stopPropagation();
+});
+workflowIndicator.addEventListener("click", function(event){
+event.preventDefault();
+event.stopPropagation();
+if(workflowLink){
+window.open(workflowLink, "_blank");
+}
+});
+indicators.push(workflowIndicator);
+}
+indicators.forEach(function(indicator, index){
+indicator.style.right = (8 + (index * 18)) + "px";
+el.appendChild(indicator);
+});
+}
+
+if(isEditingDiagram){
+const editButton = document.createElement("button");
+editButton.className = "item-edit-trigger";
+editButton.type = "button";
+editButton.textContent = "✎";
+editButton.title = "Editar";
+editButton.setAttribute("aria-label", "Editar");
+editButton.addEventListener("pointerdown", function(event){
+event.stopPropagation();
+});
+editButton.addEventListener("click", function(event){
+event.preventDefault();
+event.stopPropagation();
+if(item.kind === "process" && item.processId){
+openProcessEditor(item.processId);
+return;
+}
+openTextEditor(item.id);
+});
+el.appendChild(editButton);
+}
+
+el.addEventListener("pointerdown", startItemDrag);
+el.addEventListener("click", function(event){
+if(isEditingDiagram && itemLink){
+event.preventDefault();
+}
+});
+
+return el;
+}
+
+function startItemDrag(event){
+if(!isEditingDiagram){
+return;
+}
+
+const itemId = event.currentTarget.dataset.itemId;
+const item = diagramState.items.find(function(entry){ return entry.id === itemId; });
+if(!item){
+return;
+}
+const groupedItems = getGroupedItems(item);
+
+event.preventDefault();
+event.stopPropagation();
+activeDrag = {
+type: "item",
+id: itemId,
+groupId: item.groupId || null,
+pointerId: event.pointerId,
+startX: event.clientX,
+startY: event.clientY,
+groupOrigins: groupedItems.map(function(entry){
+return {
+id: entry.id,
+x: entry.x,
+y: entry.y,
+width: entry.width,
+height: entry.height
+};
+})
+};
+
+event.currentTarget.classList.add("is-dragging", "is-selected");
+event.currentTarget.setPointerCapture(event.pointerId);
+window.addEventListener("pointermove", onPointerMove);
+window.addEventListener("pointerup", onPointerUp);
+updateDiagramStatus("Moviendo elemento: " + itemId);
+}
+
+function startArrowEndpointDrag(event){
+if(!isEditingDiagram){
+return;
+}
+
+const arrowId = event.currentTarget.dataset.arrowId;
+const endpoint = event.currentTarget.dataset.endpoint;
+event.preventDefault();
+event.stopPropagation();
+event.currentTarget.classList.add("is-dragging");
+activeDrag = {
+type: "arrow-endpoint",
+id: arrowId,
+endpoint: endpoint,
+pointerId: event.pointerId
+};
+
+event.currentTarget.setPointerCapture(event.pointerId);
+window.addEventListener("pointermove", onPointerMove);
+window.addEventListener("pointerup", onPointerUp);
+updateDiagramStatus("Ajustando unión del conector: " + arrowId);
+}
+
+function onPointerMove(event){
+if(!activeDrag){
+return;
+}
+
+if(activeDrag.type === "item"){
+const item = diagramState.items.find(function(entry){ return entry.id === activeDrag.id; });
+if(!item){
+return;
+}
+const bounds = getCanvasBounds();
+const deltaX = (event.clientX - activeDrag.startX) / diagramZoom;
+const deltaY = (event.clientY - activeDrag.startY) / diagramZoom;
+const minAllowedDeltaX = Math.max.apply(null, activeDrag.groupOrigins.map(function(origin){
+return -origin.x;
+}));
+const maxAllowedDeltaX = Math.min.apply(null, activeDrag.groupOrigins.map(function(origin){
+return bounds.width - origin.width - origin.x;
+}));
+const minAllowedDeltaY = Math.max.apply(null, activeDrag.groupOrigins.map(function(origin){
+return -origin.y;
+}));
+const maxAllowedDeltaY = Math.min.apply(null, activeDrag.groupOrigins.map(function(origin){
+return bounds.height - origin.height - origin.y;
+}));
+const clampedDeltaX = clamp(deltaX, minAllowedDeltaX, maxAllowedDeltaX);
+const clampedDeltaY = clamp(deltaY, minAllowedDeltaY, maxAllowedDeltaY);
+
+activeDrag.groupOrigins.forEach(function(origin){
+const groupedItem = diagramState.items.find(function(entry){ return entry.id === origin.id; });
+if(groupedItem){
+groupedItem.x = origin.x + clampedDeltaX;
+groupedItem.y = origin.y + clampedDeltaY;
+}
+});
+renderDiagram();
+return;
+}
+
+if(activeDrag.type === "arrow-endpoint"){
+const arrow = diagramState.arrows.find(function(entry){ return entry.id === activeDrag.id; });
+if(!arrow){
+return;
+}
+const viewportRect = document.getElementById("diagramViewport").getBoundingClientRect();
+const pointer = {
+x: (event.clientX - viewportRect.left) / diagramZoom,
+y: (event.clientY - viewportRect.top) / diagramZoom
+};
+const nearest = getNearestAnchorTarget(pointer);
+if(nearest && nearest.distance <= 160){
+arrow[activeDrag.endpoint] = {
+itemId: nearest.itemId,
+side: nearest.side
+};
+arrow.auto = false;
+}
+renderDiagram();
+}
+}
+
+function onPointerUp(){
+if(!activeDrag){
+return;
+}
+
+document.querySelectorAll(".diagram-item.is-dragging, .diagram-item.is-selected, .arrow-handle.is-dragging").forEach(function(el){
+el.classList.remove("is-dragging", "is-selected");
+});
+
+activeDrag = null;
+window.removeEventListener("pointermove", onPointerMove);
+window.removeEventListener("pointerup", onPointerUp);
+saveDiagramState();
+renderDiagram();
+}
+
+function openTextEditor(itemId){
+const sourceItem = getItemById(itemId);
+const item = getEditorTargetItem(sourceItem);
+if(!item){
+return;
+}
+
+activeTextEditItemId = item.id;
+document.querySelector(".panel-content").classList.add("is-editor-mode");
+document.querySelector(".panel-title").textContent = "Edición de Nodo";
+document.getElementById("content").innerHTML = renderItemEditor(item.id);
+initRichTextEditors(document.getElementById("content"));
+document.getElementById("panel").classList.add("is-open");
+document.body.classList.add("panel-open");
+document.getElementById("closeItemEditorButton").addEventListener("click", closeTextEditor);
+document.getElementById("createItemWorkflowLinkButton").addEventListener("click", function(){
+const title = window.prompt("Título del workflow", "Workflow " + (getItemDetail(item.id).title || item.id));
+if(!title){
+return;
+}
+const pageName = window.prompt("Nombre de página", slugify(title));
+if(!pageName){
+return;
+}
+const entry = createWorkflowEntry(title, pageName);
+const selectEl = document.getElementById("itemEditWorkflowLink");
+selectEl.innerHTML = renderWorkflowOptions(entry.url);
+selectEl.value = entry.url;
+syncWorkflowActionButtons("itemEditWorkflowLink", "openItemWorkflowLinkButton", "deleteItemWorkflowLinkButton");
+});
+document.getElementById("clearItemWorkflowLinkButton").addEventListener("click", function(){
+const selectEl = document.getElementById("itemEditWorkflowLink");
+selectEl.value = "";
+syncWorkflowActionButtons("itemEditWorkflowLink", "openItemWorkflowLinkButton", "deleteItemWorkflowLinkButton");
+});
+document.getElementById("openItemWorkflowLinkButton").addEventListener("click", function(){
+const href = document.getElementById("itemEditWorkflowLink").value.trim();
+if(!href){
+return;
+}
+window.open(href, "_blank");
+});
+document.getElementById("itemEditWorkflowLink").addEventListener("change", function(){
+syncWorkflowActionButtons("itemEditWorkflowLink", "openItemWorkflowLinkButton", "deleteItemWorkflowLinkButton");
+});
+document.getElementById("deleteItemWorkflowLinkButton").addEventListener("click", function(){
+const selectEl = document.getElementById("itemEditWorkflowLink");
+const href = selectEl.value.trim();
+const workflow = findWorkflowByUrl(href);
+if(!workflow){
+return;
+}
+if(!window.confirm(`¿Eliminar el workflow ${workflow.title}?`)){
+return;
+}
+if(deleteWorkflowEntryByUrl(href)){
+selectEl.innerHTML = renderWorkflowOptions("");
+selectEl.value = "";
+syncWorkflowActionButtons("itemEditWorkflowLink", "openItemWorkflowLinkButton", "deleteItemWorkflowLinkButton");
+renderDiagram();
+}
+});
+document.getElementById("saveItemEditorButton").addEventListener("click", saveTextEditor);
+bindItemFileInput(item.id);
+renderProcessFiles(item.id, "itemEditorFilesList", true);
+syncWorkflowActionButtons("itemEditWorkflowLink", "openItemWorkflowLinkButton", "deleteItemWorkflowLinkButton");
+window.setTimeout(function(){
+const numeralField = document.getElementById("itemEditBadge");
+const titleField = document.getElementById("itemEditTitle");
+if(numeralField){
+numeralField.focus();
+numeralField.select();
+return;
+}
+titleField.focus();
+titleField.select();
+}, 0);
+updateDiagramStatus("Editando texto de: " + item.id);
+}
+
+function closeTextEditor(event){
+if(event){
+event.stopPropagation();
+}
+activeTextEditItemId = null;
+document.querySelector(".panel-content").classList.remove("is-editor-mode");
+document.getElementById("panel").classList.remove("is-open");
+document.body.classList.remove("panel-open");
+}
+
+function initRichTextEditors(container){
+container.querySelectorAll(".rich-editor-button").forEach(function(button){
+button.addEventListener("click", function(){
+const targetId = button.dataset.editorTarget;
+const editor = document.getElementById(targetId);
+if(!editor){
+return;
+}
+editor.focus();
+const command = button.dataset.command;
+const value = button.dataset.value || null;
+if(command === "formatBlock" && value){
+document.execCommand(command, false, `<${value}>`);
+return;
+}
+document.execCommand(command, false, value);
+});
+});
+}
+
+function getRichEditorValue(editorId, mode){
+const editor = document.getElementById(editorId);
+if(!editor){
+return normalizeRichTextField("", mode);
+}
+return normalizeRichTextField(editor.innerHTML, mode);
+}
+
+function saveTextEditor(){
+if(!activeTextEditItemId){
+return;
+}
+
+const item = getItemById(activeTextEditItemId);
+if(!item){
+closeTextEditor();
+return;
+}
+
+const badgeItem = getGroupBadgeItem(item);
+
+itemDetails[item.id] = {
+title: document.getElementById("itemEditTitle").value.trim() || item.text || item.id,
+description: getRichEditorValue("itemEditDescription", "paragraph"),
+link: document.getElementById("itemEditWorkflowLink").value.trim()
+};
+if(badgeItem){
+badgeItem.text = document.getElementById("itemEditBadge").value.trim() || badgeItem.text || "";
+}
+setEditableItemContent(item, itemDetails[item.id].title);
+saveItemDetails();
+saveDiagramState();
+closeTextEditor();
+renderDiagram();
+updateDiagramStatus("Texto actualizado para: " + item.id);
+}
+
+function parseTextareaList(value){
+return value.split("\n").map(function(line){
+return line.trim();
+}).filter(Boolean);
+}
+
+function bindProcessFileInput(processId){
+const inputEl = document.getElementById("processEditFiles");
+if(!inputEl){
+return;
+}
+inputEl.addEventListener("change", async function(){
+await handleProcessFileUpload(processId);
+await refreshAttachedFileOwners().catch(function(){});
+renderProcessFiles(processId, "processEditorFilesList", true);
+renderDiagram();
+});
+}
+
+function bindItemFileInput(itemId){
+const inputEl = document.getElementById("itemEditFiles");
+if(!inputEl){
+return;
+}
+inputEl.addEventListener("change", async function(){
+await handleProcessFileUpload(itemId, "itemEditFiles");
+await refreshAttachedFileOwners().catch(function(){});
+renderProcessFiles(itemId, "itemEditorFilesList", true);
+renderDiagram();
+});
+}
+
+function syncWorkflowActionButtons(selectId, openButtonId, deleteButtonId){
+const selectEl = document.getElementById(selectId);
+const openButtonEl = document.getElementById(openButtonId);
+const deleteButtonEl = document.getElementById(deleteButtonId);
+if(!selectEl || !openButtonEl || !deleteButtonEl){
+return;
+}
+const value = selectEl.value.trim();
+openButtonEl.disabled = !value;
+deleteButtonEl.disabled = !value || value === "cotizaciones.html";
+}
+
+function openProcessEditor(processId){
+document.querySelector(".panel-content").classList.add("is-editor-mode");
+document.getElementById("content").innerHTML = renderProcessEditor(processId);
+initRichTextEditors(document.getElementById("content"));
+document.querySelector(".panel-title").textContent = "Edición de actividad";
+document.getElementById("panel").classList.add("is-open");
+document.body.classList.add("panel-open");
+document.getElementById("closeProcessEditorButton").addEventListener("click", closePanel);
+document.getElementById("cancelProcessEditorButton").addEventListener("click", function(){
+openProcess(processId);
+});
+document.getElementById("createWorkflowLinkButton").addEventListener("click", function(){
+const title = window.prompt("Título del workflow", "Workflow " + (getProcessDetail(processId).title || processId));
+if(!title){
+return;
+}
+const pageName = window.prompt("Nombre de página", slugify(title));
+if(!pageName){
+return;
+}
+const entry = createWorkflowEntry(title, pageName);
+const selectEl = document.getElementById("processEditWorkflowLink");
+selectEl.innerHTML = renderWorkflowOptions(entry.url);
+selectEl.value = entry.url;
+syncWorkflowActionButtons("processEditWorkflowLink", "openWorkflowLinkButton", "deleteWorkflowLinkButton");
+});
+document.getElementById("clearWorkflowLinkButton").addEventListener("click", function(){
+const selectEl = document.getElementById("processEditWorkflowLink");
+selectEl.value = "";
+syncWorkflowActionButtons("processEditWorkflowLink", "openWorkflowLinkButton", "deleteWorkflowLinkButton");
+});
+document.getElementById("openWorkflowLinkButton").addEventListener("click", function(){
+const href = document.getElementById("processEditWorkflowLink").value.trim();
+if(!href){
+return;
+}
+window.open(href, "_blank");
+});
+document.getElementById("processEditWorkflowLink").addEventListener("change", function(){
+syncWorkflowActionButtons("processEditWorkflowLink", "openWorkflowLinkButton", "deleteWorkflowLinkButton");
+});
+document.getElementById("deleteWorkflowLinkButton").addEventListener("click", function(){
+const selectEl = document.getElementById("processEditWorkflowLink");
+const href = selectEl.value.trim();
+const workflow = findWorkflowByUrl(href);
+if(!workflow){
+return;
+}
+if(!window.confirm(`¿Eliminar el workflow ${workflow.title}?`)){
+return;
+}
+if(deleteWorkflowEntryByUrl(href)){
+selectEl.innerHTML = renderWorkflowOptions("");
+selectEl.value = "";
+syncWorkflowActionButtons("processEditWorkflowLink", "openWorkflowLinkButton", "deleteWorkflowLinkButton");
+renderDiagram();
+}
+});
+document.getElementById("saveProcessEditorButton").addEventListener("click", function(){
+saveProcessEditor(processId);
+});
+bindProcessFileInput(processId);
+renderProcessFiles(processId, "processEditorFilesList", true);
+syncWorkflowActionButtons("processEditWorkflowLink", "openWorkflowLinkButton", "deleteWorkflowLinkButton");
+}
+
+function saveProcessEditor(processId){
+const detail = getProcessDetail(processId);
+const processItem = getProcessItemByProcessId(processId);
+const badgeItem = getBadgeItemByProcessId(processId);
+if(!detail || !processItem || !badgeItem){
+return;
+}
+
+detail.title = document.getElementById("processEditTitle").value.trim() || detail.title;
+detail.objective = getRichEditorValue("processEditObjective", "paragraph");
+detail.description = getRichEditorValue("processEditDescription", "list");
+detail.policies = getRichEditorValue("processEditPolicies", "list");
+detail.records = getRichEditorValue("processEditRecords", "list");
+detail.link = document.getElementById("processEditWorkflowLink").value.trim();
+
+badgeItem.text = document.getElementById("processEditBadge").value.trim() || badgeItem.text;
+setEditableItemContent(processItem, detail.title);
+saveProcessDetails();
+saveDiagramState();
+handleProcessFileUpload(processId).then(function(){
+renderDiagram();
+openProcess(processId);
+updateDiagramStatus("Detalle actualizado para: " + processId);
+});
+}
+
+function openProcessFilesDb(){
+return new Promise(function(resolve, reject){
+const request = window.indexedDB.open(PROCESS_FILES_DB_NAME, 1);
+request.onupgradeneeded = function(){
+const db = request.result;
+if(!db.objectStoreNames.contains(PROCESS_FILES_STORE)){
+const store = db.createObjectStore(PROCESS_FILES_STORE, { keyPath: "id" });
+store.createIndex("processId", "processId", { unique: false });
+}
+};
+request.onsuccess = function(){ resolve(request.result); };
+request.onerror = function(){ reject(request.error); };
+});
+}
+
+async function getProcessFiles(processId){
+const db = await openProcessFilesDb();
+return new Promise(function(resolve, reject){
+const tx = db.transaction(PROCESS_FILES_STORE, "readonly");
+const store = tx.objectStore(PROCESS_FILES_STORE).index("processId");
+const request = store.getAll(processId);
+request.onsuccess = function(){ resolve(request.result || []); };
+request.onerror = function(){ reject(request.error); };
+});
+}
+
+async function refreshAttachedFileOwners(){
+const db = await openProcessFilesDb();
+const owners = await new Promise(function(resolve, reject){
+const tx = db.transaction(PROCESS_FILES_STORE, "readonly");
+const request = tx.objectStore(PROCESS_FILES_STORE).getAll();
+request.onsuccess = function(){
+resolve((request.result || []).map(function(entry){ return entry.processId; }));
+};
+request.onerror = function(){ reject(request.error); };
+});
+itemsWithAttachedFiles = new Set(owners.filter(Boolean));
+}
+
+function getFileOwnerKeyForItem(item){
+if(!item){
+return "";
+}
+if(item.kind === "process" && item.processId){
+return item.processId;
+}
+if(item.kind === "node"){
+return item.id;
+}
+return "";
+}
+
+function itemHasAttachedFiles(item){
+const ownerKey = getFileOwnerKeyForItem(item);
+return ownerKey ? itemsWithAttachedFiles.has(ownerKey) : false;
+}
+
+function itemHasWorkflow(item){
+if(!item){
+return false;
+}
+if(item.kind === "process" && item.processId){
+return !!getWorkflowLinkForProcess(item.processId);
+}
+if(item.kind === "node"){
+return !!getWorkflowLinkForItem(item.id);
+}
+return false;
+}
+
+function getItemNavigationLink(item){
+if(!item){
+return "";
+}
+if(item.href){
+return item.href;
+}
+if(item.kind === "process" && item.processId){
+return getWorkflowLinkForProcess(item.processId);
+}
+if(item.kind === "node"){
+return getWorkflowLinkForItem(item.id);
+}
+return "";
+}
+
+async function saveProcessFile(processId, file){
+const db = await openProcessFilesDb();
+return new Promise(function(resolve, reject){
+const tx = db.transaction(PROCESS_FILES_STORE, "readwrite");
+tx.objectStore(PROCESS_FILES_STORE).put({
+id: `${processId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+processId: processId,
+name: file.name,
+displayName: getFileBaseName(file.name),
+type: file.type,
+size: file.size,
+blob: file,
+createdAt: new Date().toISOString()
+});
+tx.oncomplete = function(){ resolve(); };
+tx.onerror = function(){ reject(tx.error); };
+});
+}
+
+async function deleteProcessFile(fileId){
+const db = await openProcessFilesDb();
+return new Promise(function(resolve, reject){
+const tx = db.transaction(PROCESS_FILES_STORE, "readwrite");
+tx.objectStore(PROCESS_FILES_STORE).delete(fileId);
+tx.oncomplete = function(){ resolve(); };
+tx.onerror = function(){ reject(tx.error); };
+});
+}
+
+async function updateProcessFileDisplayName(fileId, nextName){
+const db = await openProcessFilesDb();
+return new Promise(function(resolve, reject){
+const tx = db.transaction(PROCESS_FILES_STORE, "readwrite");
+const store = tx.objectStore(PROCESS_FILES_STORE);
+const request = store.get(fileId);
+request.onsuccess = function(){
+const record = request.result;
+if(!record){
+resolve();
+return;
+}
+record.displayName = nextName;
+store.put(record);
+};
+request.onerror = function(){ reject(request.error); };
+tx.oncomplete = function(){ resolve(); };
+tx.onerror = function(){ reject(tx.error); };
+});
+}
+
+function formatFileSize(size){
+if(size < 1024){
+return size + " B";
+}
+if(size < 1024 * 1024){
+return Math.max(1, Math.round(size / 1024)) + " KB";
+}
+return (size / (1024 * 1024)).toFixed(1).replace(".0", "") + " MB";
+}
+
+function formatFileDate(value){
+if(!value){
+return "";
+}
+const date = new Date(value);
+if(Number.isNaN(date.getTime())){
+return "";
+}
+return date.toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function getFileExtension(fileName){
+const normalized = String(fileName || "").trim();
+const lastDot = normalized.lastIndexOf(".");
+if(lastDot <= 0 || lastDot === normalized.length - 1){
+return "";
+}
+return normalized.slice(lastDot + 1);
+}
+
+function getFileBaseName(fileName){
+const normalized = String(fileName || "").trim();
+const lastDot = normalized.lastIndexOf(".");
+if(lastDot <= 0){
+return normalized;
+}
+return normalized.slice(0, lastDot);
+}
+
+async function handleProcessFileUpload(processId, inputId){
+const inputEl = document.getElementById(inputId || "processEditFiles");
+if(!inputEl || !inputEl.files || !inputEl.files.length){
+return;
+}
+const files = Array.from(inputEl.files);
+for(const file of files){
+await saveProcessFile(processId, file);
+}
+inputEl.value = "";
+}
+
+async function renderProcessFiles(processId, containerId, editable){
+const container = document.getElementById(containerId);
+if(!container){
+return;
+}
+container.dataset.editable = editable ? "true" : "false";
+const files = await getProcessFiles(processId).catch(function(){ return []; });
+if(!files.length){
+container.classList.add("is-empty");
+container.innerHTML = `<div class="process-files-empty">No hay archivos asociados todavía.</div>`;
+return;
+}
+container.classList.remove("is-empty");
+
+container.innerHTML = files.map(function(file){
+const displayName = file.displayName || getFileBaseName(file.name);
+const fileType = escapeHtml((getFileExtension(file.name) || (file.type || "archivo").split("/").pop()).toUpperCase());
+const uploadDate = formatFileDate(file.createdAt);
+const secondaryText = `${fileType}${uploadDate ? ` · ${uploadDate}` : ""}`;
+const editableActions = editable
+? `<button class="process-file-action" data-rename-file-id="${file.id}" type="button" title="Cambiar nombre visible" aria-label="Cambiar nombre visible">✎</button><button class="process-file-action" data-delete-file-id="${file.id}" type="button" title="Eliminar archivo" aria-label="Eliminar archivo">🗑</button>`
+: "";
+const renameShell = editable
+? `<div class="process-file-rename-shell" data-file-rename-shell="${file.id}" hidden><input class="process-file-name-input" data-file-rename-input="${file.id}" type="text" value="${escapeHtmlAttribute(displayName)}"><div class="process-file-actions"><button class="process-file-action" data-save-file-name-id="${file.id}" type="button" title="Guardar nombre" aria-label="Guardar nombre">✓</button><button class="process-file-action" data-cancel-file-name-id="${file.id}" type="button" title="Cancelar" aria-label="Cancelar">↺</button></div></div>`
+: "";
+const displayShell = `<div class="process-file-display-shell" data-file-display-shell="${file.id}"><div class="process-file-name" data-file-name="${file.id}">${escapeHtml(displayName)}</div><div class="process-file-meta-line">${secondaryText}</div></div>`;
+const actionShell = `<div class="process-file-actions" data-file-actions-shell="${file.id}">${editableActions}<button class="process-file-action" data-download-file-id="${file.id}" type="button" title="Descargar archivo" aria-label="Descargar archivo">↓</button></div>`;
+return `<div class="process-file-row" data-file-id="${file.id}"><div class="process-file-meta">${displayShell}${renameShell}</div>${actionShell}</div>`;
+}).join("");
+
+container.querySelectorAll("[data-download-file-id]").forEach(function(button){
+button.addEventListener("click", function(){
+downloadProcessFile(button.dataset.downloadFileId);
+});
+});
+container.querySelectorAll("[data-delete-file-id]").forEach(function(button){
+button.addEventListener("click", async function(){
+const card = button.closest("[data-file-id]");
+const fileNameEl = card ? card.querySelector(".process-file-name") : null;
+const fileName = fileNameEl ? fileNameEl.textContent.trim() : "este archivo";
+if(!window.confirm(`¿Eliminar ${fileName}?`)){
+return;
+}
+await deleteProcessFile(button.dataset.deleteFileId);
+await refreshAttachedFileOwners().catch(function(){});
+renderProcessFiles(processId, containerId, editable);
+renderDiagram();
+});
+});
+container.querySelectorAll("[data-rename-file-id]").forEach(function(button){
+button.addEventListener("click", function(){
+const fileId = button.dataset.renameFileId;
+const card = container.querySelector(`[data-file-id="${fileId}"]`);
+if(!card){
+return;
+}
+const displayShellEl = card.querySelector(`[data-file-display-shell="${fileId}"]`);
+const shellEl = card.querySelector(`[data-file-rename-shell="${fileId}"]`);
+const inputEl = card.querySelector(`[data-file-rename-input="${fileId}"]`);
+const actionsEl = card.querySelector(`[data-file-actions-shell="${fileId}"]`);
+if(!displayShellEl || !shellEl || !inputEl || !actionsEl){
+return;
+}
+displayShellEl.hidden = true;
+actionsEl.hidden = true;
+shellEl.hidden = false;
+inputEl.focus();
+inputEl.select();
+});
+});
+container.querySelectorAll("[data-cancel-file-name-id]").forEach(function(button){
+button.addEventListener("click", function(){
+renderProcessFiles(processId, containerId, editable);
+});
+});
+container.querySelectorAll("[data-save-file-name-id]").forEach(function(button){
+button.addEventListener("click", async function(){
+const fileId = button.dataset.saveFileNameId;
+const inputEl = container.querySelector(`[data-file-rename-input="${fileId}"]`);
+if(!inputEl){
+return;
+}
+const nextName = inputEl.value.trim();
+if(!nextName){
+inputEl.focus();
+return;
+}
+await updateProcessFileDisplayName(fileId, nextName);
+renderProcessFiles(processId, containerId, editable);
+});
+});
+}
+
+async function downloadProcessFile(fileId){
+const db = await openProcessFilesDb();
+const file = await new Promise(function(resolve, reject){
+const tx = db.transaction(PROCESS_FILES_STORE, "readonly");
+const request = tx.objectStore(PROCESS_FILES_STORE).get(fileId);
+request.onsuccess = function(){ resolve(request.result); };
+request.onerror = function(){ reject(request.error); };
+});
+if(!file){
+return;
+}
+const url = URL.createObjectURL(file.blob);
+const link = document.createElement("a");
+link.href = url;
+const extension = getFileExtension(file.name);
+const displayName = file.displayName || getFileBaseName(file.name);
+link.download = extension ? `${displayName}.${extension}` : displayName;
+link.click();
+URL.revokeObjectURL(url);
+}
+
+function startInlineProcessTitleEdit(processId){
+const badgeEl = document.querySelector(".content-process-badge");
+const titleEl = document.getElementById("processDetailTitle");
+const actionsEl = document.querySelector(".content-title-actions");
+const processItem = getProcessItemByProcessId(processId);
+const badgeItem = getBadgeItemByProcessId(processId);
+if(!titleEl || !actionsEl || !processItem || !badgeEl || !badgeItem){
+return;
+}
+
+const currentTitle = getEditableItemContent(processItem).replace(/\n/g, " ").trim();
+badgeEl.innerHTML = `<input class="inline-badge-input" id="processDetailBadgeInput" type="text" maxlength="4" value="${escapeHtml(badgeItem.text || processId)}">`;
+titleEl.outerHTML = `<input class="inline-title-input" id="processDetailTitleInput" type="text" value="${escapeHtml(currentTitle)}">`;
+actionsEl.innerHTML = `<div class="content-edit-actions"><button class="content-edit-icon" id="saveProcessTitleButton" type="button" title="Guardar cambios" aria-label="Guardar cambios">✓</button><button class="content-edit-icon" id="cancelProcessTitleButton" type="button" title="Cancelar edicion" aria-label="Cancelar edicion">×</button></div>`;
+
+const badgeInputEl = document.getElementById("processDetailBadgeInput");
+const inputEl = document.getElementById("processDetailTitleInput");
+badgeInputEl.focus();
+badgeInputEl.select();
+
+document.getElementById("saveProcessTitleButton").addEventListener("click", function(){
+saveInlineProcessTitle(processId);
+});
+document.getElementById("cancelProcessTitleButton").addEventListener("click", function(){
+openProcess(processId);
+});
+function handleInlineEditKeydown(event){
+if(event.key === "Enter"){
+event.preventDefault();
+saveInlineProcessTitle(processId);
+}
+if(event.key === "Escape"){
+event.preventDefault();
+openProcess(processId);
+}
+}
+badgeInputEl.addEventListener("keydown", handleInlineEditKeydown);
+inputEl.addEventListener("keydown", handleInlineEditKeydown);
+}
+
+function saveInlineProcessTitle(processId){
+const badgeInputEl = document.getElementById("processDetailBadgeInput");
+const inputEl = document.getElementById("processDetailTitleInput");
+const processItem = getProcessItemByProcessId(processId);
+const badgeItem = getBadgeItemByProcessId(processId);
+if(!inputEl || !processItem || !badgeInputEl || !badgeItem){
+return;
+}
+
+badgeItem.text = badgeInputEl.value.trim() || processId;
+setEditableItemContent(processItem, inputEl.value);
+saveDiagramState();
+renderDiagram();
+openProcess(processId);
+updateDiagramStatus("Numeral y titulo actualizados para: " + processId);
+}
+
+function toggleDiagramEditing(){
+isEditingDiagram = !isEditingDiagram;
+const button = document.getElementById("toggleEditButton");
+button.classList.toggle("is-active", isEditingDiagram);
+button.textContent = isEditingDiagram ? "Volver a publicación" : "Editar mapa";
+updateDiagramStatus(isEditingDiagram ? "Modo edición activo. Arrastra cajas, textos y flechas para reordenar el mapa." : "Vista en modo consulta.");
+renderDiagram();
+}
+
+async function copyLayoutToClipboard(){
+const serialized = JSON.stringify(diagramState, null, 2);
+try{
+await navigator.clipboard.writeText(serialized);
+updateDiagramStatus("JSON del layout copiado al portapapeles.");
+}catch(error){
+updateDiagramStatus("No se pudo copiar el JSON. El navegador bloqueó el portapapeles.");
+}
+}
+
+function resetDiagramLayout(){
+diagramState = structuredClone(defaultDiagramState);
+processDetails = structuredClone(defaultProcessDetails);
+itemDetails = structuredClone(defaultItemDetails);
+window.localStorage.setItem(DIAGRAM_STORAGE_KEY, JSON.stringify(diagramState));
+window.localStorage.setItem(PROCESS_DETAILS_STORAGE_KEY, JSON.stringify(processDetails));
+window.localStorage.setItem(ITEM_DETAILS_STORAGE_KEY, JSON.stringify(itemDetails));
+renderDiagram();
+updateDiagramStatus("Mapa restablecido al diseño base.");
+}
+
+function setDiagramZoom(nextZoom){
+diagramZoom = clamp(Math.round(nextZoom * 100) / 100, ZOOM_MIN, ZOOM_MAX);
+saveDiagramZoom();
+renderDiagram();
+}
+
+function zoomIn(){
+setDiagramZoom(diagramZoom + ZOOM_STEP);
+}
+
+function zoomOut(){
+setDiagramZoom(diagramZoom - ZOOM_STEP);
+}
+
+function resetZoom(){
+setDiagramZoom(1);
+}
+
+document.getElementById("toggleEditButton").addEventListener("click", toggleDiagramEditing);
+document.getElementById("floatingEditModeButton").addEventListener("click", toggleDiagramEditing);
+document.getElementById("copyLayoutButton").addEventListener("click", copyLayoutToClipboard);
+document.getElementById("resetLayoutButton").addEventListener("click", resetDiagramLayout);
+document.getElementById("zoomInButton").addEventListener("click", zoomIn);
+document.getElementById("zoomOutButton").addEventListener("click", zoomOut);
+document.getElementById("zoomResetButton").addEventListener("click", resetZoom);
+refreshAttachedFileOwners().catch(function(){
+itemsWithAttachedFiles = new Set();
+}).finally(function(){
+applyProcessNavigationLinks();
+renderDiagram();
+});
+</script>
+</body>
+</html>
