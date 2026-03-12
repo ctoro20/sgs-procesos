@@ -1577,7 +1577,7 @@ margin-left:16px;
 <div class="nav-group">
 <div class="nav-group-label"><span class="nav-pill">A</span>Comercial</div>
 <div class="nav-group-children">
-<a class="nav-link" data-process-nav="P1" href="cotizaciones.html"><span class="nav-pill">P1</span>Cotizaciones</a>
+<a class="nav-link" data-process-nav="P1" href="workflow.html?workflow=wf-cotizaciones"><span class="nav-pill">P1</span>Cotizaciones</a>
 </div>
 </div>
 <div class="nav-group">
@@ -1720,7 +1720,7 @@ items: [
 { id: "badge-c", groupId: "grp-area-c", kind: "badge", className: "badge gray", x: 950, y: 145, width: 34, height: 34, text: "C" },
 { id: "area-c", groupId: "grp-area-c", kind: "node", className: "node area", x: 968, y: 160, width: 145, height: 66, text: "ÁREA TÉCNICA" },
 { id: "badge-p1", groupId: "grp-proc-p1", kind: "badge", className: "badge orange", x: 54, y: 255, width: 34, height: 34, text: "P1" },
-{ id: "proc-p1", groupId: "grp-proc-p1", kind: "process", className: "node process", x: 70, y: 272, width: 150, height: 62, html: "Cotizaciones", processId: "P1", href: "cotizaciones.html" },
+{ id: "proc-p1", groupId: "grp-proc-p1", kind: "process", className: "node process", x: 70, y: 272, width: 150, height: 62, html: "Cotizaciones", processId: "P1", href: "workflow.html?workflow=wf-cotizaciones" },
 { id: "badge-p2", groupId: "grp-proc-p2", kind: "badge", className: "badge orange", x: 314, y: 255, width: 34, height: 34, text: "P2" },
 { id: "proc-p2", groupId: "grp-proc-p2", kind: "process", className: "node process", x: 330, y: 272, width: 150, height: 62, html: "Planificación", processId: "P2" },
 { id: "badge-p3", groupId: "grp-proc-p3", kind: "badge", className: "badge orange", x: 494, y: 255, width: 34, height: 34, text: "P3" },
@@ -1787,7 +1787,7 @@ P1: `
 <li>Archivos de costeo y documentación técnica de respaldo.</li>
 <li>Cotización emitida y aprobaciones del proceso.</li>
 </ol>
-<a class="action-link" href="cotizaciones.html">Ver flujo detallado</a>
+<a class="action-link" href="workflow.html?workflow=wf-cotizaciones">Ver flujo detallado</a>
 `,
 P2: `
 <h2>Planificación</h2>
@@ -1948,7 +1948,7 @@ let processDetails = loadProcessDetails();
 const defaultItemDetails = buildDefaultItemDetails();
 let itemDetails = loadItemDetails();
 const defaultWorkflowCatalog = [
-{ id: "wf-cotizaciones", title: "Workflow Cotizaciones", pageName: "cotizaciones.html", url: "cotizaciones.html" }
+{ id: "wf-cotizaciones", title: "Workflow Cotizaciones", pageName: "workflow.html?workflow=wf-cotizaciones", url: "workflow.html?workflow=wf-cotizaciones" }
 ];
 let workflowCatalog = loadWorkflowCatalog();
 
@@ -2034,7 +2034,7 @@ saveItemDetails();
 
 function deleteWorkflowEntryByUrl(url){
 const target = findWorkflowByUrl(url);
-if(!target || target.url === "cotizaciones.html"){
+if(!target || target.url === "workflow.html?workflow=wf-cotizaciones"){
 return false;
 }
 workflowCatalog = workflowCatalog.filter(function(entry){
@@ -2357,7 +2357,7 @@ if(!processId){
 return;
 }
 const detail = getProcessDetail(processId);
-const href = (detail && detail.link) || (processId === "P1" ? "cotizaciones.html" : "index.html");
+const href = (detail && detail.link) || (processId === "P1" ? "workflow.html?workflow=wf-cotizaciones" : "index.html");
 linkEl.href = href;
 });
 }
@@ -2462,7 +2462,7 @@ ${renderRichTextEditor("processEditRecords", detail.records, "Detalla registros 
 <button class="diagram-button" id="createWorkflowLinkButton" type="button">Crear workflow</button>
 <button class="diagram-button" id="openWorkflowLinkButton" type="button"${detail.link ? "" : " disabled"}>Abrir workflow</button>
 <button class="diagram-button" id="clearWorkflowLinkButton" type="button">Desasociar</button>
-<button class="diagram-button" id="deleteWorkflowLinkButton" type="button"${detail.link && detail.link !== "cotizaciones.html" ? "" : " disabled"}>Eliminar workflow</button>
+<button class="diagram-button" id="deleteWorkflowLinkButton" type="button"${detail.link && detail.link !== "workflow.html?workflow=wf-cotizaciones" ? "" : " disabled"}>Eliminar workflow</button>
 </div>
 </div>
 <div class="process-editor-actions">
@@ -2517,7 +2517,7 @@ ${renderRichTextEditor("itemEditDescription", detail.description, "Agrega una de
 <button class="diagram-button" id="createItemWorkflowLinkButton" type="button">Crear workflow</button>
 <button class="diagram-button" id="openItemWorkflowLinkButton" type="button"${detail.link ? "" : " disabled"}>Abrir workflow</button>
 <button class="diagram-button" id="clearItemWorkflowLinkButton" type="button">Desasociar</button>
-<button class="diagram-button" id="deleteItemWorkflowLinkButton" type="button"${detail.link && detail.link !== "cotizaciones.html" ? "" : " disabled"}>Eliminar workflow</button>
+<button class="diagram-button" id="deleteItemWorkflowLinkButton" type="button"${detail.link && detail.link !== "workflow.html?workflow=wf-cotizaciones" ? "" : " disabled"}>Eliminar workflow</button>
 </div>
 </div>
 <div class="content-panel-actions">
@@ -3535,7 +3535,7 @@ return;
 }
 const value = selectEl.value.trim();
 openButtonEl.disabled = !value;
-deleteButtonEl.disabled = !value || value === "cotizaciones.html";
+deleteButtonEl.disabled = !value || value === "workflow.html?workflow=wf-cotizaciones";
 }
 
 function openProcessEditor(processId){

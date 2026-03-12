@@ -310,12 +310,14 @@ padding:24px 26px 30px;
 display:flex;
 flex-direction:column;
 gap:18px;
+min-height:calc(100vh - 94px);
 }
 
 .page{
 display:flex;
 flex-direction:column;
 gap:14px;
+min-height:100%;
 }
 
 .page-modebar{
@@ -364,6 +366,23 @@ display:flex;
 flex-direction:column;
 gap:14px;
 overflow:hidden;
+}
+
+.workflow-editor-shell{
+position:relative;
+}
+
+#workflowFullscreenTarget:fullscreen{
+padding:18px;
+background:#eef2f4;
+}
+
+#workflowFullscreenTarget:fullscreen .diagram{
+min-height:calc(100vh - 36px);
+}
+
+#workflowFullscreenTarget:fullscreen .diagram[data-editing="true"] .diagram-canvas-shell{
+height:calc(100vh - 150px);
 }
 
 .diagram{
@@ -417,6 +436,19 @@ gap:10px;
 flex-wrap:wrap;
 }
 
+.diagram-inline-tools{
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.diagram-inline-tools .workflow-edit-tools,
+.diagram-inline-tools .floating-map-tools{
+margin:0;
+box-shadow:none;
+}
+
 .diagram-button{
 display:inline-flex;
 align-items:center;
@@ -456,13 +488,19 @@ overflow:visible;
 }
 
 .diagram[data-editing="true"] .diagram-canvas-shell{
-height:min(70vh, 760px);
+height:calc(100vh - 250px);
+min-height:680px;
 overflow:auto;
 margin:12px 18px 18px;
 border:1px solid rgba(32,48,61,.08);
 border-radius:18px;
 background:linear-gradient(180deg, rgba(255,255,255,.62) 0%, rgba(250,250,250,.84) 100%);
 scrollbar-gutter:stable both-edges;
+cursor:grab;
+}
+
+.diagram[data-editing="true"] .diagram-canvas-shell:active{
+cursor:grabbing;
 }
 
 .diagram-zoom-layer{
@@ -519,6 +557,10 @@ pointer-events:auto;
 cursor:grab;
 }
 
+.workflow-connectors line.is-selected{
+filter:drop-shadow(0 0 2px rgba(47,163,107,.28));
+}
+
 .workflow-connector-hit{
 stroke:transparent;
 stroke-width:18;
@@ -536,6 +578,24 @@ background:#fff;
 box-shadow:0 0 0 3px rgba(47,163,107,.12);
 cursor:move;
 z-index:3;
+}
+
+.workflow-connector-toolbar{
+position:absolute;
+display:none;
+align-items:center;
+gap:6px;
+padding:5px;
+border:1px solid rgba(32,48,61,.08);
+border-radius:13px;
+background:rgba(255,255,255,.97);
+box-shadow:0 10px 22px rgba(25,42,53,.12);
+transform:translateX(-50%);
+z-index:5;
+}
+
+.workflow-connector-toolbar.is-visible{
+display:inline-flex;
 }
 
 .workflow-node{
@@ -557,32 +617,169 @@ box-shadow:0 14px 28px rgba(26, 38, 48, .08);
 cursor:default;
 }
 
+.workflow-node .workflow-item-label{
+width:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+}
+
+.workflow-node.is-selected,
+.workflow-text.is-selected,
+.workflow-icon.is-selected,
+.workflow-decision.is-selected{
+box-shadow:0 0 0 4px rgba(47,163,107,.16), 0 14px 28px rgba(26, 38, 48, .08);
+}
+
 .diagram[data-editing="true"] .workflow-node{
 cursor:grab;
+}
+
+.workflow-decision{
+position:absolute;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:6px;
+border:2px solid #d9c1a3;
+background:#f7f2ed;
+color:#30424d;
+font-size:12px;
+line-height:1.15;
+text-align:center;
+box-shadow:0 14px 28px rgba(26, 38, 48, .08);
+cursor:default;
+transform:rotate(45deg);
+overflow:visible;
+}
+
+.workflow-decision .workflow-item-label{
+transform:rotate(-45deg);
+max-width:120px;
+}
+
+.diagram[data-editing="true"] .workflow-decision{
+cursor:grab;
+}
+
+.workflow-decision .workflow-item-toolbar,
+.workflow-decision .workflow-resize-handle{
+transform:rotate(-45deg);
 }
 
 .workflow-node.is-dragging{
 cursor:grabbing;
 }
 
-.workflow-node-edit{
+.workflow-resize-handle{
 position:absolute;
-top:8px;
-right:8px;
+right:-7px;
+bottom:-7px;
+width:14px;
+height:14px;
+border:2px solid #2fa36b;
+border-radius:4px;
+background:#fff;
+box-shadow:0 0 0 3px rgba(47,163,107,.12);
+cursor:nwse-resize;
+z-index:4;
+}
+
+.workflow-item-toolbar{
+position:absolute;
+top:-40px;
+right:0;
 display:none;
 align-items:center;
+gap:6px;
+padding:5px;
+border:1px solid rgba(32,48,61,.08);
+border-radius:13px;
+background:rgba(255,255,255,.97);
+box-shadow:0 10px 22px rgba(25,42,53,.12);
+z-index:5;
+overflow:visible;
+}
+
+.workflow-item-tool{
+width:30px;
+height:30px;
+padding:0;
+display:inline-flex;
+align-items:center;
 justify-content:center;
-width:20px;
-height:20px;
 border:none;
-border-radius:8px;
-background:rgba(255,255,255,.9);
-color:#5f6d76;
-font-size:12px;
+border-radius:9px;
+background:transparent;
+color:#495963;
+line-height:1;
 cursor:pointer;
 }
 
-.diagram[data-editing="true"] .workflow-node:hover .workflow-node-edit{
+.workflow-item-tool svg{
+width:15px;
+height:15px;
+display:block;
+stroke:currentColor;
+stroke-width:1.45;
+stroke-linecap:round;
+stroke-linejoin:round;
+fill:none;
+}
+
+.workflow-item-tool:hover{
+background:#eef3f5;
+color:#24343f;
+}
+
+.workflow-item-tool.is-delete:hover{
+background:#fdf0ed;
+color:#b4493a;
+}
+
+.workflow-item-transform-menu{
+position:absolute;
+top:38px;
+left:0;
+display:flex;
+flex-direction:column;
+gap:4px;
+min-width:108px;
+padding:5px;
+border:1px solid rgba(32,48,61,.08);
+border-radius:12px;
+background:rgba(255,255,255,.98);
+box-shadow:0 14px 28px rgba(25,42,53,.14);
+}
+
+.workflow-item-transform-option{
+min-height:28px;
+padding:0 10px;
+display:flex;
+align-items:center;
+justify-content:flex-start;
+border:none;
+border-radius:8px;
+background:transparent;
+color:#31424f;
+font-size:12px;
+font-weight:600;
+cursor:pointer;
+}
+
+.workflow-item-transform-option:hover{
+background:#eef3f5;
+}
+
+.workflow-item-transform-option:disabled{
+opacity:.45;
+cursor:default;
+background:transparent;
+}
+
+.diagram[data-editing="true"] .workflow-node:hover .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-node.is-selected .workflow-item-toolbar{
 display:inline-flex;
 }
 
@@ -663,16 +860,140 @@ color:#31424f;
 
 .workflow-text{
 position:absolute;
-min-width:140px;
+display:flex;
+align-items:flex-start;
+justify-content:flex-start;
 padding:6px 8px;
 color:#30424d;
 font-size:15px;
-line-height:1.35;
+line-height:1.15;
 cursor:default;
+overflow:visible;
+}
+
+.workflow-text .workflow-item-label{
+display:flex;
+align-items:flex-start;
+width:100%;
+height:100%;
+text-align:left;
+word-break:break-word;
+overflow-wrap:anywhere;
 }
 
 .diagram[data-editing="true"] .workflow-text{
 cursor:grab;
+}
+
+.workflow-entry{
+position:absolute;
+display:flex;
+align-items:center;
+padding:0;
+background:transparent;
+border:none;
+color:#30424d;
+font-size:12px;
+line-height:1;
+cursor:default;
+overflow:visible;
+}
+
+.workflow-output{
+position:absolute;
+display:flex;
+align-items:center;
+padding:0;
+background:transparent;
+border:none;
+color:#30424d;
+font-size:12px;
+line-height:1;
+cursor:default;
+overflow:visible;
+}
+
+.workflow-entry-dot{
+flex:0 0 16px;
+width:16px;
+height:16px;
+border-radius:50%;
+background:#111;
+}
+
+.workflow-output-dot{
+flex:0 0 16px;
+width:16px;
+height:16px;
+border-radius:50%;
+background:#111;
+box-shadow:0 0 0 2px #fff, 0 0 0 3px #111;
+}
+
+.workflow-entry-label-shell{
+position:absolute;
+display:flex;
+align-items:center;
+justify-content:flex-start;
+overflow:visible;
+cursor:grab;
+}
+
+.workflow-entry .workflow-item-label{
+display:flex;
+align-items:center;
+width:100%;
+height:100%;
+text-align:left;
+line-height:1.15;
+word-break:break-word;
+overflow-wrap:anywhere;
+}
+
+.workflow-output .workflow-item-label{
+display:flex;
+align-items:center;
+width:100%;
+height:100%;
+text-align:left;
+line-height:1.15;
+word-break:break-word;
+overflow-wrap:anywhere;
+}
+
+.workflow-entry-label-resize{
+position:absolute;
+right:-7px;
+bottom:-7px;
+width:12px;
+height:12px;
+padding:0;
+border:2px solid #2fa36b;
+border-radius:4px;
+background:#fff;
+box-shadow:0 0 0 2px rgba(47,163,107,.12);
+cursor:nwse-resize;
+display:none;
+}
+
+.diagram[data-editing="true"] .workflow-entry{
+cursor:grab;
+}
+
+.diagram[data-editing="true"] .workflow-output{
+cursor:grab;
+}
+
+.diagram[data-editing="true"] .workflow-entry.is-selected .workflow-entry-label-resize{
+display:block;
+}
+
+.diagram[data-editing="true"] .workflow-output.is-selected .workflow-entry-label-resize{
+display:block;
+}
+
+.diagram[data-editing="true"] .workflow-icon.is-selected .workflow-entry-label-resize{
+display:block;
 }
 
 .workflow-icon{
@@ -680,40 +1001,420 @@ position:absolute;
 display:flex;
 align-items:center;
 justify-content:center;
-width:56px;
-height:56px;
-border-radius:18px;
-background:rgba(255,255,255,.9);
-border:1px solid rgba(32,48,61,.12);
-box-shadow:0 10px 24px rgba(25,42,53,.08);
+padding:0;
 font-size:24px;
 color:#30424d;
 cursor:default;
+overflow:visible;
+}
+
+.workflow-icon-glyph{
+width:100%;
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.workflow-icon-glyph svg{
+width:100%;
+height:100%;
+display:block;
+stroke:currentColor;
+stroke-width:1.7;
+stroke-linecap:round;
+stroke-linejoin:round;
+fill:none;
+}
+
+.workflow-icon-label-shell{
+cursor:grab;
+}
+
+.workflow-icon .workflow-item-label{
+display:flex;
+align-items:center;
+width:100%;
+height:100%;
+text-align:left;
+line-height:1.15;
+word-break:break-word;
+overflow-wrap:anywhere;
 }
 
 .diagram[data-editing="true"] .workflow-icon{
 cursor:grab;
 }
 
-.workflow-object-edit{
-position:absolute;
-top:6px;
-right:6px;
+.diagram[data-editing="true"] .workflow-text:hover .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-text.is-selected .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-entry:hover .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-entry.is-selected .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-output:hover .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-output.is-selected .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-decision:hover .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-decision.is-selected .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-icon:hover .workflow-item-toolbar,
+.diagram[data-editing="true"] .workflow-icon.is-selected .workflow-item-toolbar{
+display:inline-flex;
+}
+
+.workflow-inspector{
+position:fixed;
+top:138px;
+right:28px;
+width:320px;
+max-height:calc(100vh - 170px);
+overflow:auto;
+padding:16px;
+border:1px solid rgba(32,48,61,.08);
+border-radius:18px;
+background:linear-gradient(180deg, rgba(255,255,255,.97) 0%, rgba(248,249,250,.98) 100%);
+box-shadow:0 18px 42px rgba(25,42,53,.16);
+z-index:20;
 display:none;
+}
+
+.workflow-inspector.is-visible{
+display:block;
+}
+
+.workflow-inspector-header{
+display:flex;
 align-items:center;
-justify-content:center;
-width:18px;
-height:18px;
-border:none;
-border-radius:7px;
-background:rgba(255,255,255,.92);
-color:#5f6d76;
-font-size:11px;
+justify-content:space-between;
+gap:12px;
+margin-bottom:14px;
+}
+
+.workflow-inspector-close{
+height:30px;
+padding:0 12px;
+border:1px solid rgba(32,48,61,.12);
+border-radius:10px;
+background:#fff;
+color:#31424f;
+font-size:12px;
+font-weight:700;
 cursor:pointer;
 }
 
-.diagram[data-editing="true"] .workflow-text:hover .workflow-object-edit,
-.diagram[data-editing="true"] .workflow-icon:hover .workflow-object-edit{
+.workflow-inspector-empty{
+font-size:13px;
+line-height:1.5;
+color:#6f7d86;
+}
+
+.workflow-inspector-title{
+margin:0 0 4px;
+font-size:16px;
+color:#24333f;
+}
+
+.workflow-inspector-subtitle{
+margin:0 0 14px;
+font-size:12px;
+color:#7b8790;
+}
+
+.workflow-inspector-group{
+display:flex;
+flex-direction:column;
+gap:6px;
+margin-bottom:14px;
+}
+
+.workflow-inspector-group label{
+font-size:12px;
+font-weight:700;
+color:#4e5c66;
+}
+
+.workflow-inspector-input,
+.workflow-inspector-range{
+width:100%;
+}
+
+.workflow-inspector-input{
+min-height:38px;
+padding:10px 12px;
+border:1px solid #d5dde2;
+border-radius:12px;
+background:#fff;
+color:#30424d;
+font-size:13px;
+}
+
+textarea.workflow-inspector-input{
+min-height:88px;
+resize:vertical;
+}
+
+.workflow-inspector-color-row{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:10px;
+}
+
+.workflow-inspector-color{
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.workflow-inspector-color input{
+width:100%;
+height:42px;
+padding:4px;
+border:1px solid #d5dde2;
+border-radius:12px;
+background:#fff;
+cursor:pointer;
+}
+
+.workflow-inspector-actions{
+display:flex;
+gap:8px;
+margin-bottom:14px;
+}
+
+.workflow-inspector-actions.is-apply-row{
+margin-top:4px;
+margin-bottom:0;
+}
+
+.workflow-inspector-button{
+flex:1 1 auto;
+min-height:36px;
+padding:0 12px;
+border:1px solid rgba(32,48,61,.12);
+border-radius:12px;
+background:#fff;
+color:#31424f;
+font-size:12px;
+font-weight:700;
+cursor:pointer;
+}
+
+.workflow-inspector-button.is-primary{
+background:#20303d;
+border-color:#20303d;
+color:#fff;
+}
+
+.workflow-inspector-button.is-primary:hover{
+background:#2a3d4c;
+border-color:#2a3d4c;
+}
+
+.workflow-inspector-button:disabled{
+opacity:.45;
+cursor:not-allowed;
+}
+
+.workflow-inspector-metrics{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:10px;
+}
+
+.workflow-inspector-metric{
+padding:10px 12px;
+border:1px solid rgba(32,48,61,.08);
+border-radius:12px;
+background:#fff;
+}
+
+.workflow-inspector-metric strong{
+display:block;
+margin-bottom:4px;
+font-size:11px;
+letter-spacing:.05em;
+text-transform:uppercase;
+color:#7b8790;
+}
+
+.workflow-inspector-metric span{
+font-size:14px;
+font-weight:700;
+color:#30424d;
+}
+
+@media (max-width: 1180px){
+.workflow-inspector{
+position:static;
+width:100%;
+max-height:none;
+margin-top:12px;
+}
+}
+
+.canvas-item{
+position:absolute;
+}
+
+.canvas-item.is-draggable{
+cursor:grab;
+}
+
+.canvas-item.is-dragging{
+cursor:grabbing;
+}
+
+.canvas-item.is-selected{
+box-shadow:0 0 0 4px rgba(47,163,107,.16);
+}
+
+.diagram[data-editing="true"] .canvas-item:hover .workflow-item-toolbar,
+.diagram[data-editing="true"] .canvas-item.is-selected .workflow-item-toolbar{
 display:inline-flex;
+}
+
+.canvas-item.label{
+font-size:13px;
+line-height:1.15;
+color:var(--text);
+text-align:center;
+}
+
+.canvas-item.actor{
+width:150px;
+font-size:12px;
+line-height:1.15;
+text-align:center;
+color:#777;
+}
+
+.canvas-item.actor::before{
+content:"";
+display:block;
+width:18px;
+height:18px;
+margin:0 auto 4px;
+border:3px solid #ababab;
+border-radius:50%;
+box-shadow:0 22px 0 -9px #ababab;
+}
+
+.canvas-item.flow-card{
+display:flex;
+align-items:center;
+justify-content:center;
+width:102px;
+min-height:38px;
+padding:8px 10px;
+background:var(--card);
+border:1px solid var(--orange-soft);
+border-radius:6px;
+font-size:12px;
+line-height:1.15;
+text-align:center;
+cursor:pointer;
+transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.canvas-item-flow-content{
+width:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+}
+
+.diagram[data-editing="false"] .canvas-item.flow-card:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 16px rgba(0,0,0,.10);
+background:#fdf8f3;
+}
+
+.canvas-item .badge{
+position:absolute;
+top:-18px;
+left:-18px;
+width:30px;
+height:30px;
+border-radius:50%;
+background:var(--orange);
+color:#fff;
+font-size:16px;
+font-weight:700;
+display:flex;
+align-items:center;
+justify-content:center;
+box-shadow:0 4px 10px rgba(235,122,7,.25);
+}
+
+.canvas-item .badge.small{
+font-size:14px;
+}
+
+.canvas-item.decision{
+width:18px;
+height:18px;
+border:2px solid var(--orange-soft);
+background:#fff;
+transform:rotate(45deg);
+}
+
+.canvas-item.decision-label{
+font-size:12px;
+color:var(--text);
+text-align:center;
+line-height:1.1;
+}
+
+.canvas-item.tag{
+padding:2px 8px;
+background:var(--yellow);
+font-size:10px;
+line-height:1;
+color:#4a4a4a;
+}
+
+.canvas-item.note{
+max-width:220px;
+font-size:11px;
+line-height:1.2;
+color:var(--orange);
+font-weight:700;
+}
+
+.canvas-item.mini-icon{
+font-size:12px;
+color:#888;
+line-height:1.2;
+text-align:center;
+}
+
+.canvas-item.start-dot,
+.canvas-item.end-dot{
+width:14px;
+height:14px;
+border-radius:50%;
+background:#5c5c5c;
+}
+
+.canvas-item.end-dot{
+background:#fff;
+border:2px solid var(--orange);
+box-shadow:inset 0 0 0 2px #8f8f8f;
+}
+
+.canvas-item.dashed-box{
+width:145px;
+padding:14px 14px 10px;
+border:1px dashed var(--orange-soft);
+border-radius:4px;
+font-size:12px;
+line-height:1.45;
+text-align:center;
+color:var(--text);
+}
+
+.canvas-item.soft-icon{
+font-size:11px;
+line-height:1.1;
+color:#7b7b7b;
+text-align:center;
 }
 

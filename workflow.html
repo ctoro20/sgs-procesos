@@ -67,11 +67,15 @@
               <div class="workflow-tool-label">Objetos</div>
               <button class="floating-map-button" id="addWorkflowActivityButton" type="button" title="Agregar actividad" aria-label="Agregar actividad">A</button>
               <button class="floating-map-button" id="addWorkflowConnectorButton" type="button" title="Agregar conector" aria-label="Agregar conector">↗</button>
+              <button class="floating-map-button" id="addWorkflowDecisionButton" type="button" title="Agregar punto de decisión" aria-label="Agregar punto de decisión">◇</button>
+              <button class="floating-map-button" id="addWorkflowEntryButton" type="button" title="Agregar entrada" aria-label="Agregar entrada">●</button>
+              <button class="floating-map-button" id="addWorkflowOutputButton" type="button" title="Agregar salida" aria-label="Agregar salida">◉</button>
               <button class="floating-map-button" id="addWorkflowTextButton" type="button" title="Agregar texto" aria-label="Agregar texto">T</button>
               <button class="floating-map-button" id="addWorkflowIconButton" type="button" title="Agregar icono" aria-label="Agregar icono">◎</button>
             </div>
             <div class="floating-map-tools" id="floatingWorkflowTools">
               <button class="floating-map-button" id="floatingWorkflowEditModeButton" type="button" title="Entrar a edición" aria-label="Entrar a edición">✎</button>
+              <button class="floating-map-button" id="workflowFullscreenButton" type="button" title="Pantalla completa" aria-label="Pantalla completa">⛶</button>
               <button class="floating-map-button" id="workflowZoomOutButton" type="button" title="Reducir zoom" aria-label="Reducir zoom">-</button>
               <button class="floating-map-button is-reset" id="workflowZoomResetButton" type="button" title="Volver a 100%" aria-label="Volver a 100%">100%</button>
               <button class="floating-map-button" id="workflowZoomInButton" type="button" title="Aumentar zoom" aria-label="Aumentar zoom">+</button>
@@ -81,27 +85,33 @@
         </div>
         <p class="hint" id="workflowHint">Canvas persistido por workflow. En edición puedes mover y renombrar la actividad base.</p>
         <div class="diagram-shell">
-          <div class="diagram" id="workflowDiagram" data-editing="false">
-            <div class="diagram-toolbar">
-              <div class="diagram-toolbar-copy">
-                <strong id="workflowHeading">Nuevo workflow</strong>
-                <span>Este mapa usa el mismo patrón del macroproceso principal, con una sola actividad inicial para cada workflow nuevo.</span>
+          <div class="workflow-editor-shell" id="workflowFullscreenTarget">
+            <div class="diagram" id="workflowDiagram" data-editing="false">
+              <div class="diagram-toolbar">
+                <div class="diagram-toolbar-copy">
+                  <strong id="workflowHeading">Nuevo workflow</strong>
+                  <span>Este mapa usa el mismo patrón del macroproceso principal, con una sola actividad inicial para cada workflow nuevo.</span>
+                </div>
+                <div class="diagram-actions">
+                  <button class="diagram-button" id="toggleWorkflowModeButton" type="button">Editar mapa</button>
+                  <div class="diagram-inline-tools" id="workflowDiagramInlineTools"></div>
+                  <button class="diagram-button" id="copyWorkflowLayoutButton" type="button">Copiar JSON</button>
+                  <button class="diagram-button" id="resetWorkflowButton" type="button">Restablecer</button>
+                </div>
               </div>
-              <div class="diagram-actions">
-                <button class="diagram-button" id="toggleWorkflowModeButton" type="button">Editar mapa</button>
-                <button class="diagram-button" id="copyWorkflowLayoutButton" type="button">Copiar JSON</button>
-                <button class="diagram-button" id="resetWorkflowButton" type="button">Restablecer</button>
-              </div>
-            </div>
-            <div class="diagram-status" id="workflowStatus">Vista en modo publicación.</div>
-            <div class="diagram-canvas-shell" id="workflowCanvasShell">
-              <div class="diagram-zoom-layer" id="workflowZoomLayer">
-                <div class="diagram-canvas" id="workflowCanvas">
-                  <div class="diagram-grid" aria-hidden="true"></div>
-                  <div class="diagram-viewport" id="workflowViewport"></div>
+              <div class="diagram-status" id="workflowStatus">Vista en modo publicación.</div>
+              <div class="diagram-canvas-shell" id="workflowCanvasShell">
+                <div class="diagram-zoom-layer" id="workflowZoomLayer">
+                  <div class="diagram-canvas" id="workflowCanvas">
+                    <div class="diagram-grid" aria-hidden="true"></div>
+                    <div class="diagram-viewport" id="workflowViewport"></div>
+                  </div>
                 </div>
               </div>
             </div>
+            <aside class="workflow-inspector" id="workflowInspector">
+              <div class="workflow-inspector-empty">Selecciona un objeto en modo edición para personalizarlo.</div>
+            </aside>
           </div>
         </div>
       </div>
