@@ -1577,7 +1577,7 @@ margin-left:16px;
 <div class="nav-group">
 <div class="nav-group-label"><span class="nav-pill">A</span>Comercial</div>
 <div class="nav-group-children">
-<a class="nav-link" data-process-nav="P1" href="workflow.html?workflow=wf-cotizaciones"><span class="nav-pill">P1</span>Cotizaciones</a>
+<a class="nav-link" data-process-nav="P1" href="cotizaciones.html"><span class="nav-pill">P1</span>Cotizaciones</a>
 </div>
 </div>
 <div class="nav-group">
@@ -1720,7 +1720,7 @@ items: [
 { id: "badge-c", groupId: "grp-area-c", kind: "badge", className: "badge gray", x: 950, y: 145, width: 34, height: 34, text: "C" },
 { id: "area-c", groupId: "grp-area-c", kind: "node", className: "node area", x: 968, y: 160, width: 145, height: 66, text: "ÁREA TÉCNICA" },
 { id: "badge-p1", groupId: "grp-proc-p1", kind: "badge", className: "badge orange", x: 54, y: 255, width: 34, height: 34, text: "P1" },
-{ id: "proc-p1", groupId: "grp-proc-p1", kind: "process", className: "node process", x: 70, y: 272, width: 150, height: 62, html: "Cotizaciones", processId: "P1", href: "workflow.html?workflow=wf-cotizaciones" },
+{ id: "proc-p1", groupId: "grp-proc-p1", kind: "process", className: "node process", x: 70, y: 272, width: 150, height: 62, html: "Cotizaciones", processId: "P1", href: "cotizaciones.html" },
 { id: "badge-p2", groupId: "grp-proc-p2", kind: "badge", className: "badge orange", x: 314, y: 255, width: 34, height: 34, text: "P2" },
 { id: "proc-p2", groupId: "grp-proc-p2", kind: "process", className: "node process", x: 330, y: 272, width: 150, height: 62, html: "Planificación", processId: "P2" },
 { id: "badge-p3", groupId: "grp-proc-p3", kind: "badge", className: "badge orange", x: 494, y: 255, width: 34, height: 34, text: "P3" },
@@ -1788,7 +1788,9 @@ P1: `
 <li>Cotización emitida y aprobaciones del proceso.</li>
 </ol>
 <a class="action-link" href="workflow.html?workflow=wf-cotizaciones">Ver flujo detallado</a>
-`,
+<a class="action-link" href="cotizaciones.html">Ver mapa cotizaciones</a>
+<a class="action-link" href="cotizacion-pdf.html">Ver vista interpretada del PDF</a>
+  `,
 P2: `
 <h2>Planificación</h2>
 <p><span class="pill">Área: Operaciones</span><span class="pill">Responsable: Coordinación Operacional</span></p>
@@ -2357,7 +2359,7 @@ if(!processId){
 return;
 }
 const detail = getProcessDetail(processId);
-const href = (detail && detail.link) || (processId === "P1" ? "workflow.html?workflow=wf-cotizaciones" : "index.html");
+const href = (detail && detail.link) || (processId === "P1" ? "cotizaciones.html" : "index.html");
 linkEl.href = href;
 });
 }

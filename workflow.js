@@ -3,6 +3,8 @@ const PROCESS_DETAILS_STORAGE_KEY = "conemi-process-details-v1";
 const ITEM_DETAILS_STORAGE_KEY = "conemi-item-details-v1";
 const WORKFLOW_CATALOG_STORAGE_KEY = "conemi-workflow-catalog-v1";
 const WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-v1:";
+const WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-base-v1:";
+const COTIZACIONES_WORKFLOW_TEMPLATE_VERSION = "cotizaciones-html-20260321-roles";
 const params = new URLSearchParams(window.location.search);
 const processId = params.get("process") || "";
 const itemId = params.get("item") || "";
@@ -12,7 +14,9 @@ const WORKFLOW_TOOL_ICONS = {
   edit: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 11.8 11.9 3a1.4 1.4 0 0 1 2 2L5 13.8 2.5 14.5z"></path><path d="m10.8 4.1 1.1 1.1"></path></svg>',
   delete: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.3 3.3h5.4"></path><path d="M6.2 3.3V2.5h3.6v.8"></path><path d="M4.4 4.6 5 13.2c.1.7.6 1.3 1.4 1.3h3.2c.8 0 1.3-.6 1.4-1.3l.6-8.6"></path><path d="M6.7 6.3v5.1"></path><path d="M9.3 6.3v5.1"></path></svg>',
   convert: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.2h7.5"></path><path d="m8.3 2.7 2.5 2.5-2.5 2.5"></path><path d="M13 10.8H5.5"></path><path d="m7.7 8.3-2.5 2.5 2.5 2.5"></path></svg>',
-  duplicate: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="7" height="7" rx="1.5"></rect><path d="M3.5 10.5h-.2A1.3 1.3 0 0 1 2 9.2V3.3A1.3 1.3 0 0 1 3.3 2h5.9a1.3 1.3 0 0 1 1.3 1.3v.2"></path></svg>'
+  duplicate: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="7" height="7" rx="1.5"></rect><path d="M3.5 10.5h-.2A1.3 1.3 0 0 1 2 9.2V3.3A1.3 1.3 0 0 1 3.3 2h5.9a1.3 1.3 0 0 1 1.3 1.3v.2"></path></svg>',
+  connect: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="4" cy="8" r="1.7"></circle><circle cx="12" cy="4" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><path d="M5.5 7.1 10.4 4.9"></path><path d="M5.5 8.9 10.4 11.1"></path></svg>',
+  close: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 5 11 11"></path><path d="M11 5 5 11"></path></svg>'
 };
 const PROCESS_TREE = [
   { areaId: "A", areaLabel: "Comercial", nodes: [{ id: "P1", label: "Cotizaciones", href: COTIZACIONES_WORKFLOW_URL }] },
@@ -139,6 +143,7 @@ const workflowSubtitle = workflowEntry
   : (processId ? ("Proceso " + processId) : (itemId ? ("Nodo " + itemId) : "Workflow no especificado"));
 const workflowToken = workflowId || processId || itemId || "WF";
 const workflowStorageKey = WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
+const workflowBaseStorageKey = WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
 const WORKFLOW_ZOOM_STORAGE_KEY_PREFIX = "conemi-workflow-zoom-v1:";
 const PUBLICATION_WIDTH = 1200;
 const PUBLICATION_HEIGHT = 380;
@@ -210,117 +215,452 @@ function hasWorkflowFloatingLabel(type){
   return type === "entry" || type === "output" || type === "icon";
 }
 
+function getDefaultActorLabelLayout(){
+  return {
+    labelOffsetX: 0,
+    labelOffsetY: 0,
+    labelWidth: 110,
+    labelHeight: 24
+  };
+}
+
 function getWorkflowIconPreset(variant){
   return WORKFLOW_ICON_PRESETS[variant] || WORKFLOW_ICON_PRESETS.current;
 }
 
-function createCotizacionesWorkflowState(){
+function getCotizacionesSystemIcon(label){
+  return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='13' rx='2'/%3E%3Cpath d='M8 20h8'/%3E%3Cpath d='M12 17v3'/%3E%3C/svg%3E";
+}
+
+function getCotizacionesMiniIcon(label){
+  const normalized = String(label || "").replace(/<br\s*\/?>/gi, " ").trim().toLowerCase();
+  if(normalized === "llamado telefónico" || normalized === "llamado telefonico"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.1 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 3a2 2 0 0 1-.6 1.8l-1.3 1.3a16 16 0 0 0 6.4 6.4l1.3-1.3a2 2 0 0 1 1.8-.6l3 .5A2 2 0 0 1 22 16.9z'/%3E%3C/svg%3E";
+  }
+  if(normalized === "email"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='m4 7 8 6 8-6'/%3E%3C/svg%3E";
+  }
+  if(normalized === "portal licitaciones"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='13' rx='2'/%3E%3Cpath d='M8 20h8'/%3E%3Cpath d='M12 17v3'/%3E%3Cpath d='M7 8h10'/%3E%3Cpath d='M7 11h6'/%3E%3C/svg%3E";
+  }
+  return "";
+}
+
+function getCotizacionesWorkflowKindDefaults(kind){
+  const kindDefaults = {
+    "start-dot": { width: 14, height: 14 },
+    "end-dot": { width: 14, height: 14 },
+    "label": { width: 90, height: 28 },
+    "actor": { width: 150, height: 44 },
+    "flow-card": { width: 102, height: 54 },
+    "mini-icon": { width: 84, height: 18 },
+    "decision-label": { width: 90, height: 18 },
+    "decision": { width: 18, height: 18 },
+    "subactivity": { width: 132, height: 26 },
+    "dashed-box": { width: 145, height: 112 },
+    "soft-icon": { width: 82, height: 18 },
+    "tag": { width: 74, height: 18 },
+    "note": { width: 160, height: 36 }
+  };
+  return kindDefaults[kind] || { width: 120, height: 24 };
+}
+
+function getWorkflowKindTextDefaults(kind){
+  const kindDefaults = {
+    "actor": { fontSize: 11, textColor: "#777" },
+    "flow-card": { fontSize: 12, textColor: "#30424d" },
+    "decision-label": { fontSize: 12, textColor: "#30424d" },
+    "tag": { fontSize: 9, textColor: "#555" },
+    "note": { fontSize: 11, textColor: "#eb7a07" },
+    "mini-icon": { fontSize: 9, textColor: "#555" },
+    "label": { fontSize: 13, textColor: "#30424d" },
+    "soft-icon": { fontSize: 10, textColor: "#6d7680" },
+    "subactivity": { fontSize: 10, textColor: "#30424d" },
+    "dashed-box": { fontSize: 12, textColor: "#30424d" }
+  };
+  return kindDefaults[kind] || null;
+}
+
+function normalizeWorkflowRoleKind(item){
+  const html = String(item && item.html || "").toLowerCase();
+  if(item && item.kind === "soft-icon" && (html.includes("jefe técnico") || html.includes("jefe tecnico") || html.includes("jefe<br>operaciones"))){
+    return "actor";
+  }
+  return item.kind;
+}
+
+function normalizeCotizacionesWorkflowItems(items){
+  return items.map(function(item){
+    const normalizedKind = normalizeWorkflowRoleKind(item);
+    const defaults = getCotizacionesWorkflowKindDefaults(normalizedKind);
+    const textDefaults = getWorkflowKindTextDefaults(normalizedKind);
+    const entryLayout = normalizedKind === "actor" ? getDefaultActorLabelLayout() : null;
+    return Object.assign({}, item, {
+      kind: normalizedKind,
+      width: Number.isFinite(item.width) ? item.width : defaults.width,
+      height: Number.isFinite(item.height) ? item.height : defaults.height,
+      fontSize: Number.isFinite(item.fontSize) ? item.fontSize : (textDefaults ? textDefaults.fontSize : undefined),
+      textColor: item.textColor || (textDefaults ? textDefaults.textColor : undefined),
+      labelOffsetX: entryLayout ? (Number.isFinite(item.labelOffsetX) ? item.labelOffsetX : entryLayout.labelOffsetX) : item.labelOffsetX,
+      labelOffsetY: entryLayout ? (Number.isFinite(item.labelOffsetY) ? item.labelOffsetY : entryLayout.labelOffsetY) : item.labelOffsetY,
+      labelWidth: entryLayout ? (Number.isFinite(item.labelWidth) ? item.labelWidth : entryLayout.labelWidth) : item.labelWidth,
+      labelHeight: entryLayout ? (Number.isFinite(item.labelHeight) ? item.labelHeight : entryLayout.labelHeight) : item.labelHeight
+    });
+  });
+}
+
+function getCotizacionesWorkflowTemplate(){
   return {
-    items: [
-      { id:"label-1", kind:"label", html:"Necesidad del<br>Cliente", x:12, y:120, width:90, height:32 },
-      { id:"actor-1", kind:"actor", html:"Ejecutivo<br>Comercial", x:124, y:30, width:150, height:44 },
-      { id:"step-1", kind:"flow-card", html:"Recepcionar<br>Requerimiento", badge:"1", step:"1", x:128, y:92, width:102, height:54 },
-      { id:"mini-1", kind:"mini-icon", html:"Llamado telefónico", x:142, y:145, width:104, height:18 },
-      { id:"mini-2", kind:"mini-icon", html:"Email", x:142, y:168, width:72, height:18 },
-      { id:"mini-3", kind:"mini-icon", html:"Portal Licitaciones", x:142, y:191, width:110, height:18 },
-      { id:"mini-4", kind:"mini-icon", html:"Documentos<br>de soporte", x:264, y:90, width:92, height:28 },
-      { id:"decision-label-1", kind:"decision-label", html:"¿Requerimiento<br>corresponde a Licitación?", x:389, y:74, width:110, height:30 },
-      { id:"decision-1", kind:"decision", x:424, y:101, width:18, height:18 },
-      { id:"decision-label-2", kind:"decision-label", html:"Si", x:405, y:138, width:50, height:18 },
-      { id:"decision-label-3", kind:"decision-label", html:"No", x:470, y:105, width:44, height:18 },
-      { id:"actor-2", kind:"actor", html:"Ejecutivo<br>Comercial", x:301, y:204, width:150, height:44 },
-      { id:"step-1-1", kind:"flow-card", html:"Validar Técnica y<br>Operativamente", badge:"1.1", badgeClass:"small", step:"1.1", x:387, y:182, width:102, height:54 },
-      { id:"soft-1", kind:"soft-icon", html:"Consultas a las áreas", x:382, y:278, width:118, height:18 },
-      { id:"dash-1", kind:"dashed-box", html:"Laboratorios/ETFA<br>Permisología<br>Inspectores/Otros<br>Equipos/Insumos<br>Logística", x:225, y:313, width:145, height:112 },
-      { id:"soft-2", kind:"soft-icon", html:"Operaciones", x:486, y:266, width:82, height:18 },
-      { id:"soft-3", kind:"soft-icon", html:"Técnicas", x:486, y:286, width:82, height:18 },
-      { id:"soft-4", kind:"soft-icon", html:"Entrega de la información", x:391, y:377, width:108, height:18 },
-      { id:"soft-5", kind:"soft-icon", html:"Jefe<br>Operaciones", x:505, y:332, width:92, height:28 },
-      { id:"soft-6", kind:"soft-icon", html:"Jefe Técnico", x:505, y:362, width:92, height:28 },
-      { id:"actor-3", kind:"actor", html:"Ejecutivo<br>Comercial", x:542, y:32, width:150, height:44 },
-      { id:"step-2", kind:"flow-card", html:"Elaborar<br>Cotización", badge:"2", step:"2", x:575, y:92, width:102, height:54 },
-      { id:"tag-1", kind:"tag", html:"Qcotizador", x:671, y:116, width:74, height:18 },
-      { id:"tag-2", kind:"tag", html:"QETFA", x:683, y:136, width:54, height:18 },
-      { id:"note-1", kind:"note", html:"Se adjunta archivo de costeo y se especifican los servicios ETFA, el sistema realiza la validación.", x:620, y:145, width:165, height:54 },
-      { id:"actor-4", kind:"actor", html:"Gerente de Desarrollo de<br>Negocios", x:738, y:26, width:180, height:44 },
-      { id:"step-3", kind:"flow-card", html:"Aprobar<br>Cotización", badge:"3", step:"3", x:742, y:92, width:102, height:54 },
-      { id:"tag-3", kind:"tag", html:"Qcotizador", x:796, y:136, width:74, height:18 },
-      { id:"decision-label-4", kind:"decision-label", html:"¿Se aprueba la<br>Cotización?", x:866, y:74, width:110, height:30 },
-      { id:"decision-2", kind:"decision", x:906, y:101, width:18, height:18 },
-      { id:"decision-label-5", kind:"decision-label", html:"No", x:892, y:138, width:46, height:18 },
-      { id:"decision-label-6", kind:"decision-label", html:"Si", x:964, y:105, width:44, height:18 },
-      { id:"mini-5", kind:"mini-icon", html:"Corregir", x:866, y:182, width:92, height:18 },
-      { id:"mini-6", kind:"mini-icon", html:"Solicitar<br>Correcciones", x:900, y:202, width:85, height:28 },
-      { id:"mini-7", kind:"mini-icon", html:"Email", x:970, y:205, width:70, height:18 },
-      { id:"mini-8", kind:"mini-icon", html:"Cotización<br>Aprobada", x:1044, y:90, width:82, height:28 },
-      { id:"actor-5", kind:"actor", html:"Ejecutivo<br>Comercial", x:1115, y:30, width:150, height:44 },
-      { id:"step-4", kind:"flow-card", html:"Notificar al<br>Cliente", badge:"4", step:"4", x:1148, y:92, width:102, height:54 },
-      { id:"tag-4", kind:"tag", html:"Qcotizador", x:1254, y:116, width:74, height:18 },
-      { id:"note-2", kind:"note", html:"Se realiza correo personalizado al Cliente.", x:1201, y:147, width:155, height:36 },
-      { id:"mini-9", kind:"mini-icon", html:"Cotización<br>Enviada", x:1146, y:196, width:108, height:28 },
-      { id:"mini-10", kind:"mini-icon", html:"Email", x:1220, y:208, width:54, height:18 },
-      { id:"actor-6", kind:"actor", html:"Ejecutivo<br>Comercial", x:1244, y:275, width:150, height:44 },
-      { id:"step-5", kind:"flow-card", html:"Realizar seguimiento", badge:"5", step:"5", x:1148, y:286, width:102, height:54 },
-      { id:"note-3", kind:"note", html:"Al tercer día si no se obtiene respuesta aún.", x:1200, y:349, width:180, height:36 },
-      { id:"actor-7", kind:"actor", html:"Ejecutivo<br>Comercial", x:1244, y:381, width:150, height:44 },
-      { id:"step-6", kind:"flow-card", html:"Realizar Negociación", badge:"6", step:"6", x:1148, y:389, width:102, height:54 },
-      { id:"note-4", kind:"note", html:"Ajustar precios, plazos y condiciones según las necesidades del cliente.", x:1200, y:452, width:192, height:44 },
-      { id:"decision-label-7", kind:"decision-label", html:"¿Cotización<br>aceptada?", x:1088, y:543, width:95, height:28 },
+    items: normalizeCotizacionesWorkflowItems([
+      { id:"start-1", kind:"start-dot", x:48, y:133 },
+      { id:"label-1", kind:"label", x:12, y:150, width:90, html:"Necesidad del<br>Cliente" },
+      { id:"actor-1", kind:"actor", x:124, y:60, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-1", kind:"flow-card", x:128, y:122, width:102, html:"Recepcionar<br>Requerimiento", badge:"1", step:"1" },
+      { id:"mini-1", kind:"mini-icon", x:142, y:175, html:"Llamado telefónico" },
+      { id:"mini-2", kind:"mini-icon", x:142, y:198, html:"Email" },
+      { id:"mini-3", kind:"mini-icon", x:142, y:221, width:110, html:"Portal Licitaciones" },
+      { id:"mini-4", kind:"mini-icon", x:264, y:120, width:92, height:28, html:"Documentos<br>de soporte" },
+      { id:"decision-label-1", kind:"decision-label", x:389, y:104, width:110, height:30, html:"¿Requerimiento<br>corresponde a Licitación?" },
+      { id:"decision-1", kind:"decision", x:424, y:132, width:18, height:18 },
+      { id:"decision-label-2", kind:"decision-label", x:405, y:168, width:50, html:"Si" },
+      { id:"decision-label-3", kind:"decision-label", x:470, y:135, width:44, html:"No" },
+      { id:"actor-2", kind:"actor", x:301, y:204, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-1-1", kind:"flow-card", x:387, y:182, width:102, html:"Validar Técnica y<br>Operativamente", badge:"1.1", badgeClass:"small", step:"1.1" },
+      { id:"soft-1", kind:"subactivity", x:377, y:272, width:132, height:26, html:"Consultas a las áreas" },
+      { id:"dash-1", kind:"dashed-box", x:225, y:313, width:145, html:"Laboratorios/ETFA<br>Permisología<br>Inspectores/Otros<br>Equipos/Insumos<br>Logística" },
+      { id:"soft-2", kind:"soft-icon", x:486, y:266, width:82, html:"Operaciones" },
+      { id:"soft-3", kind:"soft-icon", x:486, y:286, width:82, html:"Técnicas" },
+      { id:"soft-4", kind:"subactivity", x:382, y:372, width:126, height:26, html:"Entrega de la información" },
+      { id:"soft-5", kind:"soft-icon", x:505, y:332, width:92, height:28, html:"Jefe<br>Operaciones" },
+      { id:"soft-6", kind:"soft-icon", x:505, y:362, width:92, height:28, html:"Jefe Técnico" },
+      { id:"actor-3", kind:"actor", x:542, y:62, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-2", kind:"flow-card", x:575, y:122, width:102, html:"Elaborar<br>Cotización", badge:"2", step:"2" },
+      { id:"tag-1", kind:"tag", x:671, y:146, html:"Qcotizador" },
+      { id:"tag-2", kind:"tag", x:683, y:166, width:54, html:"QETFA" },
+      { id:"note-1", kind:"note", x:620, y:175, width:165, height:54, html:"Se adjunta archivo de costeo y se especifican los servicios ETFA, el sistema realiza la validación." },
+      { id:"actor-4", kind:"actor", x:738, y:56, width:180, html:"Gerente de Desarrollo de<br>Negocios" },
+      { id:"step-3", kind:"flow-card", x:742, y:122, width:102, html:"Aprobar<br>Cotización", badge:"3", step:"3" },
+      { id:"tag-3", kind:"tag", x:796, y:166, html:"Qcotizador" },
+      { id:"decision-label-4", kind:"decision-label", x:866, y:104, width:110, height:30, html:"¿Se aprueba la<br>Cotización?" },
+      { id:"decision-2", kind:"decision", x:906, y:132, width:18, height:18 },
+      { id:"decision-label-5", kind:"decision-label", x:892, y:168, width:46, html:"No" },
+      { id:"decision-label-6", kind:"decision-label", x:964, y:135, width:44, html:"Si" },
+      { id:"mini-5", kind:"mini-icon", x:866, y:182, width:92, html:"Corregir" },
+      { id:"mini-6", kind:"mini-icon", x:900, y:202, width:85, height:28, html:"Solicitar<br>Correcciones" },
+      { id:"mini-7", kind:"mini-icon", x:970, y:205, width:70, html:"Email" },
+      { id:"mini-8", kind:"mini-icon", x:1044, y:120, width:82, height:28, html:"Cotización<br>Aprobada" },
+      { id:"actor-5", kind:"actor", x:1115, y:60, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-4", kind:"flow-card", x:1148, y:122, width:102, html:"Notificar al<br>Cliente", badge:"4", step:"4" },
+      { id:"tag-4", kind:"tag", x:1254, y:146, html:"Qcotizador" },
+      { id:"note-2", kind:"note", x:1201, y:177, width:155, html:"Se realiza correo personalizado al Cliente." },
+      { id:"mini-9", kind:"mini-icon", x:1146, y:196, width:108, height:28, html:"Cotización<br>Enviada" },
+      { id:"mini-10", kind:"mini-icon", x:1220, y:208, width:54, html:"Email" },
+      { id:"actor-6", kind:"actor", x:1244, y:275, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-5", kind:"flow-card", x:1148, y:286, width:102, html:"Realizar seguimiento", badge:"5", step:"5" },
+      { id:"tag-4b", kind:"tag", x:1201, y:332, html:"Qcotizador" },
+      { id:"note-3", kind:"note", x:1200, y:349, width:180, html:"Al tercer día si no se obtiene respuesta aún." },
+      { id:"actor-7", kind:"actor", x:1244, y:381, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-6", kind:"flow-card", x:1148, y:389, width:102, html:"Realizar Negociación", badge:"6", step:"6" },
+      { id:"tag-4c", kind:"tag", x:1201, y:435, html:"Qcotizador" },
+      { id:"note-4", kind:"note", x:1200, y:452, width:192, height:44, html:"Ajustar precios, plazos y condiciones según las necesidades del cliente." },
+      { id:"decision-label-7", kind:"decision-label", x:1088, y:543, width:95, height:28, html:"¿Cotización<br>aceptada?" },
       { id:"decision-3", kind:"decision", x:1191, y:545, width:18, height:18 },
-      { id:"decision-label-8", kind:"decision-label", html:"Si", x:1178, y:584, width:45, height:18 },
-      { id:"decision-label-9", kind:"decision-label", html:"No", x:1247, y:548, width:44, height:18 },
-      { id:"actor-8", kind:"actor", html:"Ejecutivo<br>Comercial", x:1294, y:493, width:150, height:44 },
-      { id:"step-6-1", kind:"flow-card", html:"Rechazar Cotización", badge:"6.1", badgeClass:"small", step:"6.1", x:1282, y:535, width:102, height:54 },
-      { id:"tag-5", kind:"tag", html:"Qcotizador", x:1357, y:576, width:74, height:18 },
+      { id:"decision-label-8", kind:"decision-label", x:1178, y:584, width:45, html:"Si" },
+      { id:"decision-label-9", kind:"decision-label", x:1247, y:548, width:44, html:"No" },
+      { id:"actor-8", kind:"actor", x:1294, y:493, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-6-1", kind:"flow-card", x:1282, y:535, width:102, html:"Rechazar Cotización", badge:"7", step:"7" },
+      { id:"tag-5", kind:"tag", x:1357, y:576, html:"Qcotizador" },
       { id:"end-1", kind:"end-dot", x:1468, y:548, width:14, height:14 },
-      { id:"label-2", kind:"label", html:"Cotización<br>Rechazada", x:1428, y:566, width:92, height:28 },
-      { id:"decision-label-10", kind:"decision-label", html:"¿Cotización de<br>Cliente prospecto?", x:1080, y:640, width:110, height:30 },
+      { id:"label-2", kind:"label", x:1428, y:566, width:92, html:"Cotización<br>Rechazada" },
+      { id:"decision-label-10", kind:"decision-label", x:1080, y:640, width:110, height:30, html:"¿Cotización de<br>Cliente prospecto?" },
       { id:"decision-4", kind:"decision", x:1191, y:645, width:18, height:18 },
-      { id:"decision-label-11", kind:"decision-label", html:"No", x:1177, y:684, width:45, height:18 },
-      { id:"decision-label-12", kind:"decision-label", html:"Si", x:1246, y:648, width:44, height:18 },
-      { id:"boss-1", kind:"flow-card", html:"Creación de<br>Cliente en<br>BOSS", x:1304, y:626, width:92, height:62 },
-      { id:"note-5", kind:"note", html:"Se debe tener el cliente creado en BOSS para aceptar la cotización en sistema.", x:1348, y:684, width:160, height:44 },
-      { id:"actor-9", kind:"actor", html:"Ejecutivo<br>Comercial", x:1046, y:698, width:150, height:44 },
-      { id:"step-6-2", kind:"flow-card", html:"Aceptar Cotización", badge:"6.2", badgeClass:"small", step:"6.2", x:1148, y:718, width:102, height:54 },
-      { id:"tag-6", kind:"tag", html:"Qcotizador", x:1201, y:759, width:74, height:18 },
-      { id:"actor-10", kind:"actor", html:"Ejecutivo<br>Comercial", x:1257, y:798, width:150, height:44 },
-      { id:"step-7", kind:"flow-card", html:"Crear o Actualizar<br>OL", badge:"7", step:"7", x:1148, y:816, width:102, height:54 },
-      { id:"tag-7", kind:"tag", html:"Qcotizador", x:1201, y:857, width:74, height:18 },
+      { id:"decision-label-11", kind:"decision-label", x:1177, y:684, width:45, html:"No" },
+      { id:"decision-label-12", kind:"decision-label", x:1246, y:648, width:44, html:"Si" },
+      { id:"boss-1", kind:"flow-card", x:1304, y:626, width:92, html:"Creación de<br>Cliente en<br>BOSS", badge:"7.1", badgeClass:"small", step:"7.1" },
+      { id:"note-5", kind:"note", x:1348, y:684, width:160, height:44, html:"Se debe tener el cliente creado en BOSS para aceptar la cotización en sistema." },
+      { id:"actor-9", kind:"actor", x:1046, y:698, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-6-2", kind:"flow-card", x:1148, y:718, width:102, html:"Aceptar Cotización", badge:"7.2", badgeClass:"small", step:"7.2" },
+      { id:"tag-6", kind:"tag", x:1201, y:759, html:"Qcotizador" },
+      { id:"actor-10", kind:"actor", x:1257, y:798, width:150, html:"Ejecutivo<br>Comercial" },
+      { id:"step-7", kind:"flow-card", x:1148, y:816, width:102, html:"Crear o Actualizar<br>OL", badge:"8", step:"8" },
+      { id:"tag-7", kind:"tag", x:1201, y:857, html:"Syscom" },
       { id:"end-2", kind:"end-dot", x:1193, y:889, width:14, height:14 },
-      { id:"label-3", kind:"label", html:"OL creada o<br>actualizada", x:1142, y:907, width:118, height:28 }
-    ],
-    connectors: [
-      { id:"line-1", x1:54, y1:110, x2:125, y2:110 },
-      { id:"line-2", x1:222, y1:110, x2:262, y2:110 },
-      { id:"line-3", x1:334, y1:110, x2:415, y2:110 },
-      { id:"line-4", x1:433, y1:120, x2:433, y2:180 },
-      { id:"line-5", x1:442, y1:110, x2:575, y2:110 },
-      { id:"line-6", x1:659, y1:110, x2:742, y2:110 },
-      { id:"line-7", x1:842, y1:110, x2:922, y2:110 },
-      { id:"line-8", x1:940, y1:110, x2:1038, y2:110 },
-      { id:"line-9", x1:1124, y1:110, x2:1162, y2:110 },
-      { id:"line-10", x1:1200, y1:148, x2:1200, y2:195 },
-      { id:"line-11", x1:1200, y1:232, x2:1200, y2:286 },
-      { id:"line-12", x1:1200, y1:322, x2:1200, y2:389 },
-      { id:"line-13", x1:1200, y1:425, x2:1200, y2:553 },
-      { id:"line-14", x1:1200, y1:589, x2:1200, y2:652 },
-      { id:"line-15", x1:1200, y1:688, x2:1200, y2:736 },
-      { id:"line-16", x1:1200, y1:773, x2:1200, y2:816 },
-      { id:"line-17", x1:1209, y1:553, x2:1282, y2:553 },
-      { id:"line-18", x1:1302, y1:553, x2:1470, y2:553 },
-      { id:"line-19", x1:1209, y1:652, x2:1292, y2:652 },
-      { id:"line-20", x1:1388, y1:652, x2:1440, y2:652 },
-      { id:"line-21", x1:1440, y1:652, x2:1440, y2:726 },
-      { id:"line-22", x1:1440, y1:726, x2:1289, y2:726 },
-      { id:"line-23", x1:1209, y1:736, x2:1146, y2:736 },
-      { id:"line-24", x1:1270, y1:736, x2:1282, y2:736 },
-      { id:"line-25", x1:540, y1:220, x2:540, y2:418 },
-      { id:"line-26", x1:435, y1:220, x2:435, y2:360 },
-      { id:"line-27", x1:438, y1:398, x2:438, y2:420 },
-      { id:"line-28", x1:438, y1:420, x2:540, y2:420 },
-      { id:"line-29", x1:540, y1:420, x2:540, y2:148 },
-      { id:"line-30", x1:915, y1:120, x2:915, y2:175 }
+      { id:"label-3", kind:"label", x:1142, y:907, width:118, html:"OL creada o<br>actualizada" }
+    ]),
+    lines: [
+      { id:"line-1", from:{ itemId:"start-1", side:"right" }, to:{ itemId:"step-1", side:"left" } },
+      { id:"line-2", from:{ itemId:"step-1", side:"right" }, to:{ itemId:"decision-1", side:"left" } },
+      { id:"line-3", from:{ itemId:"decision-1", side:"bottom" }, to:{ itemId:"step-1-1", side:"top" } },
+      { id:"line-4", from:{ itemId:"decision-1", side:"right" }, to:{ itemId:"step-2", side:"left" } },
+      { id:"line-5", from:{ itemId:"step-1-1", side:"bottom" }, to:{ itemId:"soft-1", side:"top" } },
+      { id:"line-6", from:{ itemId:"soft-1", side:"left" }, via:[{ x:356, y:285 }], to:{ itemId:"dash-1", side:"top" } },
+      { id:"line-7", from:{ itemId:"dash-1", side:"right" }, via:[{ x:438, y:349 }], to:{ itemId:"soft-4", side:"left" } },
+      { id:"line-8", from:{ itemId:"soft-4", side:"right" }, to:{ itemId:"step-2", side:"bottom" } },
+      { id:"line-9", from:{ itemId:"step-2", side:"right" }, to:{ itemId:"step-3", side:"left" } },
+      { id:"line-10", from:{ itemId:"step-3", side:"right" }, to:{ itemId:"decision-2", side:"left" } },
+      { id:"line-11", from:{ itemId:"decision-2", side:"right" }, to:{ itemId:"step-4", side:"left" } },
+      { id:"line-12", from:{ itemId:"decision-2", side:"bottom" }, via:[{ x:915, y:235 }, { x:540, y:235 }, { x:540, y:178 }], to:{ itemId:"step-2", side:"top" } },
+      { id:"line-13", from:{ itemId:"step-4", side:"bottom" }, via:[{ x:1200, y:225 }], to:{ itemId:"step-5", side:"top" } },
+      { id:"line-14", from:{ itemId:"step-5", side:"bottom" }, via:[{ x:1200, y:389 }], to:{ itemId:"step-6", side:"top" } },
+      { id:"line-15", from:{ itemId:"step-6", side:"bottom" }, via:[{ x:1200, y:553 }], to:{ itemId:"decision-3", side:"top" } },
+      { id:"line-16", from:{ itemId:"decision-3", side:"right" }, to:{ itemId:"step-6-1", side:"left" } },
+      { id:"line-17", from:{ itemId:"step-6-1", side:"right" }, to:{ itemId:"end-1", side:"left" } },
+      { id:"line-18", from:{ itemId:"decision-3", side:"bottom" }, via:[{ x:1200, y:652 }], to:{ itemId:"decision-4", side:"top" } },
+      { id:"line-19", from:{ itemId:"decision-4", side:"right" }, to:{ itemId:"boss-1", side:"left" } },
+      { id:"line-20", from:{ itemId:"boss-1", side:"bottom" }, via:[{ x:1350, y:700 }, { x:1250, y:700 }], to:{ itemId:"step-6-2", side:"right" } },
+      { id:"line-21", from:{ itemId:"decision-4", side:"bottom" }, via:[{ x:1200, y:700 }], to:{ itemId:"step-6-2", side:"top" } },
+      { id:"line-22", from:{ itemId:"step-6-2", side:"bottom" }, via:[{ x:1200, y:816 }], to:{ itemId:"step-7", side:"top" } },
+      { id:"line-23", from:{ itemId:"step-7", side:"bottom" }, to:{ itemId:"end-2", side:"top" } }
     ]
+  };
+}
+
+function getCotizacionesWorkflowAnchorPoint(item, side){
+  const anchorHeights = {
+    "decision": 18,
+    "start-dot": 14,
+    "end-dot": 14,
+    "subactivity": 26,
+    "dashed-box": 92,
+    "tag": 14
+  };
+  const anchorWidths = {
+    "decision": 18,
+    "start-dot": 14,
+    "end-dot": 14,
+    "subactivity": 120,
+    "dashed-box": 145,
+    "tag": 54
+  };
+  const usesVisibleBounds = item.kind === "flow-card" || item.kind === "subactivity";
+  const anchorWidth = usesVisibleBounds ? item.width : (anchorWidths[item.kind] || item.width);
+  const anchorHeight = usesVisibleBounds ? item.height : (anchorHeights[item.kind] || item.height);
+  if(item.kind === "decision"){
+    const centerX = item.x + (anchorWidth / 2);
+    const centerY = item.y + (anchorHeight / 2);
+    const radiusX = anchorWidth / 2;
+    const radiusY = anchorHeight / 2;
+    const touchOffset = 1.5;
+    const normalizedSide = normalizeWorkflowAnchorSide(side);
+    const edge = normalizedSide === "center" ? "center" : normalizedSide.split("-")[0];
+    if(edge === "left"){
+      return { x: centerX - radiusX - touchOffset, y: centerY };
+    }
+    if(edge === "right"){
+      return { x: centerX + radiusX + touchOffset, y: centerY };
+    }
+    if(edge === "top"){
+      return { x: centerX, y: centerY - radiusY - touchOffset };
+    }
+    if(edge === "bottom"){
+      return { x: centerX, y: centerY + radiusY + touchOffset };
+    }
+    return { x: centerX, y: centerY };
+  }
+  const geometry = getWorkflowAnchorGeometryFromRect(item.x, item.y, anchorWidth, anchorHeight, item);
+  return getWorkflowAnchorPointFromGeometry(geometry, side);
+}
+
+function normalizeWorkflowAnchorSide(side){
+  const normalized = String(side || "").trim().toLowerCase();
+  if(!normalized || normalized === "center"){
+    return "center";
+  }
+  if(normalized === "left" || normalized === "right" || normalized === "top" || normalized === "bottom"){
+    return normalized + "-middle";
+  }
+  return normalized;
+}
+
+function getWorkflowAnchorFractionsForLength(length){
+  const size = Number.isFinite(length) ? length : 0;
+  if(size >= 180){
+    return [0.125, 0.25, 0.5, 0.75, 0.875];
+  }
+  if(size >= 110){
+    return [0.17, 0.33, 0.5, 0.67, 0.83];
+  }
+  return [0.25, 0.5, 0.75];
+}
+
+function getWorkflowAnchorFractionsByItem(item, width, height){
+  const horizontalFractions = getWorkflowAnchorFractionsForLength(width);
+  const verticalFractions = getWorkflowAnchorFractionsForLength(height);
+  if(item && item.kind === "subactivity"){
+    return {
+      left: [0.17, 0.33, 0.5, 0.67, 0.83],
+      right: [0.17, 0.33, 0.5, 0.67, 0.83],
+      top: horizontalFractions,
+      bottom: horizontalFractions
+    };
+  }
+  return {
+    left: verticalFractions,
+    right: verticalFractions,
+    top: horizontalFractions,
+    bottom: horizontalFractions
+  };
+}
+
+function getWorkflowAnchorGeometryFromRect(x, y, width, height, item){
+  const safeWidth = Number.isFinite(width) ? width : 0;
+  const safeHeight = Number.isFinite(height) ? height : 0;
+  const centerX = x + (safeWidth / 2);
+  const centerY = y + (safeHeight / 2);
+  return {
+    x: x,
+    y: y,
+    width: safeWidth,
+    height: safeHeight,
+    centerX: centerX,
+    centerY: centerY,
+    edgeFractions: getWorkflowAnchorFractionsByItem(item, safeWidth, safeHeight)
+  };
+}
+
+function getWorkflowAnchorFraction(edge, position, fractions){
+  if(position === "top" || position === "left"){
+    return fractions[0];
+  }
+  if(position === "middle" || position === "center"){
+    const middleFraction = fractions.find(function(value){
+      return Math.abs(value - 0.5) < 0.001;
+    });
+    return typeof middleFraction === "number" ? middleFraction : fractions[Math.floor(fractions.length / 2)];
+  }
+  if(position === "bottom" || position === "right"){
+    return fractions[fractions.length - 1];
+  }
+  const numericPosition = Number(position);
+  if(Number.isFinite(numericPosition)){
+    const normalizedNumeric = numericPosition > 1 ? (numericPosition / 100) : numericPosition;
+    let closestFraction = fractions[0];
+    let closestDistance = Math.abs(fractions[0] - normalizedNumeric);
+    fractions.forEach(function(fraction){
+      const distance = Math.abs(fraction - normalizedNumeric);
+      if(distance < closestDistance){
+        closestFraction = fraction;
+        closestDistance = distance;
+      }
+    });
+    return closestFraction;
+  }
+  return fractions[Math.floor(fractions.length / 2)];
+}
+
+function getWorkflowAnchorPointFromGeometry(geometry, side){
+  const normalizedSide = normalizeWorkflowAnchorSide(side);
+  if(normalizedSide === "center"){
+    return {
+      x: geometry.centerX,
+      y: geometry.centerY
+    };
+  }
+  const parts = normalizedSide.split("-");
+  const edge = parts[0];
+  const position = parts[1] || "middle";
+  const width = geometry.width || 0;
+  const height = geometry.height || 0;
+  const fractions = geometry.edgeFractions || {};
+  const horizontalFractions = (fractions.top && fractions.top.length ? fractions.top : [0.25, 0.5, 0.75]);
+  const verticalFractions = (fractions.left && fractions.left.length ? fractions.left : [0.25, 0.5, 0.75]);
+
+  if(edge === "left"){
+    const fraction = getWorkflowAnchorFraction(edge, position, verticalFractions);
+    return {
+      x: geometry.x,
+      y: geometry.y + (height * fraction)
+    };
+  }
+  if(edge === "right"){
+    const fraction = getWorkflowAnchorFraction(edge, position, verticalFractions);
+    return {
+      x: geometry.x + width,
+      y: geometry.y + (height * fraction)
+    };
+  }
+  if(edge === "top"){
+    const fraction = getWorkflowAnchorFraction(edge, position, horizontalFractions);
+    return {
+      x: geometry.x + (width * fraction),
+      y: geometry.y
+    };
+  }
+  const fraction = getWorkflowAnchorFraction(edge, position, horizontalFractions);
+  return {
+    x: geometry.x + (width * fraction),
+    y: geometry.y + height
+  };
+}
+
+function getWorkflowAnchorSidesForItem(item){
+  if(!item){
+    return ["center"];
+  }
+  const geometry = getWorkflowAnchorGeometryFromRect(item.x, item.y, item.width || 0, item.height || 0, item);
+  const sides = ["center"];
+  ["top", "right", "bottom", "left"].forEach(function(edge){
+    const fractions = (geometry.edgeFractions[edge] || []).slice();
+    fractions.forEach(function(fraction){
+      if(Math.abs(fraction - 0.5) < 0.001){
+        sides.push(edge + "-middle");
+      }else{
+        sides.push(edge + "-" + String(Math.round(fraction * 100)));
+      }
+    });
+  });
+  return sides;
+}
+
+function createCotizacionesWorkflowState(){
+  const template = getCotizacionesWorkflowTemplate();
+  const itemsById = template.items.reduce(function(acc, item){
+    acc[item.id] = item;
+    return acc;
+  }, {});
+  const connectors = [];
+
+  template.lines.forEach(function(line){
+    const points = [];
+    const fromItem = line.from && line.from.itemId ? itemsById[line.from.itemId] : null;
+    const toItem = line.to && line.to.itemId ? itemsById[line.to.itemId] : null;
+    if(fromItem){
+      points.push(getCotizacionesWorkflowAnchorPoint(fromItem, line.from.side || "right"));
+    }
+    if(Array.isArray(line.via)){
+      line.via.forEach(function(point){
+        points.push({ x: point.x, y: point.y });
+      });
+    }
+    if(toItem){
+      points.push(getCotizacionesWorkflowAnchorPoint(toItem, line.to.side || "left"));
+    }
+    for(let index = 0; index < points.length - 1; index += 1){
+      const start = points[index];
+      const end = points[index + 1];
+      connectors.push({
+        id: points.length > 2 ? (line.id + "-seg-" + (index + 1)) : line.id,
+        x1: start.x,
+        y1: start.y,
+        x2: end.x,
+        y2: end.y,
+        from: index === 0 && line.from && line.from.itemId ? {
+          itemId: line.from.itemId,
+          side: line.from.side || "right"
+        } : null,
+        to: index === (points.length - 2) && line.to && line.to.itemId ? {
+          itemId: line.to.itemId,
+          side: line.to.side || "left"
+        } : null,
+        via: []
+      });
+    }
+  });
+
+  return {
+    templateVersion: COTIZACIONES_WORKFLOW_TEMPLATE_VERSION,
+    items: structuredClone(template.items),
+    connectors: connectors
   };
 }
 
@@ -354,6 +694,8 @@ let activeDrag = null;
 let workflowZoom = loadWorkflowZoom();
 let selectedWorkflowItemId = workflowState.items[0] ? workflowState.items[0].id : "";
 let selectedWorkflowConnectorId = "";
+let openWorkflowConnectorToolbarId = "";
+let activeWorkflowAnchorPreview = null;
 let copiedWorkflowActivityStyle = null;
 let openWorkflowTransformMenuItemId = "";
 let isWorkflowPanning = false;
@@ -376,16 +718,20 @@ function loadWorkflowState(){
       return structuredClone(defaultWorkflowState);
     }
     parsed.items = parsed.items.map(function(item, index){
-      const normalizedType = item.type || (item.kind === "flow-card" ? "activity" : "activity");
+      const normalizedKind = normalizeWorkflowRoleKind(item);
+      const normalizedType = item.type || (normalizedKind === "flow-card" ? "activity" : "activity");
       const defaults = getDefaultWorkflowItem(normalizedType);
-      const entryLayout = hasWorkflowFloatingLabel(normalizedType) ? getDefaultEntryLabelLayout() : null;
+      const entryLayout = hasWorkflowFloatingLabel(normalizedType)
+        ? getDefaultEntryLabelLayout()
+        : (normalizedKind === "actor" ? getDefaultActorLabelLayout() : null);
+      const kindTextDefaults = normalizedKind ? getWorkflowKindTextDefaults(normalizedKind) : null;
       const normalizedFontSize = Number.isFinite(item.fontSize)
         ? item.fontSize
-        : (item.kind === "flow-card" ? 12 : defaults.fontSize);
+        : (kindTextDefaults ? kindTextDefaults.fontSize : (normalizedKind === "flow-card" ? 12 : defaults.fontSize));
       return {
         id: item.id || ("item-" + (index + 1)),
         type: normalizedType,
-        kind: item.kind || "",
+        kind: normalizedKind || "",
         title: item.title || "Elemento",
         html: item.html || "",
         badge: item.badge || "",
@@ -398,7 +744,7 @@ function loadWorkflowState(){
         fontSize: normalizedFontSize,
         borderColor: item.borderColor || defaults.borderColor,
         backgroundColor: item.backgroundColor || defaults.backgroundColor,
-        textColor: item.textColor || defaults.textColor,
+        textColor: item.textColor || (kindTextDefaults ? kindTextDefaults.textColor : defaults.textColor),
         iconVariant: item.iconVariant || "current",
         labelOffsetX: entryLayout ? (Number.isFinite(item.labelOffsetX) ? item.labelOffsetX : entryLayout.labelOffsetX) : 0,
         labelOffsetY: entryLayout ? (Number.isFinite(item.labelOffsetY) ? item.labelOffsetY : entryLayout.labelOffsetY) : 0,
@@ -413,6 +759,20 @@ function loadWorkflowState(){
         y1: Number.isFinite(connector.y1) ? connector.y1 : 180,
         x2: Number.isFinite(connector.x2) ? connector.x2 : 360,
         y2: Number.isFinite(connector.y2) ? connector.y2 : 180,
+        from: connector.from && connector.from.itemId ? {
+          itemId: connector.from.itemId,
+          side: connector.from.side || "right"
+        } : null,
+        to: connector.to && connector.to.itemId ? {
+          itemId: connector.to.itemId,
+          side: connector.to.side || "left"
+        } : null,
+        via: Array.isArray(connector.via) ? connector.via.map(function(point){
+          return {
+            x: Number.isFinite(point.x) ? point.x : 0,
+            y: Number.isFinite(point.y) ? point.y : 0
+          };
+        }) : [],
         color: connector.color || "#7d7d7d",
         strokeWidth: Number.isFinite(connector.strokeWidth) ? connector.strokeWidth : 2
       };
@@ -425,6 +785,24 @@ function loadWorkflowState(){
 
 function saveWorkflowState(){
   window.localStorage.setItem(workflowStorageKey, JSON.stringify(workflowState));
+}
+
+function loadWorkflowBaseState(){
+  try{
+    const raw = window.localStorage.getItem(workflowBaseStorageKey);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if(!parsed || !Array.isArray(parsed.items) || !parsed.items.length){
+      return structuredClone(defaultWorkflowState);
+    }
+    window.localStorage.setItem(workflowStorageKey, JSON.stringify(parsed));
+    return loadWorkflowState();
+  }catch(error){
+    return structuredClone(defaultWorkflowState);
+  }
+}
+
+function saveWorkflowBaseState(){
+  window.localStorage.setItem(workflowBaseStorageKey, JSON.stringify(workflowState));
 }
 
 function loadWorkflowZoom(){
@@ -475,6 +853,529 @@ function clamp(value, min, max){
   return Math.min(max, Math.max(min, value));
 }
 
+function dedupeWorkflowConnectorPoints(points){
+  return points.filter(function(point, index){
+    if(index === 0){
+      return true;
+    }
+    const previous = points[index - 1];
+    return previous.x !== point.x || previous.y !== point.y;
+  });
+}
+
+function getWorkflowItemById(itemId){
+  return workflowState.items.find(function(entry){
+    return entry.id === itemId;
+  }) || null;
+}
+
+function getWorkflowAnchorableKinds(){
+  return [
+    "flow-card",
+    "decision",
+    "start-dot",
+    "end-dot",
+    "subactivity",
+    "dashed-box",
+    "tag",
+    "actor",
+    "mini-icon",
+    "soft-icon"
+  ];
+}
+
+function getWorkflowAnchorPointForItem(item, side){
+  if(!item){
+    return { x: 0, y: 0 };
+  }
+  if(workflowId === "wf-cotizaciones"){
+    return getCotizacionesWorkflowAnchorPoint(item, side);
+  }
+  const geometry = getWorkflowAnchorGeometryFromRect(item.x, item.y, item.width || 0, item.height || 0, item);
+  return getWorkflowAnchorPointFromGeometry(geometry, side);
+}
+
+function isPointNearWorkflowItem(item, point, padding){
+  const extra = Number.isFinite(padding) ? padding : 0;
+  const width = item.width || 0;
+  const height = item.height || 0;
+  return point.x >= (item.x - extra)
+    && point.x <= (item.x + width + extra)
+    && point.y >= (item.y - extra)
+    && point.y <= (item.y + height + extra);
+}
+
+function isPointInsideWorkflowItemInterior(item, point){
+  const width = item.width || 0;
+  const height = item.height || 0;
+  const insetX = Math.max(6, Math.min(14, width * 0.18));
+  const insetY = Math.max(6, Math.min(10, height * 0.3));
+  return point.x >= (item.x + insetX)
+    && point.x <= (item.x + width - insetX)
+    && point.y >= (item.y + insetY)
+    && point.y <= (item.y + height - insetY);
+}
+
+function getWorkflowAnchorSnapBias(item, pointer, side){
+  const normalizedSide = normalizeWorkflowAnchorSide(side);
+  if(normalizedSide === "center"){
+    return 0;
+  }
+  const edge = normalizedSide.split("-")[0];
+  const position = normalizedSide.split("-")[1] || "middle";
+  const width = item.width || 0;
+  const height = item.height || 0;
+  const centerX = item.x + (width / 2);
+  const centerY = item.y + (height / 2);
+  const outsideLeft = pointer.x < item.x;
+  const outsideRight = pointer.x > (item.x + width);
+  const outsideTop = pointer.y < item.y;
+  const outsideBottom = pointer.y > (item.y + height);
+  const nearTopEdge = pointer.y >= (item.y - 18) && pointer.y <= (item.y + Math.max(10, height * 0.22));
+  const nearBottomEdge = pointer.y <= (item.y + height + 18) && pointer.y >= (item.y + height - Math.max(10, height * 0.22));
+  const nearCenterX = Math.abs(pointer.x - centerX) <= Math.max(12, width * 0.14);
+  const nearCenterY = Math.abs(pointer.y - centerY) <= Math.max(10, height * 0.2);
+  let bias = 0;
+
+  if(outsideTop || (nearTopEdge && pointer.y <= centerY)){
+    if(edge === "top"){
+      bias -= 10;
+      if(position === "middle" && nearCenterX){
+        bias -= 18;
+      }else if(nearCenterX){
+        bias += 14;
+      }
+    }else if(edge === "bottom"){
+      bias += 8;
+    }
+  }else if(outsideBottom || (nearBottomEdge && pointer.y >= centerY)){
+    if(edge === "bottom"){
+      bias -= 10;
+      if(position === "middle" && nearCenterX){
+        bias -= 18;
+      }else if(nearCenterX){
+        bias += 14;
+      }
+    }else if(edge === "top"){
+      bias += 8;
+    }
+  }
+
+  if(outsideLeft){
+    if(edge === "left"){
+      bias -= 10;
+      if(position === "middle" && nearCenterY){
+        bias -= 6;
+      }
+    }else if(edge === "right"){
+      bias += 8;
+    }
+  }else if(outsideRight){
+    if(edge === "right"){
+      bias -= 10;
+      if(position === "middle" && nearCenterY){
+        bias -= 6;
+      }
+    }else if(edge === "left"){
+      bias += 8;
+    }
+  }
+
+  return bias;
+}
+
+function getWorkflowPointer(event){
+  const viewportEl = document.getElementById("workflowViewport");
+  if(!viewportEl){
+    return { x: 0, y: 0 };
+  }
+  const rect = viewportEl.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) / workflowZoom,
+    y: (event.clientY - rect.top) / workflowZoom
+  };
+}
+
+function getWorkflowConnectionSide(item, point){
+  const center = getWorkflowAnchorPointForItem(item, "center");
+  const deltaX = point.x - center.x;
+  const deltaY = point.y - center.y;
+  if(Math.abs(deltaX) >= Math.abs(deltaY)){
+    return deltaX >= 0 ? "right-middle" : "left-middle";
+  }
+  return deltaY >= 0 ? "bottom-middle" : "top-middle";
+}
+
+function getWorkflowConnectorEndpointPoint(connector, endpointKey){
+  const endpoint = endpointKey === "start" ? connector.from : connector.to;
+  const fallbackSide = endpointKey === "start" ? "right" : "left";
+  if(endpoint && endpoint.itemId){
+    const item = getWorkflowItemById(endpoint.itemId);
+    if(item){
+      return getWorkflowAnchorPointForItem(item, endpoint.side || fallbackSide);
+    }
+  }
+  return {
+    x: endpointKey === "start" ? connector.x1 : connector.x2,
+    y: endpointKey === "start" ? connector.y1 : connector.y2
+  };
+}
+
+function syncWorkflowConnectorEndpoint(connector, endpointKey){
+  const point = getWorkflowConnectorEndpointPoint(connector, endpointKey);
+  if(endpointKey === "start"){
+    connector.x1 = point.x;
+    connector.y1 = point.y;
+  }else{
+    connector.x2 = point.x;
+    connector.y2 = point.y;
+  }
+}
+
+function getNearestWorkflowAnchorTarget(pointer, options){
+  const settings = options || {};
+  let bestMatch = null;
+  workflowState.items.forEach(function(item){
+    if(settings.excludeItemId && item.id === settings.excludeItemId){
+      return;
+    }
+    if(item.kind && !getWorkflowAnchorableKinds().includes(item.kind)){
+      return;
+    }
+    getWorkflowAnchorSidesForItem(item).forEach(function(side){
+      const anchor = getWorkflowAnchorPointForItem(item, side);
+      let distance = Math.hypot(pointer.x - anchor.x, pointer.y - anchor.y);
+      distance += getWorkflowAnchorSnapBias(item, pointer, side);
+      if(side === "center" && isPointInsideWorkflowItemInterior(item, pointer)){
+        distance = Math.max(0, distance - 12);
+      }
+      if(!bestMatch || distance < bestMatch.distance){
+        bestMatch = {
+          itemId: item.id,
+          side: side,
+          distance: distance,
+          anchorX: anchor.x,
+          anchorY: anchor.y
+        };
+      }
+    });
+  });
+  return bestMatch;
+}
+
+function setWorkflowConnectorEndpointAnchor(connector, endpointKey, anchor){
+  if(endpointKey === "start"){
+    connector.from = anchor;
+  }else{
+    connector.to = anchor;
+  }
+  syncWorkflowConnectorEndpoint(connector, endpointKey);
+}
+
+function clearWorkflowConnectorEndpointAnchor(connector, endpointKey, point){
+  if(endpointKey === "start"){
+    connector.from = null;
+    connector.x1 = point.x;
+    connector.y1 = point.y;
+  }else{
+    connector.to = null;
+    connector.x2 = point.x;
+    connector.y2 = point.y;
+  }
+}
+
+function workflowItemHasAnchoredConnectors(itemId){
+  return workflowState.connectors.some(function(connector){
+    return (connector.from && connector.from.itemId === itemId) || (connector.to && connector.to.itemId === itemId);
+  });
+}
+
+function buildWorkflowOrthogonalPoints(start, end, viaPoints){
+  const waypoints = Array.isArray(viaPoints) ? viaPoints : [];
+  if(waypoints.length){
+    return dedupeWorkflowConnectorPoints([start].concat(waypoints, [end]));
+  }
+  const deltaX = Math.abs(end.x - start.x);
+  const deltaY = Math.abs(end.y - start.y);
+  if(deltaX < 1 || deltaY < 1){
+    return [start, end];
+  }
+  if(deltaX >= deltaY){
+    const midX = Math.round((start.x + end.x) / 2);
+    return dedupeWorkflowConnectorPoints([
+      start,
+      { x: midX, y: start.y },
+      { x: midX, y: end.y },
+      end
+    ]);
+  }
+  const midY = Math.round((start.y + end.y) / 2);
+  return dedupeWorkflowConnectorPoints([
+    start,
+    { x: start.x, y: midY },
+    { x: end.x, y: midY },
+    end
+  ]);
+}
+
+function getWorkflowAnchorStemPoint(point, side, distance){
+  const normalizedSide = normalizeWorkflowAnchorSide(side);
+  const edge = normalizedSide === "center" ? "center" : normalizedSide.split("-")[0];
+  if(edge === "top"){
+    return { x: point.x, y: point.y - distance };
+  }
+  if(edge === "right"){
+    return { x: point.x + distance, y: point.y };
+  }
+  if(edge === "bottom"){
+    return { x: point.x, y: point.y + distance };
+  }
+  if(edge === "left"){
+    return { x: point.x - distance, y: point.y };
+  }
+  return { x: point.x, y: point.y };
+}
+
+function getWorkflowConnectorEndpointSide(connector, endpointKey){
+  const endpoint = endpointKey === "start" ? connector.from : connector.to;
+  if(endpoint && endpoint.itemId){
+    return normalizeWorkflowAnchorSide(endpoint.side || (endpointKey === "start" ? "right" : "left"));
+  }
+  return "center";
+}
+
+function getWorkflowAnchorEdge(side){
+  const normalizedSide = normalizeWorkflowAnchorSide(side);
+  return normalizedSide === "center" ? "center" : normalizedSide.split("-")[0];
+}
+
+function isWorkflowHorizontalEdge(edge){
+  return edge === "left" || edge === "right";
+}
+
+function isWorkflowVerticalEdge(edge){
+  return edge === "top" || edge === "bottom";
+}
+
+function isWorkflowPointCompatibleWithEdge(point, anchor, edge){
+  if(edge === "left"){
+    return point.x <= anchor.x + 0.5;
+  }
+  if(edge === "right"){
+    return point.x >= anchor.x - 0.5;
+  }
+  if(edge === "top"){
+    return point.y <= anchor.y + 0.5;
+  }
+  if(edge === "bottom"){
+    return point.y >= anchor.y - 0.5;
+  }
+  return true;
+}
+
+function buildWorkflowSingleElbowPoints(start, startSide, end, endSide){
+  const startEdge = getWorkflowAnchorEdge(startSide);
+  const endEdge = getWorkflowAnchorEdge(endSide);
+  if(isWorkflowHorizontalEdge(startEdge) && isWorkflowVerticalEdge(endEdge)){
+    const elbow = { x: end.x, y: start.y };
+    if(isWorkflowPointCompatibleWithEdge(elbow, start, startEdge) && isWorkflowPointCompatibleWithEdge(elbow, end, endEdge)){
+      return dedupeWorkflowConnectorPoints([start, elbow, end]);
+    }
+  }
+  if(isWorkflowVerticalEdge(startEdge) && isWorkflowHorizontalEdge(endEdge)){
+    const elbow = { x: start.x, y: end.y };
+    if(isWorkflowPointCompatibleWithEdge(elbow, start, startEdge) && isWorkflowPointCompatibleWithEdge(elbow, end, endEdge)){
+      return dedupeWorkflowConnectorPoints([start, elbow, end]);
+    }
+  }
+  return null;
+}
+
+function buildWorkflowConnectorPoints(connector){
+  const start = getWorkflowConnectorEndpointPoint(connector, "start");
+  const end = getWorkflowConnectorEndpointPoint(connector, "end");
+  const viaPoints = Array.isArray(connector.via) ? connector.via : [];
+  if(viaPoints.length){
+    return buildWorkflowOrthogonalPoints(start, end, viaPoints);
+  }
+  const startSide = getWorkflowConnectorEndpointSide(connector, "start");
+  const endSide = getWorkflowConnectorEndpointSide(connector, "end");
+  if(startSide !== "center" && endSide !== "center"){
+    const singleElbowPoints = buildWorkflowSingleElbowPoints(start, startSide, end, endSide);
+    if(singleElbowPoints){
+      return singleElbowPoints;
+    }
+    const stemDistance = 18;
+    const startStem = getWorkflowAnchorStemPoint(start, startSide, stemDistance);
+    const endStem = getWorkflowAnchorStemPoint(end, endSide, stemDistance);
+    const middlePoints = buildWorkflowOrthogonalPoints(startStem, endStem, []);
+    return dedupeWorkflowConnectorPoints([start].concat(middlePoints, [end]));
+  }
+  return buildWorkflowOrthogonalPoints(start, end, []);
+}
+
+function getWorkflowConnectorToolbarPoint(connector){
+  const points = buildWorkflowConnectorPoints(connector);
+  if(points.length < 2){
+    return { x: connector.x1, y: connector.y1, totalLength: 0, segmentOrientation: "horizontal" };
+  }
+  let totalLength = 0;
+  const segments = [];
+  for(let index = 0; index < points.length - 1; index += 1){
+    const start = points[index];
+    const end = points[index + 1];
+    const length = Math.abs(end.x - start.x) + Math.abs(end.y - start.y);
+    segments.push({ start, end, length });
+    totalLength += length;
+  }
+  if(totalLength <= 0){
+    return { x: points[0].x, y: points[0].y, totalLength: 0, segmentOrientation: "horizontal" };
+  }
+  let targetLength = totalLength / 2;
+  for(let index = 0; index < segments.length; index += 1){
+    const segment = segments[index];
+    if(targetLength <= segment.length){
+      if(segment.start.x === segment.end.x){
+        const direction = segment.end.y >= segment.start.y ? 1 : -1;
+        return {
+          x: segment.start.x,
+          y: segment.start.y + (targetLength * direction),
+          totalLength: totalLength,
+          segmentOrientation: "vertical"
+        };
+      }
+      const direction = segment.end.x >= segment.start.x ? 1 : -1;
+      return {
+        x: segment.start.x + (targetLength * direction),
+        y: segment.start.y,
+        totalLength: totalLength,
+        segmentOrientation: "horizontal"
+      };
+    }
+    targetLength -= segment.length;
+  }
+  return {
+    x: points[points.length - 1].x,
+    y: points[points.length - 1].y,
+    totalLength: totalLength,
+    segmentOrientation: "horizontal"
+  };
+}
+
+function getWorkflowConnectorBounds(points){
+  const sourcePoints = Array.isArray(points) && points.length ? points : [];
+  if(!sourcePoints.length){
+    return {
+      minX: 0,
+      maxX: 0,
+      minY: 0,
+      maxY: 0,
+      width: 0,
+      height: 0,
+      centerX: 0,
+      centerY: 0
+    };
+  }
+  let minX = sourcePoints[0].x;
+  let maxX = sourcePoints[0].x;
+  let minY = sourcePoints[0].y;
+  let maxY = sourcePoints[0].y;
+  sourcePoints.forEach(function(point){
+    minX = Math.min(minX, point.x);
+    maxX = Math.max(maxX, point.x);
+    minY = Math.min(minY, point.y);
+    maxY = Math.max(maxY, point.y);
+  });
+  return {
+    minX: minX,
+    maxX: maxX,
+    minY: minY,
+    maxY: maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2
+  };
+}
+
+function getWorkflowEditableConnectorPoints(connector){
+  const start = getWorkflowConnectorEndpointPoint(connector, "start");
+  const end = getWorkflowConnectorEndpointPoint(connector, "end");
+  if(Array.isArray(connector.via) && connector.via.length){
+    return [start].concat(connector.via.map(function(point){
+      return { x: point.x, y: point.y };
+    }), [end]);
+  }
+  return buildWorkflowConnectorPoints(connector).map(function(point){
+    return { x: point.x, y: point.y };
+  });
+}
+
+function getWorkflowConnectorSegmentHandles(connector){
+  const points = getWorkflowEditableConnectorPoints(connector);
+  const handles = [];
+  for(let index = 1; index < points.length - 2; index += 1){
+    const start = points[index];
+    const end = points[index + 1];
+    const isHorizontal = Math.abs(start.y - end.y) < 0.5;
+    const isVertical = Math.abs(start.x - end.x) < 0.5;
+    const length = isHorizontal ? Math.abs(end.x - start.x) : Math.abs(end.y - start.y);
+    if((!isHorizontal && !isVertical) || length < 36){
+      continue;
+    }
+    handles.push({
+      segmentIndex: index,
+      orientation: isHorizontal ? "horizontal" : "vertical",
+      x: (start.x + end.x) / 2,
+      y: (start.y + end.y) / 2
+    });
+  }
+  return handles;
+}
+
+function moveWorkflowConnectorSegment(points, segmentIndex, orientation, pointer){
+  const sourcePoints = points.map(function(point){
+    return { x: point.x, y: point.y };
+  });
+  const start = sourcePoints[segmentIndex];
+  const end = sourcePoints[segmentIndex + 1];
+  if(!start || !end){
+    return sourcePoints;
+  }
+  if(orientation === "horizontal"){
+    const newY = Math.round(pointer.y);
+    sourcePoints[segmentIndex].y = newY;
+    sourcePoints[segmentIndex + 1].y = newY;
+    return dedupeWorkflowConnectorPoints(sourcePoints);
+  }
+  const newX = Math.round(pointer.x);
+  sourcePoints[segmentIndex].x = newX;
+  sourcePoints[segmentIndex + 1].x = newX;
+  return dedupeWorkflowConnectorPoints(sourcePoints);
+}
+
+function getWorkflowConnectorToolbarPlacement(connector){
+  const points = buildWorkflowConnectorPoints(connector);
+  const bounds = getWorkflowConnectorBounds(points);
+  const canvasBounds = getCanvasBounds();
+  const screenGap = 72;
+  const sideGap = 56;
+  const topGap = screenGap / Math.max(workflowZoom, 0.01);
+  const lateralGap = sideGap / Math.max(workflowZoom, 0.01);
+  const canPlaceAbove = (bounds.minY - topGap) >= 28;
+  const x = canPlaceAbove
+    ? Math.min(Math.max(bounds.centerX, 48), canvasBounds.width - 48)
+    : Math.min(canvasBounds.width - 36, bounds.maxX + lateralGap);
+  const y = canPlaceAbove
+    ? Math.max(28, bounds.minY - topGap)
+    : Math.max(28, bounds.centerY - (18 / Math.max(workflowZoom, 0.01)));
+  return {
+    x: x,
+    y: y,
+    toolbarClass: canPlaceAbove ? "" : " is-side"
+  };
+}
+
 function getPublicationBounds(){
   let maxX = PUBLICATION_WIDTH;
   let maxY = PUBLICATION_HEIGHT;
@@ -483,8 +1384,10 @@ function getPublicationBounds(){
     maxY = Math.max(maxY, item.y + item.height + 36);
   });
   workflowState.connectors.forEach(function(connector){
-    maxX = Math.max(maxX, connector.x1 + 36, connector.x2 + 36);
-    maxY = Math.max(maxY, connector.y1 + 36, connector.y2 + 36);
+    buildWorkflowConnectorPoints(connector).forEach(function(point){
+      maxX = Math.max(maxX, point.x + 36);
+      maxY = Math.max(maxY, point.y + 36);
+    });
   });
   return {
     width: Math.ceil(maxX),
@@ -522,8 +1425,19 @@ function renderWorkflowCanvas(){
   const bounds = getCanvasBounds();
   const scaledWidth = Math.ceil(bounds.width * workflowZoom);
   const scaledHeight = Math.ceil(bounds.height * workflowZoom);
+  const isDraggingObject = Boolean(activeDrag && (
+    activeDrag.mode === "item" ||
+    activeDrag.mode === "item-resize" ||
+    activeDrag.mode === "entry-label-move" ||
+    activeDrag.mode === "actor-label-move" ||
+    activeDrag.mode === "entry-label-resize" ||
+    activeDrag.mode === "connector-end" ||
+    activeDrag.mode === "connector-move"
+  ));
 
   diagramEl.dataset.editing = isEditingWorkflow ? "true" : "false";
+  diagramEl.dataset.connecting = activeDrag && activeDrag.mode === "connector-create" ? "true" : "false";
+  diagramEl.dataset.draggingObject = isDraggingObject ? "true" : "false";
   modeChipEl.textContent = isEditingWorkflow ? "Modo edición" : "Modo publicación";
   toggleButtonEl.textContent = isEditingWorkflow ? "Volver a publicación" : "Editar mapa";
   toggleButtonEl.classList.toggle("is-active", isEditingWorkflow);
@@ -555,6 +1469,7 @@ function renderWorkflowCanvas(){
   zoomLayerEl.style.height = scaledHeight + "px";
   canvasEl.style.width = bounds.width + "px";
   canvasEl.style.height = bounds.height + "px";
+  canvasEl.style.setProperty("--workflow-zoom", String(workflowZoom));
   canvasEl.style.transform = `scale(${workflowZoom})`;
   canvasShellEl.style.height = isEditingWorkflow ? "" : scaledHeight + "px";
   if(!isEditingWorkflow){
@@ -567,12 +1482,15 @@ function renderWorkflowCanvas(){
   }
   if(selectedWorkflowConnectorId && !selectedConnector){
     selectedWorkflowConnectorId = "";
+    openWorkflowConnectorToolbarId = "";
   }
   viewportEl.innerHTML = "";
   if(isEditingWorkflow){
     viewportEl.onclick = function(event){
       if(event.target === viewportEl){
         selectedWorkflowItemId = "";
+        selectedWorkflowConnectorId = "";
+        openWorkflowConnectorToolbarId = "";
         renderWorkflowCanvas();
         updateWorkflowStatus("Selección limpiada.");
       }
@@ -581,6 +1499,8 @@ function renderWorkflowCanvas(){
     viewportEl.onclick = null;
   }
   viewportEl.insertAdjacentHTML("beforeend", renderWorkflowConnectors(bounds));
+  viewportEl.insertAdjacentHTML("beforeend", renderWorkflowConnectorDraft());
+  viewportEl.insertAdjacentHTML("beforeend", renderWorkflowAnchorPreview());
   bindWorkflowConnectorInteractions();
   workflowState.items.forEach(function(item){
     const el = document.createElement("div");
@@ -591,17 +1511,63 @@ function renderWorkflowCanvas(){
     el.dataset.itemId = item.id;
     el.style.left = item.x + "px";
     el.style.top = item.y + "px";
-    el.style.width = item.width + "px";
-    el.style.height = item.height + "px";
+    if(item.kind === "actor"){
+      el.style.width = "fit-content";
+      el.style.maxWidth = item.width + "px";
+      el.style.height = "auto";
+      el.style.minHeight = item.height + "px";
+    }else{
+      el.style.width = item.width + "px";
+      el.style.height = item.height + "px";
+    }
     el.style.fontSize = (item.fontSize || getDefaultWorkflowItem(item.type).fontSize) + "px";
     el.style.color = item.textColor || getDefaultWorkflowItem(item.type).textColor;
     if(item.kind){
-      if(item.kind === "flow-card"){
+      if(item.kind === "actor"){
+        el.innerHTML = buildWorkflowActorMarkup(item);
+        const actorLabelShell = el.querySelector(".workflow-actor-label-shell");
+        const actorLabelResize = el.querySelector(".workflow-entry-label-resize");
+        if(actorLabelShell && isEditingWorkflow && item.id === selectedWorkflowItemId){
+          actorLabelShell.addEventListener("pointerdown", function(event){
+            startWorkflowActorLabelDrag(event, item.id);
+          });
+        }
+        if(actorLabelResize){
+          actorLabelResize.addEventListener("pointerdown", function(event){
+            startWorkflowEntryLabelResize(event, item.id);
+          });
+        }
+      }else if(item.kind === "flow-card"){
         el.style.borderColor = item.borderColor || getDefaultWorkflowItem("activity").borderColor;
         el.style.background = item.backgroundColor || getDefaultWorkflowItem("activity").backgroundColor;
         el.style.fontSize = (item.fontSize || getDefaultWorkflowItem("activity").fontSize) + "px";
         el.style.color = item.textColor || getDefaultWorkflowItem("activity").textColor;
         el.innerHTML = `${item.badge ? `<div class="badge${item.badgeClass ? " " + item.badgeClass : ""}">${escapeHtml(item.badge)}</div>` : ""}<div class="canvas-item-flow-content">${item.html || ""}</div>`;
+      }else if(item.kind === "tag"){
+        const icon = getCotizacionesSystemIcon(item.html);
+        const iconEl = document.createElement("span");
+        const labelEl = document.createElement("span");
+        iconEl.className = "tag-icon";
+        iconEl.style.backgroundImage = `url("${icon}")`;
+        labelEl.className = "tag-label";
+        labelEl.textContent = String(item.html || "");
+        el.appendChild(iconEl);
+        el.appendChild(labelEl);
+      }else if(item.kind === "mini-icon"){
+        const icon = getCotizacionesMiniIcon(item.html);
+        if(icon){
+          const iconEl = document.createElement("span");
+          const labelEl = document.createElement("span");
+          el.classList.add("is-channel");
+          iconEl.className = "mini-icon-symbol";
+          iconEl.style.backgroundImage = `url("${icon}")`;
+          labelEl.className = "mini-icon-label";
+          labelEl.textContent = String(item.html || "").replace(/<br\s*\/?>/gi, " ");
+          el.appendChild(iconEl);
+          el.appendChild(labelEl);
+        }else{
+          el.innerHTML = item.html || "";
+        }
       }else{
         el.style.color = item.textColor || getDefaultWorkflowItem("text").textColor;
         el.innerHTML = item.html || "";
@@ -699,17 +1665,56 @@ function renderWorkflowCanvas(){
 function renderWorkflowConnectors(bounds){
   const lines = workflowState.connectors.map(function(connector){
     const selectedClass = connector.id === selectedWorkflowConnectorId ? " is-selected" : "";
-    return `<line class="workflow-connector-hit${selectedClass}" data-connector-id="${connector.id}" data-drag="move" x1="${connector.x1}" y1="${connector.y1}" x2="${connector.x2}" y2="${connector.y2}"></line><line class="${selectedClass ? "is-selected" : ""}" data-connector-id="${connector.id}" data-drag="move" x1="${connector.x1}" y1="${connector.y1}" x2="${connector.x2}" y2="${connector.y2}" stroke="${escapeHtml(connector.color || "#7d7d7d")}" stroke-width="${connector.strokeWidth || 2}"></line>`;
+    const points = buildWorkflowConnectorPoints(connector).map(function(point){
+      return point.x + "," + point.y;
+    }).join(" ");
+    return `<polyline class="workflow-connector-hit${selectedClass}" data-connector-id="${connector.id}" data-drag="move" points="${points}"></polyline><polyline class="${selectedClass ? "is-selected" : ""}" data-connector-id="${connector.id}" data-drag="move" points="${points}" stroke="${escapeHtml(connector.color || "#7d7d7d")}" stroke-width="${connector.strokeWidth || 2}"></polyline>`;
   }).join("");
   const handles = isEditingWorkflow ? workflowState.connectors.map(function(connector){
-    return `<div class="workflow-connector-handle" data-connector-id="${connector.id}" data-endpoint="start" style="left:${connector.x1}px;top:${connector.y1}px"></div><div class="workflow-connector-handle" data-connector-id="${connector.id}" data-endpoint="end" style="left:${connector.x2}px;top:${connector.y2}px"></div>`;
+    const start = getWorkflowConnectorEndpointPoint(connector, "start");
+    const end = getWorkflowConnectorEndpointPoint(connector, "end");
+    const visibleClass = connector.id === selectedWorkflowConnectorId ? " is-visible" : "";
+    return `<div class="workflow-connector-handle${visibleClass}" data-connector-id="${connector.id}" data-endpoint="start" style="left:${start.x}px;top:${start.y}px"></div><div class="workflow-connector-handle${visibleClass}" data-connector-id="${connector.id}" data-endpoint="end" style="left:${end.x}px;top:${end.y}px"></div>`;
+  }).join("") : "";
+  const bendHandles = isEditingWorkflow ? workflowState.connectors.map(function(connector){
+    if(connector.id !== selectedWorkflowConnectorId){
+      return "";
+    }
+    return getWorkflowConnectorSegmentHandles(connector).map(function(handle){
+      return `<button class="workflow-connector-bend-handle is-visible" type="button" data-connector-id="${connector.id}" data-segment-index="${handle.segmentIndex}" data-orientation="${handle.orientation}" style="left:${handle.x}px;top:${handle.y}px" title="Mover tramo del conector" aria-label="Mover tramo del conector"></button>`;
+    }).join("");
   }).join("") : "";
   const toolbars = isEditingWorkflow ? workflowState.connectors.map(function(connector){
-    const midX = (connector.x1 + connector.x2) / 2;
-    const midY = (connector.y1 + connector.y2) / 2;
-    return `<div class="workflow-connector-toolbar${connector.id === selectedWorkflowConnectorId ? " is-visible" : ""}" data-connector-toolbar="${connector.id}" style="left:${midX}px;top:${midY - 34}px"><button class="workflow-item-tool is-edit" type="button" data-connector-action="edit" data-connector-id="${connector.id}" title="Editar" aria-label="Editar">${WORKFLOW_TOOL_ICONS.edit}</button><button class="workflow-item-tool is-delete" type="button" data-connector-action="delete" data-connector-id="${connector.id}" title="Eliminar" aria-label="Eliminar">${WORKFLOW_TOOL_ICONS.delete}</button></div>`;
+    const placement = getWorkflowConnectorToolbarPlacement(connector);
+    return `<div class="workflow-connector-toolbar${connector.id === openWorkflowConnectorToolbarId ? " is-visible" : ""}${placement.toolbarClass}" data-connector-toolbar="${connector.id}" style="left:${placement.x}px;top:${placement.y}px"><button class="workflow-toolbar-close workflow-connector-close" type="button" data-connector-close="${connector.id}" title="Cerrar panel" aria-label="Cerrar panel">${WORKFLOW_TOOL_ICONS.close}</button><button class="workflow-item-tool is-edit" type="button" data-connector-action="edit" data-connector-id="${connector.id}" title="Editar" aria-label="Editar">${WORKFLOW_TOOL_ICONS.edit}</button><button class="workflow-item-tool is-delete" type="button" data-connector-action="delete" data-connector-id="${connector.id}" title="Eliminar" aria-label="Eliminar">${WORKFLOW_TOOL_ICONS.delete}</button></div>`;
   }).join("") : "";
-  return `<svg class="workflow-connectors" viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true"><defs><marker id="workflow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7d7d7d"></path></marker></defs>${lines}</svg>${handles}${toolbars}`;
+  return `<svg class="workflow-connectors" viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true"><defs><marker id="workflow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7d7d7d"></path></marker></defs>${lines}</svg>${handles}${bendHandles}${toolbars}`;
+}
+
+function renderWorkflowAnchorPreview(){
+  if(!isEditingWorkflow || !activeWorkflowAnchorPreview){
+    return "";
+  }
+  return `<div class="workflow-anchor-preview is-visible${activeWorkflowAnchorPreview.side === "center" ? " is-center" : ""}" style="left:${activeWorkflowAnchorPreview.anchorX}px;top:${activeWorkflowAnchorPreview.anchorY}px"></div>`;
+}
+
+function renderWorkflowConnectorDraft(){
+  if(!isEditingWorkflow || !activeDrag || activeDrag.mode !== "connector-create"){
+    return "";
+  }
+  const sourceItem = getWorkflowItemById(activeDrag.sourceItemId);
+  if(!sourceItem){
+    return "";
+  }
+  const endPoint = activeWorkflowAnchorPreview
+    ? { x: activeWorkflowAnchorPreview.anchorX, y: activeWorkflowAnchorPreview.anchorY }
+    : { x: activeDrag.currentX, y: activeDrag.currentY };
+  const sourceSide = getWorkflowConnectionSide(sourceItem, endPoint);
+  const startPoint = getWorkflowAnchorPointForItem(sourceItem, sourceSide);
+  const points = buildWorkflowOrthogonalPoints(startPoint, endPoint, []).map(function(point){
+    return point.x + "," + point.y;
+  }).join(" ");
+  return `<svg class="workflow-connectors workflow-connectors-draft" viewBox="0 0 ${getCanvasBounds().width} ${getCanvasBounds().height}" aria-hidden="true"><polyline class="is-draft" points="${points}"></polyline></svg>`;
 }
 
 function bindWorkflowConnectorInteractions(){
@@ -718,9 +1723,21 @@ function bindWorkflowConnectorInteractions(){
   }
   document.querySelectorAll("[data-connector-id][data-drag=\"move\"]").forEach(function(el){
     el.addEventListener("pointerdown", startWorkflowConnectorDrag);
+    el.addEventListener("click", function(event){
+      event.stopPropagation();
+      selectWorkflowConnector(event.currentTarget.dataset.connectorId, { openToolbar: true });
+    });
+    el.addEventListener("contextmenu", function(event){
+      event.preventDefault();
+      event.stopPropagation();
+      selectWorkflowConnector(event.currentTarget.dataset.connectorId, { openToolbar: true });
+    });
   });
   document.querySelectorAll(".workflow-connector-handle").forEach(function(el){
     el.addEventListener("pointerdown", startWorkflowConnectorHandleDrag);
+  });
+  document.querySelectorAll(".workflow-connector-bend-handle").forEach(function(el){
+    el.addEventListener("pointerdown", startWorkflowConnectorBendDrag);
   });
   document.querySelectorAll("[data-connector-action]").forEach(function(el){
     el.addEventListener("pointerdown", function(event){
@@ -730,10 +1747,21 @@ function bindWorkflowConnectorInteractions(){
       event.stopPropagation();
       const connectorId = event.currentTarget.dataset.connectorId;
       if(event.currentTarget.dataset.connectorAction === "edit"){
-        selectWorkflowConnector(connectorId);
+        selectWorkflowConnector(connectorId, { openToolbar: true });
       }else if(event.currentTarget.dataset.connectorAction === "delete"){
         deleteWorkflowConnector(connectorId);
       }
+    });
+  });
+  document.querySelectorAll("[data-connector-close]").forEach(function(el){
+    el.addEventListener("pointerdown", function(event){
+      event.stopPropagation();
+    });
+    el.addEventListener("click", function(event){
+      event.stopPropagation();
+      openWorkflowConnectorToolbarId = "";
+      renderWorkflowCanvas();
+      updateWorkflowStatus("Panel del conector cerrado.");
     });
   });
 }
@@ -768,26 +1796,50 @@ function getSelectedWorkflowConnector(){
   return workflowState.connectors.find(function(entry){ return entry.id === selectedWorkflowConnectorId; }) || null;
 }
 
+function buildWorkflowActorMarkup(item){
+  const showResize = isEditingWorkflow && item.id === selectedWorkflowItemId;
+  return `<span class="actor-icon" aria-hidden="true"></span><div class="workflow-actor-label-shell${showResize ? " is-selected" : ""}" style="--actor-label-offset-x:${item.labelOffsetX || 0}px;--actor-label-offset-y:${item.labelOffsetY || 0}px;width:${item.labelWidth || getDefaultActorLabelLayout().labelWidth}px;min-height:${item.labelHeight || getDefaultActorLabelLayout().labelHeight}px"><span class="workflow-item-label">${item.html || ""}</span>${showResize ? '<button type="button" class="workflow-entry-label-resize"></button>' : ""}</div>`;
+}
+
+function getWorkflowTransformType(item){
+  if(!item){
+    return "";
+  }
+  if(item.kind === "flow-card"){
+    return "activity";
+  }
+  if(item.kind === "subactivity"){
+    return "subactivity";
+  }
+  if(item.kind === "actor"){
+    return "role";
+  }
+  return item.type;
+}
+
 function selectWorkflowItem(itemId){
   if(!isEditingWorkflow){
     return;
   }
   selectedWorkflowItemId = itemId;
   selectedWorkflowConnectorId = "";
+  openWorkflowConnectorToolbarId = "";
   openWorkflowTransformMenuItemId = "";
   renderWorkflowCanvas();
   updateWorkflowStatus("Objeto seleccionado para personalización.");
 }
 
-function selectWorkflowConnector(connectorId){
+function selectWorkflowConnector(connectorId, options){
   if(!isEditingWorkflow){
     return;
   }
+  const settings = options || {};
   selectedWorkflowConnectorId = connectorId;
   selectedWorkflowItemId = "";
   openWorkflowTransformMenuItemId = "";
+  openWorkflowConnectorToolbarId = settings.openToolbar ? connectorId : "";
   renderWorkflowCanvas();
-  updateWorkflowStatus("Conector seleccionado para personalización.");
+  updateWorkflowStatus(settings.openToolbar ? "Panel del conector abierto." : "Conector seleccionado. Arrastra los extremos para reanclar.");
 }
 
 function editWorkflowItem(itemId){
@@ -880,7 +1932,7 @@ function convertWorkflowItem(itemId, targetType){
   if(!item || !targetType){
     return;
   }
-  const currentType = item.kind === "flow-card" ? "activity" : item.type;
+  const currentType = getWorkflowTransformType(item);
   if(currentType === targetType){
     openWorkflowTransformMenuItemId = "";
     renderWorkflowCanvas();
@@ -916,6 +1968,39 @@ function convertWorkflowItem(itemId, targetType){
       delete item.step;
       item.title = sourceText || "Nueva actividad";
     }
+  }else if(targetType === "subactivity"){
+    item.type = "activity";
+    item.kind = "subactivity";
+    item.html = escapeHtml(sourceText || "Consultas a las áreas").replace(/\n/g, "<br>");
+    delete item.title;
+    delete item.badge;
+    delete item.badgeClass;
+    delete item.step;
+    item.width = 132;
+    item.height = 26;
+    item.fontSize = 10;
+    item.borderColor = "transparent";
+    item.backgroundColor = "transparent";
+    item.textColor = "#30424d";
+  }else if(targetType === "role"){
+    item.type = "activity";
+    item.kind = "actor";
+    item.html = escapeHtml(sourceText || "Nuevo rol").replace(/\n/g, "<br>");
+    delete item.title;
+    delete item.badge;
+    delete item.badgeClass;
+    delete item.step;
+    item.width = 150;
+    item.height = 44;
+    item.fontSize = 11;
+    item.borderColor = "transparent";
+    item.backgroundColor = "transparent";
+    item.textColor = "#777";
+    const actorLabelLayout = getDefaultActorLabelLayout();
+    item.labelOffsetX = actorLabelLayout.labelOffsetX;
+    item.labelOffsetY = actorLabelLayout.labelOffsetY;
+    item.labelWidth = actorLabelLayout.labelWidth;
+    item.labelHeight = actorLabelLayout.labelHeight;
   }else if(targetType === "text"){
     delete item.kind;
     delete item.html;
@@ -962,7 +2047,7 @@ function convertWorkflowItem(itemId, targetType){
     item.labelWidth = labelLayout.labelWidth;
     item.labelHeight = labelLayout.labelHeight;
   }
-  if(targetType !== "activity" || workflowId !== "wf-cotizaciones"){
+  if(!["activity", "subactivity", "role"].includes(targetType) || workflowId !== "wf-cotizaciones"){
     delete item.kind;
     delete item.html;
     delete item.badge;
@@ -996,6 +2081,10 @@ function syncWorkflowItemControls(el, item){
     const toolbarHeight = 35;
     const upperEdge = Math.min(0, item.labelOffsetY || 0);
     toolbar.style.top = Math.min(-54, upperEdge - toolbarHeight - 12) + "px";
+  }else if(item.kind === "actor"){
+    const toolbarHeight = 35;
+    const upperEdge = Math.min(0, item.labelOffsetY || 0);
+    toolbar.style.top = Math.min(-56, upperEdge - toolbarHeight - 18) + "px";
   }
   const convertButton = document.createElement("button");
   convertButton.type = "button";
@@ -1011,6 +2100,16 @@ function syncWorkflowItemControls(el, item){
     toggleWorkflowTransformMenu(item.id);
   });
   toolbar.appendChild(convertButton);
+  const connectButton = document.createElement("button");
+  connectButton.type = "button";
+  connectButton.className = "workflow-item-tool is-connect";
+  connectButton.title = "Conectar";
+  connectButton.setAttribute("aria-label", "Conectar");
+  connectButton.innerHTML = WORKFLOW_TOOL_ICONS.connect;
+  connectButton.addEventListener("pointerdown", function(event){
+    startWorkflowConnectorCreate(event, item.id);
+  });
+  toolbar.appendChild(connectButton);
   const editButton = document.createElement("button");
   editButton.type = "button";
   editButton.className = "workflow-item-tool is-edit";
@@ -1053,11 +2152,30 @@ function syncWorkflowItemControls(el, item){
     deleteWorkflowItem(item.id);
   });
   toolbar.appendChild(deleteButton);
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "workflow-item-tool is-close workflow-toolbar-close";
+  closeButton.title = "Cerrar panel";
+  closeButton.setAttribute("aria-label", "Cerrar panel");
+  closeButton.innerHTML = WORKFLOW_TOOL_ICONS.close;
+  closeButton.addEventListener("pointerdown", function(event){
+    event.stopPropagation();
+  });
+  closeButton.addEventListener("click", function(event){
+    event.stopPropagation();
+    selectedWorkflowItemId = "";
+    openWorkflowTransformMenuItemId = "";
+    renderWorkflowCanvas();
+    updateWorkflowStatus("Panel de funciones cerrado.");
+  });
+  toolbar.appendChild(closeButton);
   if(openWorkflowTransformMenuItemId === item.id){
     const menu = document.createElement("div");
     menu.className = "workflow-item-transform-menu";
     [
       { type: "activity", label: "Actividad" },
+      { type: "subactivity", label: "Subactividad" },
+      { type: "role", label: "Rol" },
       { type: "entry", label: "Entrada" },
       { type: "output", label: "Salida" },
       { type: "decision", label: "Decisión" },
@@ -1068,7 +2186,7 @@ function syncWorkflowItemControls(el, item){
       optionButton.type = "button";
       optionButton.className = "workflow-item-transform-option";
       optionButton.textContent = option.label;
-      optionButton.disabled = ((item.kind === "flow-card" ? "activity" : item.type) === option.type);
+      optionButton.disabled = (getWorkflowTransformType(item) === option.type);
       optionButton.addEventListener("pointerdown", function(event){
         event.stopPropagation();
       });
@@ -1166,7 +2284,7 @@ function renderWorkflowInspector(){
   const minFontSize = item.type === "icon" ? 16 : 12;
   const maxFontSize = item.type === "icon" ? 40 : 32;
   const draft = {
-    title: item.kind === "flow-card" ? (item.html || "") : item.title,
+    title: item.kind ? (item.html || "") : item.title,
     badge: item.badge || "",
     fontSize: item.fontSize || getDefaultWorkflowItem(item.type).fontSize,
     borderColor: normalizeColorValue(item.borderColor || getDefaultWorkflowItem(item.type).borderColor),
@@ -1246,7 +2364,7 @@ function renderWorkflowInspector(){
   const applyButton = document.getElementById("applyWorkflowInspectorButton");
   function applyInspectorDraft(live){
     mutateSelectedWorkflowItem(function(target){
-      if(target.kind === "flow-card"){
+      if(target.kind){
         target.html = draft.title;
       }else{
         target.title = draft.title;
@@ -1355,6 +2473,12 @@ function mutateSelectedWorkflowItem(mutator){
 }
 
 function getInspectorTypeLabel(type){
+  if(type === "subactivity"){
+    return "Subactividad";
+  }
+  if(type === "role"){
+    return "Rol";
+  }
   if(type === "text"){
     return "Texto";
   }
@@ -1376,11 +2500,34 @@ function getInspectorTypeLabel(type){
 function applySelectedWorkflowItemPreview(item){
   const el = document.querySelector('[data-item-id="' + item.id + '"]');
   if(el){
-    el.style.width = item.width + "px";
-    el.style.height = item.height + "px";
+    el.style.left = item.x + "px";
+    el.style.top = item.y + "px";
+    if(item.kind === "actor"){
+      el.style.width = "fit-content";
+      el.style.maxWidth = item.width + "px";
+      el.style.height = "auto";
+      el.style.minHeight = item.height + "px";
+    }else{
+      el.style.width = item.width + "px";
+      el.style.height = item.height + "px";
+    }
     el.style.color = item.textColor || getDefaultWorkflowItem(item.type).textColor;
     if(item.kind){
-      if(item.kind === "flow-card"){
+      if(item.kind === "actor"){
+        el.innerHTML = buildWorkflowActorMarkup(item);
+        const actorLabelShell = el.querySelector(".workflow-actor-label-shell");
+        const actorLabelResize = el.querySelector(".workflow-entry-label-resize");
+        if(actorLabelShell && isEditingWorkflow && item.id === selectedWorkflowItemId){
+          actorLabelShell.addEventListener("pointerdown", function(event){
+            startWorkflowActorLabelDrag(event, item.id);
+          });
+        }
+        if(actorLabelResize){
+          actorLabelResize.addEventListener("pointerdown", function(event){
+            startWorkflowEntryLabelResize(event, item.id);
+          });
+        }
+      }else if(item.kind === "flow-card"){
         el.style.borderColor = item.borderColor || getDefaultWorkflowItem("activity").borderColor;
         el.style.background = item.backgroundColor || getDefaultWorkflowItem("activity").backgroundColor;
         el.style.fontSize = (item.fontSize || getDefaultWorkflowItem("activity").fontSize) + "px";
@@ -1537,9 +2684,35 @@ function startWorkflowEntryLabelDrag(event, itemId){
   window.addEventListener("pointerup", onWorkflowPointerUp);
 }
 
+function startWorkflowActorLabelDrag(event, itemId){
+  if(!isEditingWorkflow){
+    return;
+  }
+  if(event.button === 2){
+    return;
+  }
+  const item = workflowState.items.find(function(entry){ return entry.id === itemId; });
+  if(!item || item.kind !== "actor"){
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  selectedWorkflowItemId = itemId;
+  activeDrag = {
+    mode: "actor-label-move",
+    id: itemId,
+    startX: event.clientX,
+    startY: event.clientY,
+    originLabelOffsetX: Number(item.labelOffsetX) || 0,
+    originLabelOffsetY: Number(item.labelOffsetY) || 0
+  };
+  window.addEventListener("pointermove", onWorkflowPointerMove);
+  window.addEventListener("pointerup", onWorkflowPointerUp);
+}
+
 function startWorkflowEntryLabelResize(event, itemId){
   const item = workflowState.items.find(function(entry){ return entry.id === itemId; });
-  if(!item || !hasWorkflowFloatingLabel(item.type)){
+  if(!item || !(hasWorkflowFloatingLabel(item.type) || item.kind === "actor")){
     return;
   }
   if(event.button === 2){
@@ -1599,6 +2772,38 @@ function startWorkflowResize(event, itemId){
   window.addEventListener("pointerup", onWorkflowPointerUp);
 }
 
+function startWorkflowConnectorCreate(event, itemId){
+  const item = getWorkflowItemById(itemId);
+  if(!isEditingWorkflow || !item || event.button === 2){
+    return;
+  }
+  const pointer = getWorkflowPointer(event);
+  event.preventDefault();
+  event.stopPropagation();
+  if(typeof event.currentTarget.setPointerCapture === "function"){
+    try{
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }catch(error){
+    }
+  }
+  selectedWorkflowItemId = itemId;
+  selectedWorkflowConnectorId = "";
+  openWorkflowTransformMenuItemId = "";
+  activeWorkflowAnchorPreview = null;
+  activeDrag = {
+    mode: "connector-create",
+    sourceItemId: itemId,
+    pointerId: event.pointerId,
+    pointerTarget: event.currentTarget,
+    currentX: pointer.x,
+    currentY: pointer.y
+  };
+  renderWorkflowCanvas();
+  window.addEventListener("pointermove", onWorkflowPointerMove);
+  window.addEventListener("pointerup", onWorkflowPointerUp);
+  updateWorkflowStatus("Arrastra hacia otro objeto para crear el conector.");
+}
+
 function onWorkflowPointerMove(event){
   if(!activeDrag){
     return;
@@ -1612,6 +2817,15 @@ function onWorkflowPointerMove(event){
     shellEl.scrollTop = activeDrag.originScrollTop - (event.clientY - activeDrag.startY);
     return;
   }
+  if(activeDrag.mode === "connector-create"){
+    const pointer = getWorkflowPointer(event);
+    activeDrag.currentX = pointer.x;
+    activeDrag.currentY = pointer.y;
+    const nearest = getNearestWorkflowAnchorTarget(pointer, { excludeItemId: activeDrag.sourceItemId });
+    activeWorkflowAnchorPreview = nearest && nearest.distance <= 32 ? nearest : null;
+    renderWorkflowCanvas();
+    return;
+  }
   const bounds = getCanvasBounds();
   const deltaX = (event.clientX - activeDrag.startX) / workflowZoom;
   const deltaY = (event.clientY - activeDrag.startY) / workflowZoom;
@@ -1623,7 +2837,11 @@ function onWorkflowPointerMove(event){
     }
     item.x = clamp(activeDrag.originX + deltaX, 20, bounds.width - item.width - 20);
     item.y = clamp(activeDrag.originY + deltaY, 20, bounds.height - item.height - 20);
-    applySelectedWorkflowItemPreview(item);
+    if(workflowItemHasAnchoredConnectors(item.id)){
+      shouldRender = true;
+    }else{
+      applySelectedWorkflowItemPreview(item);
+    }
   }else if(activeDrag.mode === "entry-label-move"){
     const item = workflowState.items.find(function(entry){ return entry.id === activeDrag.id; });
     if(!item){
@@ -1631,6 +2849,14 @@ function onWorkflowPointerMove(event){
     }
     item.labelOffsetX = clamp(activeDrag.originLabelOffsetX + deltaX, -400, 400);
     item.labelOffsetY = clamp(activeDrag.originLabelOffsetY + deltaY, -300, 300);
+    applySelectedWorkflowItemPreview(item);
+  }else if(activeDrag.mode === "actor-label-move"){
+    const item = workflowState.items.find(function(entry){ return entry.id === activeDrag.id; });
+    if(!item){
+      return;
+    }
+    item.labelOffsetX = clamp(activeDrag.originLabelOffsetX + deltaX, -180, 180);
+    item.labelOffsetY = clamp(activeDrag.originLabelOffsetY + deltaY, -120, 180);
     applySelectedWorkflowItemPreview(item);
   }else if(activeDrag.mode === "entry-label-resize"){
     const item = workflowState.items.find(function(entry){ return entry.id === activeDrag.id; });
@@ -1669,8 +2895,37 @@ function onWorkflowPointerMove(event){
     if(!connector){
       return;
     }
-    connector[activeDrag.endpoint === "start" ? "x1" : "x2"] = clamp(activeDrag.originX + deltaX, 20, bounds.width - 20);
-    connector[activeDrag.endpoint === "start" ? "y1" : "y2"] = clamp(activeDrag.originY + deltaY, 20, bounds.height - 20);
+    const nextPoint = {
+      x: clamp(activeDrag.originX + deltaX, 20, bounds.width - 20),
+      y: clamp(activeDrag.originY + deltaY, 20, bounds.height - 20)
+    };
+    const nearest = getNearestWorkflowAnchorTarget(nextPoint);
+    if(nearest && nearest.distance <= 28){
+      activeWorkflowAnchorPreview = nearest;
+      setWorkflowConnectorEndpointAnchor(connector, activeDrag.endpoint, {
+        itemId: nearest.itemId,
+        side: nearest.side
+      });
+    }else{
+      activeWorkflowAnchorPreview = null;
+      clearWorkflowConnectorEndpointAnchor(connector, activeDrag.endpoint, nextPoint);
+    }
+    shouldRender = true;
+  }else if(activeDrag.mode === "connector-bend"){
+    const connector = workflowState.connectors.find(function(entry){ return entry.id === activeDrag.id; });
+    if(!connector){
+      return;
+    }
+    const pointer = getWorkflowPointer(event);
+    const nextPoints = moveWorkflowConnectorSegment(
+      Array.isArray(activeDrag.originalPoints) ? activeDrag.originalPoints : getWorkflowEditableConnectorPoints(connector),
+      activeDrag.segmentIndex,
+      activeDrag.orientation,
+      pointer
+    );
+    connector.via = nextPoints.slice(1, -1).map(function(point){
+      return { x: point.x, y: point.y };
+    });
     shouldRender = true;
   }
   if(shouldRender){
@@ -1682,6 +2937,43 @@ function onWorkflowPointerUp(){
   if(!activeDrag){
     return;
   }
+  if(activeDrag.mode === "connector-create"){
+    const sourceItem = getWorkflowItemById(activeDrag.sourceItemId);
+    const targetAnchor = activeWorkflowAnchorPreview;
+    if(sourceItem && targetAnchor && targetAnchor.itemId !== sourceItem.id){
+      const targetPoint = { x: targetAnchor.anchorX, y: targetAnchor.anchorY };
+      const sourceSide = getWorkflowConnectionSide(sourceItem, targetPoint);
+      const startPoint = getWorkflowAnchorPointForItem(sourceItem, sourceSide);
+      const connectorId = "connector-" + Date.now();
+      workflowState.connectors.push({
+        id: connectorId,
+        x1: startPoint.x,
+        y1: startPoint.y,
+        x2: targetPoint.x,
+        y2: targetPoint.y,
+        from: {
+          itemId: sourceItem.id,
+          side: sourceSide
+        },
+        to: {
+          itemId: targetAnchor.itemId,
+          side: targetAnchor.side
+        },
+        via: [],
+        color: "#7d7d7d",
+        strokeWidth: 2
+      });
+      selectedWorkflowConnectorId = "";
+      selectedWorkflowItemId = sourceItem.id;
+      updateWorkflowStatus("Conector creado entre objetos.");
+    }else{
+      if(sourceItem){
+        selectedWorkflowItemId = sourceItem.id;
+        selectedWorkflowConnectorId = "";
+      }
+      updateWorkflowStatus("Conexión cancelada. Acerca el cursor a otro objeto para anclar.");
+    }
+  }
   if(activeDrag.pointerTarget && typeof activeDrag.pointerTarget.releasePointerCapture === "function" && typeof activeDrag.pointerId !== "undefined"){
     try{
       activeDrag.pointerTarget.releasePointerCapture(activeDrag.pointerId);
@@ -1689,6 +2981,7 @@ function onWorkflowPointerUp(){
     }
   }
   activeDrag = null;
+  activeWorkflowAnchorPreview = null;
   isWorkflowPanning = false;
   window.removeEventListener("pointermove", onWorkflowPointerMove);
   window.removeEventListener("pointerup", onWorkflowPointerUp);
@@ -1738,10 +3031,15 @@ async function copyWorkflowLayoutToClipboard(){
 }
 
 function resetWorkflow(){
-  workflowState = structuredClone(defaultWorkflowState);
+  workflowState = loadWorkflowBaseState();
   saveWorkflowState();
   renderWorkflowCanvas();
-  updateWorkflowStatus("Workflow restablecido a la actividad base.");
+  updateWorkflowStatus("Workflow restablecido a la base guardada.");
+}
+
+function saveCurrentWorkflowAsBase(){
+  saveWorkflowBaseState();
+  updateWorkflowStatus("Base del workflow guardada. Restablecer volvera a este punto.");
 }
 
 function getViewportCenter(){
@@ -1914,6 +3212,9 @@ function addWorkflowConnector(){
     y1: Math.max(20, center.y),
     x2: Math.max(40, center.x + 90),
     y2: Math.max(20, center.y),
+    from: null,
+    to: null,
+    via: [],
     color: "#7d7d7d",
     strokeWidth: 2
   });
@@ -1934,19 +3235,29 @@ function startWorkflowConnectorDrag(event){
   if(!connector){
     return;
   }
+  const startPoint = getWorkflowConnectorEndpointPoint(connector, "start");
+  const endPoint = getWorkflowConnectorEndpointPoint(connector, "end");
   event.preventDefault();
   event.stopPropagation();
+  activeWorkflowAnchorPreview = null;
   selectedWorkflowConnectorId = connectorId;
+  openWorkflowConnectorToolbarId = "";
   selectedWorkflowItemId = "";
+  connector.from = null;
+  connector.to = null;
+  connector.x1 = startPoint.x;
+  connector.y1 = startPoint.y;
+  connector.x2 = endPoint.x;
+  connector.y2 = endPoint.y;
   activeDrag = {
     mode: "connector-move",
     id: connectorId,
     startX: event.clientX,
     startY: event.clientY,
-    originX1: connector.x1,
-    originY1: connector.y1,
-    originX2: connector.x2,
-    originY2: connector.y2
+    originX1: startPoint.x,
+    originY1: startPoint.y,
+    originX2: endPoint.x,
+    originY2: endPoint.y
   };
   window.addEventListener("pointermove", onWorkflowPointerMove);
   window.addEventListener("pointerup", onWorkflowPointerUp);
@@ -1965,9 +3276,12 @@ function startWorkflowConnectorHandleDrag(event){
   if(!connector){
     return;
   }
+  const point = getWorkflowConnectorEndpointPoint(connector, endpoint);
   event.preventDefault();
   event.stopPropagation();
+  activeWorkflowAnchorPreview = null;
   selectedWorkflowConnectorId = connectorId;
+  openWorkflowConnectorToolbarId = "";
   selectedWorkflowItemId = "";
   activeDrag = {
     mode: "connector-end",
@@ -1975,11 +3289,39 @@ function startWorkflowConnectorHandleDrag(event){
     endpoint: endpoint,
     startX: event.clientX,
     startY: event.clientY,
-    originX: endpoint === "start" ? connector.x1 : connector.x2,
-    originY: endpoint === "start" ? connector.y1 : connector.y2
+    originX: point.x,
+    originY: point.y
   };
   window.addEventListener("pointermove", onWorkflowPointerMove);
   window.addEventListener("pointerup", onWorkflowPointerUp);
+}
+
+function startWorkflowConnectorBendDrag(event){
+  if(!isEditingWorkflow || event.button === 2){
+    return;
+  }
+  const connectorId = event.currentTarget.dataset.connectorId;
+  const segmentIndex = Number(event.currentTarget.dataset.segmentIndex);
+  const orientation = event.currentTarget.dataset.orientation;
+  const connector = workflowState.connectors.find(function(entry){ return entry.id === connectorId; });
+  if(!connector || !Number.isFinite(segmentIndex) || !orientation){
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  selectedWorkflowConnectorId = connectorId;
+  openWorkflowConnectorToolbarId = "";
+  selectedWorkflowItemId = "";
+  activeDrag = {
+    mode: "connector-bend",
+    id: connectorId,
+    segmentIndex: segmentIndex,
+    orientation: orientation,
+    originalPoints: getWorkflowEditableConnectorPoints(connector)
+  };
+  window.addEventListener("pointermove", onWorkflowPointerMove);
+  window.addEventListener("pointerup", onWorkflowPointerUp);
+  updateWorkflowStatus("Arrastra el handle para mover el tramo del conector.");
 }
 
 function setWorkflowZoom(nextZoom){
@@ -1998,6 +3340,45 @@ function zoomWorkflowOut(){
 
 function resetWorkflowZoom(){
   setWorkflowZoom(1);
+}
+
+function isWorkflowTypingTarget(target){
+  if(!target || !(target instanceof Element)){
+    return false;
+  }
+  return Boolean(target.closest("input, textarea, select, [contenteditable=\"true\"]"));
+}
+
+function nudgeSelectedWorkflowItem(event){
+  if(!isEditingWorkflow || activeDrag || !selectedWorkflowItemId || isWorkflowTypingTarget(event.target)){
+    return;
+  }
+  const movementByKey = {
+    ArrowUp: { x: 0, y: -1 },
+    ArrowDown: { x: 0, y: 1 },
+    ArrowLeft: { x: -1, y: 0 },
+    ArrowRight: { x: 1, y: 0 }
+  };
+  const movement = movementByKey[event.key];
+  if(!movement){
+    return;
+  }
+  const item = getSelectedWorkflowItem();
+  if(!item){
+    return;
+  }
+  const step = event.shiftKey ? 10 : 1;
+  const bounds = getCanvasBounds();
+  item.x = clamp(item.x + (movement.x * step), 20, bounds.width - item.width - 20);
+  item.y = clamp(item.y + (movement.y * step), 20, bounds.height - item.height - 20);
+  event.preventDefault();
+  saveWorkflowState();
+  if(workflowItemHasAnchoredConnectors(item.id)){
+    renderWorkflowCanvas();
+  }else{
+    applySelectedWorkflowItemPreview(item);
+  }
+  updateWorkflowStatus("Objeto movido con teclado.");
 }
 
 async function toggleWorkflowFullscreen(){
@@ -2022,6 +3403,7 @@ async function toggleWorkflowFullscreen(){
 document.getElementById("toggleWorkflowModeButton").addEventListener("click", toggleWorkflowMode);
 document.getElementById("floatingWorkflowEditModeButton").addEventListener("click", toggleWorkflowMode);
 document.getElementById("copyWorkflowLayoutButton").addEventListener("click", copyWorkflowLayoutToClipboard);
+document.getElementById("saveWorkflowBaseButton").addEventListener("click", saveCurrentWorkflowAsBase);
 document.getElementById("resetWorkflowButton").addEventListener("click", resetWorkflow);
 document.getElementById("workflowZoomInButton").addEventListener("click", zoomWorkflowIn);
 document.getElementById("workflowZoomOutButton").addEventListener("click", zoomWorkflowOut);
@@ -2040,6 +3422,7 @@ document.getElementById("workflowCanvasShell").addEventListener("contextmenu", f
     event.preventDefault();
   }
 });
+document.addEventListener("keydown", nudgeSelectedWorkflowItem);
 document.addEventListener("fullscreenchange", renderWorkflowCanvas);
 renderWorkflowCanvas();
 updateWorkflowStatus("Vista en modo publicación.");

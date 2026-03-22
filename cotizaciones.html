@@ -17,6 +17,13 @@
 --yellow:#f2d54b;
 }
 
+body[data-palette="blue"]{
+--card:#eef5fb;
+--orange:#1f6fb2;
+--orange-soft:#6fa8d8;
+--yellow:#d8e8f7;
+}
+
 *{
 box-sizing:border-box;
 }
@@ -286,6 +293,41 @@ align-items:center;
 gap:14px;
 }
 
+.palette-switch{
+display:inline-flex;
+align-items:center;
+gap:6px;
+padding:6px;
+border-radius:999px;
+background:#fff;
+border:1px solid rgba(0,0,0,.06);
+box-shadow:0 10px 20px rgba(0,0,0,.05);
+}
+
+.palette-switch-button{
+border:none;
+border-radius:999px;
+padding:8px 12px;
+font:inherit;
+font-size:12px;
+font-weight:700;
+line-height:1;
+background:transparent;
+color:#6b7b86;
+cursor:pointer;
+transition:background .18s ease,color .18s ease,transform .18s ease;
+}
+
+.palette-switch-button:hover{
+transform:translateY(-1px);
+}
+
+.palette-switch-button.is-active{
+background:var(--card);
+color:var(--orange);
+box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
+}
+
 .status-chip,
 .user-chip{
 display:flex;
@@ -337,7 +379,7 @@ overflow:auto;
 }
 
 .page{
-padding:20px 18px 28px;
+padding:24px 20px 36px;
 }
 
 .page-modebar{
@@ -345,7 +387,12 @@ display:flex;
 align-items:center;
 justify-content:space-between;
 gap:12px;
-margin:0 0 14px;
+margin:0 0 26px;
+padding:14px 16px;
+border-radius:18px;
+background:rgba(255,255,255,.82);
+border:1px solid rgba(32,48,61,.08);
+box-shadow:0 10px 24px rgba(25,42,53,.06);
 }
 
 .page-modechip{
@@ -375,7 +422,7 @@ display:inline-flex;
 align-items:center;
 gap:8px;
 padding:10px 14px;
-margin:0 0 16px;
+margin:0 0 18px;
 border-radius:999px;
 background:#fff;
 border:1px solid #d8d8d8;
@@ -387,6 +434,7 @@ font-size:14px;
 .diagram-shell{
 overflow:auto;
 border-radius:18px;
+margin-top:20px;
 }
 
 .diagram{
@@ -482,7 +530,7 @@ overflow:auto;
 margin:12px 18px 18px;
 border:1px solid rgba(32,48,61,.08);
 border-radius:18px;
-background:linear-gradient(180deg, rgba(255,255,255,.62) 0%, rgba(250,250,250,.84) 100%);
+background:linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(248,248,248,.98) 100%);
 scrollbar-gutter:stable both-edges;
 }
 
@@ -499,23 +547,94 @@ margin:0 auto;
 background:var(--bg);
 }
 
+.diagram[data-editing="true"] .diagram-canvas{
+background:#fff;
+}
+
 .diagram-viewport{
 position:relative;
 width:100%;
 height:100%;
 }
 
+.diagram-grid{
+position:absolute;
+left:0;
+right:0;
+top:0;
+bottom:0;
+border-radius:18px;
+background-image:
+linear-gradient(rgba(124,124,124,.08) 1px, transparent 1px),
+linear-gradient(90deg, rgba(124,124,124,.08) 1px, transparent 1px);
+background-size:24px 24px;
+pointer-events:none;
+opacity:0;
+}
+
+.diagram-items,
+.diagram-arrows,
+.diagram-handles{
+position:absolute;
+left:0;
+right:0;
+top:0;
+bottom:0;
+}
+
+.diagram-items{
+z-index:2;
+}
+
+.diagram[data-editing="true"] .diagram-grid{
+opacity:1;
+}
+
+.diagram-arrows{
+z-index:1;
+pointer-events:none;
+}
+
+.diagram-handles{
+z-index:3;
+pointer-events:none;
+}
+
+.diagram[data-editing="true"] .diagram-arrows{
+pointer-events:auto;
+z-index:4;
+}
+
+.diagram-arrows svg,
 .diagram-viewport svg{
 position:absolute;
 inset:0;
 overflow:visible;
-pointer-events:none;
 }
 
-.diagram svg{
-position:absolute;
-inset:0;
-overflow:visible;
+.diagram-arrows svg{
+width:100%;
+height:100%;
+}
+
+.diagram-arrows .connector-hit,
+.diagram-arrows .connector-line{
+fill:none;
+stroke-linecap:round;
+stroke-linejoin:round;
+pointer-events:stroke;
+}
+
+.diagram-arrows .connector-hit{
+stroke:rgba(0,0,0,.001);
+stroke-width:12;
+cursor:pointer;
+}
+
+.diagram-arrows .connector-line{
+stroke:#6c6c6c;
+stroke-width:1.35;
+cursor:pointer;
 }
 
 .label{
@@ -531,24 +650,28 @@ color:var(--muted);
 }
 
 .actor{
-position:absolute;
-width:150px;
-font-size:12px;
-line-height:1.15;
-text-align:center;
-color:#777;
-}
-
-.actor::before{
-content:"";
-display:block;
-width:18px;
-height:18px;
-margin:0 auto 4px;
-border:3px solid #ababab;
-border-radius:50%;
-box-shadow:0 22px 0 -9px #ababab;
-}
+  position:absolute;
+  width:150px;
+  padding-top:28px;
+  font-size:11px;
+  line-height:1.15;
+  text-align:center;
+  color:#777;
+  }
+  
+  .actor::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:50%;
+  width:22px;
+  height:22px;
+  transform:translateX(-50%);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 21a8 8 0 0 0-16 0'/%3E%3Ccircle cx='12' cy='8' r='5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  }
 
 .flow-card{
 position:absolute;
@@ -614,13 +737,31 @@ line-height:1.1;
 }
 
 .tag{
-position:absolute;
-padding:2px 8px;
-background:var(--yellow);
-font-size:10px;
-line-height:1;
-color:#4a4a4a;
-}
+  position:absolute;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:1px 2px;
+  background:transparent;
+  font-size:9px;
+  line-height:1;
+  color:#555;
+  white-space:nowrap;
+  }
+  
+  .tag-icon{
+  width:10px;
+  height:10px;
+  flex:0 0 auto;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  }
+  
+  .tag-label{
+  display:block;
+  letter-spacing:.01em;
+  }
 
 .note{
 position:absolute;
@@ -631,13 +772,34 @@ color:var(--orange);
 font-weight:700;
 }
 
-.mini-icon{
-position:absolute;
-font-size:12px;
-color:#888;
-line-height:1.2;
-text-align:center;
-}
+  .mini-icon{
+  position:absolute;
+  font-size:9px;
+  color:#555;
+  line-height:1.1;
+  text-align:center;
+  }
+
+  .mini-icon.is-channel{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  white-space:nowrap;
+  }
+
+  .mini-icon-symbol{
+  width:10px;
+  height:10px;
+  flex:0 0 auto;
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  }
+
+  .mini-icon-label{
+  display:block;
+  }
 
 .start-dot,
 .end-dot{
@@ -666,13 +828,30 @@ text-align:center;
 color:var(--text);
 }
 
-.soft-icon{
-position:absolute;
-font-size:11px;
-line-height:1.1;
-color:#7b7b7b;
-text-align:center;
-}
+  .soft-icon{
+  position:absolute;
+  font-size:11px;
+  line-height:1.1;
+  color:#7b7b7b;
+  text-align:center;
+  }
+
+  .subactivity{
+  position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:24px;
+  padding:4px 10px;
+  background:#fafafa;
+  border:1px solid #c8c8c8;
+  border-radius:4px;
+  font-size:10px;
+  line-height:1.1;
+  color:#5f5f5f;
+  text-align:center;
+  box-shadow:0 1px 0 rgba(0,0,0,.03);
+  }
 
 .canvas-item{
 position:absolute;
@@ -710,6 +889,30 @@ z-index:5;
 
 .diagram[data-editing="true"] .canvas-item:hover .canvas-item-edit{
 display:inline-flex;
+}
+
+.canvas-item.actor .canvas-item-edit{
+top:-2px;
+right:50%;
+transform:translateX(30px);
+}
+
+.arrow-handle{
+position:absolute;
+width:5px;
+height:5px;
+border-radius:50%;
+background:#fff;
+border:1.5px solid #2fa36b;
+box-shadow:0 1px 3px rgba(0,0,0,.10);
+cursor:grab;
+z-index:5;
+pointer-events:auto;
+transform:translate(-50%, -50%);
+}
+
+.arrow-handle.is-dragging{
+cursor:grabbing;
 }
 
 .floating-map-tools{
@@ -965,6 +1168,7 @@ border-radius:0;
 <button class="nav-toggle is-collapsed" type="button" aria-label="Expandir actividades de Cotizaciones" aria-expanded="false" onclick="toggleNavSubtree(this, 'cotizaciones-subtree')">▼</button>
 </div>
 <div class="nav-subtree is-collapsed" id="cotizaciones-subtree">
+<a class="nav-link sub" href="cotizacion-pdf.html"><span class="nav-index">PDF</span><span>Vista interpretada</span></a>
 <a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('1')"><span class="nav-index">1.</span><span>Recepcionar Requerimiento</span></a>
 <a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('1.1')"><span class="nav-index">1.1</span><span>Validacion Tecnica</span></a>
 <a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('2')"><span class="nav-index">2.</span><span>Elaborar Cotizacion</span></a>
@@ -972,9 +1176,10 @@ border-radius:0;
 <a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('4')"><span class="nav-index">4.</span><span>Notificar Cliente</span></a>
 <a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('5')"><span class="nav-index">5.</span><span>Seguimiento</span></a>
 <a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('6')"><span class="nav-index">6.</span><span>Negociacion</span></a>
-<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('6.1')"><span class="nav-index">6.1</span><span>Rechazar Cotizacion</span></a>
-<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('6.2')"><span class="nav-index">6.2</span><span>Aceptar Cotizacion</span></a>
-<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('7')"><span class="nav-index">7.</span><span>Crear o Actualizar OL</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('7')"><span class="nav-index">7.</span><span>Rechazar Cotizacion</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('7.1')"><span class="nav-index">7.1</span><span>Creacion Cliente BOSS</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('7.2')"><span class="nav-index">7.2</span><span>Aceptar Cotizacion</span></a>
+<a class="nav-link sub" href="#" onclick="event.preventDefault(); openStep('8')"><span class="nav-index">8.</span><span>Crear o Actualizar OL</span></a>
 </div>
 </div>
 </div>
@@ -1024,6 +1229,11 @@ Ambiente de demostracion de procesos.
 <strong>Cristian Rojas</strong>
 </div>
 </div>
+<div class="palette-switch" id="cotizacionesPaletteSwitch" aria-label="Paleta de colores">
+<button class="palette-switch-button" id="cotizacionesPaletteOrangeButton" type="button" data-palette-option="orange">Naranjo</button>
+<button class="palette-switch-button" id="cotizacionesPaletteBlueButton" type="button" data-palette-option="blue">Azul PDF</button>
+</div>
+<a class="diagram-button" href="cotizacion-pdf.html">Vista interpretada PDF</a>
 </div>
 </header>
 
@@ -1049,15 +1259,21 @@ Ambiente de demostracion de procesos.
 </div>
 <div class="diagram-actions">
 <button class="diagram-button" id="toggleCotizacionesEditButton" type="button">Editar mapa</button>
-<button class="diagram-button" id="copyCotizacionesLayoutButton" type="button">Copiar JSON</button>
+<button class="diagram-button" id="saveCotizacionesBaseButton" type="button">Guardar base</button>
 <button class="diagram-button" id="resetCotizacionesLayoutButton" type="button">Restablecer</button>
+<button class="diagram-button" id="copyCotizacionesLayoutButton" type="button">Copiar JSON</button>
 </div>
 </div>
 <div class="diagram-status" id="cotizacionesDiagramStatus">Vista en modo publicación.</div>
 <div class="diagram-canvas-shell" id="cotizacionesCanvasShell">
 <div class="diagram-zoom-layer" id="cotizacionesZoomLayer">
 <div class="diagram-canvas" id="cotizacionesCanvas">
-<div class="diagram-viewport" id="cotizacionesViewport"></div>
+<div class="diagram-viewport" id="cotizacionesViewport">
+<div class="diagram-grid" aria-hidden="true"></div>
+<div class="diagram-arrows" id="cotizacionesArrows"></div>
+<div class="diagram-items" id="cotizacionesItems"></div>
+<div class="diagram-handles" id="cotizacionesHandles"></div>
+</div>
 </div>
 </div>
 </div>
@@ -1079,120 +1295,118 @@ Ambiente de demostracion de procesos.
 </div>
 
 <script>
-const COTIZACIONES_LAYOUT_STORAGE_KEY = "conemi-cotizaciones-layout-v1";
-const COTIZACIONES_ZOOM_STORAGE_KEY = "conemi-cotizaciones-zoom-v1";
+const COTIZACIONES_LAYOUT_STORAGE_KEY = "conemi-cotizaciones-layout-v6";
+const COTIZACIONES_BASE_LAYOUT_STORAGE_KEY = "conemi-cotizaciones-layout-base-v2";
+const COTIZACIONES_ZOOM_STORAGE_KEY = "conemi-cotizaciones-zoom-v2";
+const COTIZACIONES_PALETTE_STORAGE_KEY = "conemi-cotizaciones-palette-v1";
 const COTIZACIONES_WIDTH = 1520;
 const COTIZACIONES_HEIGHT = 930;
 const COTIZACIONES_EDITOR_WIDTH = 2200;
 const COTIZACIONES_EDITOR_HEIGHT = 1400;
+const COTIZACIONES_CANVAS_TOP_OFFSET = 72;
 const COTIZACIONES_ZOOM_MIN = 0.5;
 const COTIZACIONES_ZOOM_MAX = 1.8;
 const COTIZACIONES_ZOOM_STEP = 0.1;
 
 const defaultCotizacionesLayout = {
 lines: [
-{ x1:54, y1:110, x2:125, y2:110, arrow:true },
-{ x1:222, y1:110, x2:262, y2:110, arrow:true },
-{ x1:334, y1:110, x2:415, y2:110, arrow:true },
-{ x1:433, y1:120, x2:433, y2:180, arrow:true },
-{ x1:442, y1:110, x2:575, y2:110, arrow:true },
-{ x1:659, y1:110, x2:742, y2:110, arrow:true },
-{ x1:842, y1:110, x2:922, y2:110, arrow:true },
-{ x1:940, y1:110, x2:1038, y2:110, arrow:true },
-{ x1:1124, y1:110, x2:1162, y2:110, arrow:true },
-{ x1:1200, y1:148, x2:1200, y2:195, arrow:true },
-{ x1:1200, y1:232, x2:1200, y2:286, arrow:true },
-{ x1:1200, y1:322, x2:1200, y2:389, arrow:true },
-{ x1:1200, y1:425, x2:1200, y2:553, arrow:true },
-{ x1:1200, y1:589, x2:1200, y2:652, arrow:true },
-{ x1:1200, y1:688, x2:1200, y2:736, arrow:true },
-{ x1:1200, y1:773, x2:1200, y2:816, arrow:true },
-{ x1:1209, y1:553, x2:1282, y2:553, arrow:true },
-{ x1:1302, y1:553, x2:1470, y2:553, arrow:true },
-{ x1:1209, y1:652, x2:1292, y2:652, arrow:true },
-{ x1:1388, y1:652, x2:1440, y2:652, arrow:false },
-{ x1:1440, y1:652, x2:1440, y2:726, arrow:false },
-{ x1:1440, y1:726, x2:1289, y2:726, arrow:true },
-{ x1:1209, y1:736, x2:1146, y2:736, arrow:true },
-{ x1:1270, y1:736, x2:1282, y2:736, arrow:false },
-{ x1:540, y1:220, x2:540, y2:418, arrow:false },
-{ x1:435, y1:220, x2:435, y2:360, arrow:true },
-{ x1:438, y1:398, x2:438, y2:420, arrow:false },
-{ x1:438, y1:420, x2:540, y2:420, arrow:false },
-{ x1:540, y1:420, x2:540, y2:148, arrow:false },
-{ x1:915, y1:120, x2:915, y2:175, arrow:true }
-],
+  { id:"line-1", from:{ itemId:"start-1", side:"right" }, to:{ itemId:"step-1", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-2", from:{ itemId:"step-1", side:"right" }, to:{ itemId:"decision-1", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-3", from:{ itemId:"decision-1", side:"bottom" }, to:{ itemId:"step-1-1", side:"top" }, axis:"vertical", arrow:true },
+  { id:"line-4", from:{ itemId:"decision-1", side:"right" }, to:{ itemId:"step-2", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-5", from:{ itemId:"step-1-1", side:"bottom" }, to:{ itemId:"soft-1", side:"top" }, axis:"vertical", arrow:true },
+  { id:"line-6", from:{ itemId:"soft-1", side:"left" }, via:[{ x:356, y:285 }], to:{ itemId:"dash-1", side:"top" }, auto:false, arrow:true },
+  { id:"line-7", from:{ itemId:"dash-1", side:"right" }, via:[{ x:438, y:349 }], to:{ itemId:"soft-4", side:"left" }, auto:false, arrow:true },
+  { id:"line-8", from:{ itemId:"soft-4", side:"right" }, via:[{ x:540, y:385 }, { x:540, y:178 }], to:{ itemId:"step-2", side:"top" }, auto:false, arrow:true },
+  { id:"line-9", from:{ itemId:"step-2", side:"right" }, to:{ itemId:"step-3", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-10", from:{ itemId:"step-3", side:"right" }, to:{ itemId:"decision-2", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-11", from:{ itemId:"decision-2", side:"right" }, to:{ itemId:"step-4", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-12", from:{ itemId:"decision-2", side:"bottom" }, via:[{ x:915, y:235 }, { x:540, y:235 }, { x:540, y:178 }], to:{ itemId:"step-2", side:"top" }, auto:false, arrow:true },
+  { id:"line-13", from:{ itemId:"step-4", side:"bottom" }, via:[{ x:1200, y:225 }], to:{ itemId:"step-5", side:"top" }, auto:false, arrow:true },
+  { id:"line-14", from:{ itemId:"step-5", side:"bottom" }, via:[{ x:1200, y:389 }], to:{ itemId:"step-6", side:"top" }, auto:false, arrow:true },
+  { id:"line-15", from:{ itemId:"step-6", side:"bottom" }, via:[{ x:1200, y:553 }], to:{ itemId:"decision-3", side:"top" }, auto:false, arrow:true },
+  { id:"line-16", from:{ itemId:"decision-3", side:"right" }, to:{ itemId:"step-6-1", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-17", from:{ itemId:"step-6-1", side:"right" }, to:{ itemId:"end-1", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-18", from:{ itemId:"decision-3", side:"bottom" }, via:[{ x:1200, y:652 }], to:{ itemId:"decision-4", side:"top" }, auto:false, arrow:true },
+  { id:"line-19", from:{ itemId:"decision-4", side:"right" }, to:{ itemId:"boss-1", side:"left" }, axis:"horizontal", arrow:true },
+  { id:"line-20", from:{ itemId:"boss-1", side:"bottom" }, via:[{ x:1350, y:700 }, { x:1250, y:700 }], to:{ itemId:"step-6-2", side:"right" }, auto:false, arrow:true },
+  { id:"line-21", from:{ itemId:"decision-4", side:"bottom" }, via:[{ x:1200, y:700 }], to:{ itemId:"step-6-2", side:"top" }, auto:false, arrow:true },
+  { id:"line-22", from:{ itemId:"step-6-2", side:"bottom" }, via:[{ x:1200, y:816 }], to:{ itemId:"step-7", side:"top" }, auto:false, arrow:true },
+  { id:"line-23", from:{ itemId:"step-7", side:"bottom" }, to:{ itemId:"end-2", side:"top" }, axis:"vertical", arrow:true }
+  ],
 items: [
-{ id:"start-1", kind:"start-dot", x:48, y:103, width:14, height:14 },
-{ id:"label-1", kind:"label", x:12, y:120, width:90, html:"Necesidad del<br>Cliente" },
-{ id:"actor-1", kind:"actor", x:124, y:30, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-1", kind:"flow-card", x:128, y:92, width:102, html:"Recepcionar<br>Requerimiento", badge:"1", step:"1" },
-{ id:"mini-1", kind:"mini-icon", x:142, y:145, html:"Llamado telefónico" },
-{ id:"mini-2", kind:"mini-icon", x:142, y:168, html:"Email" },
-{ id:"mini-3", kind:"mini-icon", x:142, y:191, html:"Portal Licitaciones" },
-{ id:"mini-4", kind:"mini-icon", x:264, y:90, html:"Documentos<br>de soporte" },
-{ id:"decision-label-1", kind:"decision-label", x:389, y:74, width:110, html:"¿Requerimiento<br>corresponde a Licitación?" },
-{ id:"decision-1", kind:"decision", x:424, y:101, width:18, height:18 },
-{ id:"decision-label-2", kind:"decision-label", x:405, y:138, width:50, html:"Si" },
-{ id:"decision-label-3", kind:"decision-label", x:470, y:105, width:44, html:"No" },
+{ id:"start-1", kind:"start-dot", x:48, y:133, width:14, height:14 },
+{ id:"label-1", kind:"label", x:12, y:150, width:90, html:"Necesidad del<br>Cliente" },
+{ id:"actor-1", kind:"actor", x:124, y:60, width:150, html:"Ejecutivo<br>Comercial" },
+{ id:"step-1", kind:"flow-card", x:128, y:122, width:102, html:"Recepcionar<br>Requerimiento", badge:"1", step:"1" },
+{ id:"mini-1", kind:"mini-icon", x:142, y:175, html:"Llamado telefónico" },
+{ id:"mini-2", kind:"mini-icon", x:142, y:198, html:"Email" },
+{ id:"mini-3", kind:"mini-icon", x:142, y:221, html:"Portal Licitaciones" },
+{ id:"mini-4", kind:"mini-icon", x:264, y:120, html:"Documentos<br>de soporte" },
+{ id:"decision-label-1", kind:"decision-label", x:389, y:104, width:110, html:"¿Requerimiento<br>corresponde a Licitación?" },
+{ id:"decision-1", kind:"decision", x:424, y:132, width:18, height:18 },
+{ id:"decision-label-2", kind:"decision-label", x:405, y:168, width:50, html:"Si" },
+{ id:"decision-label-3", kind:"decision-label", x:470, y:135, width:44, html:"No" },
 { id:"actor-2", kind:"actor", x:301, y:204, width:150, html:"Ejecutivo<br>Comercial" },
 { id:"step-1-1", kind:"flow-card", x:387, y:182, width:102, html:"Validar Técnica y<br>Operativamente", badge:"1.1", badgeClass:"small", step:"1.1" },
-{ id:"soft-1", kind:"soft-icon", x:382, y:278, width:118, html:"Consultas a las áreas" },
+  { id:"soft-1", kind:"subactivity", x:377, y:272, width:132, height:26, html:"Consultas a las áreas" },
 { id:"dash-1", kind:"dashed-box", x:225, y:313, width:145, html:"Laboratorios/ETFA<br>Permisología<br>Inspectores/Otros<br>Equipos/Insumos<br>Logística" },
 { id:"soft-2", kind:"soft-icon", x:486, y:266, width:82, html:"Operaciones" },
 { id:"soft-3", kind:"soft-icon", x:486, y:286, width:82, html:"Técnicas" },
-{ id:"soft-4", kind:"soft-icon", x:391, y:377, width:108, html:"Entrega de la información" },
+  { id:"soft-4", kind:"subactivity", x:382, y:372, width:126, height:26, html:"Entrega de la información" },
 { id:"soft-5", kind:"soft-icon", x:505, y:332, width:92, html:"Jefe<br>Operaciones" },
 { id:"soft-6", kind:"soft-icon", x:505, y:362, width:92, html:"Jefe Técnico" },
-{ id:"actor-3", kind:"actor", x:542, y:32, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-2", kind:"flow-card", x:575, y:92, width:102, html:"Elaborar<br>Cotización", badge:"2", step:"2" },
-{ id:"tag-1", kind:"tag", x:671, y:116, html:"Qcotizador" },
-{ id:"tag-2", kind:"tag", x:683, y:136, html:"QETFA" },
-{ id:"note-1", kind:"note", x:620, y:145, width:165, html:"Se adjunta archivo de costeo y se especifican los servicios ETFA, el sistema realiza la validación." },
-{ id:"actor-4", kind:"actor", x:738, y:26, width:180, html:"Gerente de Desarrollo de<br>Negocios" },
-{ id:"step-3", kind:"flow-card", x:742, y:92, width:102, html:"Aprobar<br>Cotización", badge:"3", step:"3" },
-{ id:"tag-3", kind:"tag", x:796, y:136, html:"Qcotizador" },
-{ id:"decision-label-4", kind:"decision-label", x:866, y:74, width:110, html:"¿Se aprueba la<br>Cotización?" },
-{ id:"decision-2", kind:"decision", x:906, y:101, width:18, height:18 },
-{ id:"decision-label-5", kind:"decision-label", x:892, y:138, width:46, html:"No" },
-{ id:"decision-label-6", kind:"decision-label", x:964, y:105, width:44, html:"Si" },
+{ id:"actor-3", kind:"actor", x:542, y:62, width:150, html:"Ejecutivo<br>Comercial" },
+{ id:"step-2", kind:"flow-card", x:575, y:122, width:102, html:"Elaborar<br>Cotización", badge:"2", step:"2" },
+{ id:"tag-1", kind:"tag", x:671, y:146, html:"Qcotizador" },
+{ id:"tag-2", kind:"tag", x:683, y:166, html:"QETFA" },
+{ id:"note-1", kind:"note", x:620, y:175, width:165, html:"Se adjunta archivo de costeo y se especifican los servicios ETFA, el sistema realiza la validación." },
+{ id:"actor-4", kind:"actor", x:738, y:56, width:180, html:"Gerente de Desarrollo de<br>Negocios" },
+{ id:"step-3", kind:"flow-card", x:742, y:122, width:102, html:"Aprobar<br>Cotización", badge:"3", step:"3" },
+{ id:"tag-3", kind:"tag", x:796, y:166, html:"Qcotizador" },
+{ id:"decision-label-4", kind:"decision-label", x:866, y:104, width:110, html:"¿Se aprueba la<br>Cotización?" },
+{ id:"decision-2", kind:"decision", x:906, y:132, width:18, height:18 },
+{ id:"decision-label-5", kind:"decision-label", x:892, y:168, width:46, html:"No" },
+{ id:"decision-label-6", kind:"decision-label", x:964, y:135, width:44, html:"Si" },
 { id:"mini-5", kind:"mini-icon", x:866, y:182, width:92, html:"Corregir" },
 { id:"mini-6", kind:"mini-icon", x:900, y:202, width:85, html:"Solicitar<br>Correcciones" },
 { id:"mini-7", kind:"mini-icon", x:970, y:205, width:70, html:"Email" },
-{ id:"mini-8", kind:"mini-icon", x:1044, y:90, width:82, html:"Cotización<br>Aprobada" },
-{ id:"actor-5", kind:"actor", x:1115, y:30, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-4", kind:"flow-card", x:1148, y:92, width:102, html:"Notificar al<br>Cliente", badge:"4", step:"4" },
-{ id:"tag-4", kind:"tag", x:1254, y:116, html:"Qcotizador" },
-{ id:"note-2", kind:"note", x:1201, y:147, width:155, html:"Se realiza correo personalizado al Cliente." },
-{ id:"mini-9", kind:"mini-icon", x:1146, y:196, width:108, html:"Cotización<br>Enviada" },
-{ id:"mini-10", kind:"mini-icon", x:1220, y:208, width:54, html:"Email" },
-{ id:"actor-6", kind:"actor", x:1244, y:275, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-5", kind:"flow-card", x:1148, y:286, width:102, html:"Realizar seguimiento", badge:"5", step:"5" },
-{ id:"note-3", kind:"note", x:1200, y:349, width:180, html:"Al tercer día si no se obtiene respuesta aún." },
-{ id:"actor-7", kind:"actor", x:1244, y:381, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-6", kind:"flow-card", x:1148, y:389, width:102, html:"Realizar Negociación", badge:"6", step:"6" },
-{ id:"note-4", kind:"note", x:1200, y:452, width:192, html:"Ajustar precios, plazos y condiciones según las necesidades del cliente." },
+{ id:"mini-8", kind:"mini-icon", x:1044, y:120, width:82, html:"Cotización<br>Aprobada" },
+{ id:"actor-5", kind:"actor", x:1115, y:60, width:150, html:"Ejecutivo<br>Comercial" },
+  { id:"step-4", kind:"flow-card", x:1148, y:122, width:102, html:"Notificar al<br>Cliente", badge:"4", step:"4" },
+  { id:"tag-4", kind:"tag", x:1254, y:146, html:"Qcotizador" },
+  { id:"note-2", kind:"note", x:1201, y:177, width:155, html:"Se realiza correo personalizado al Cliente." },
+  { id:"mini-9", kind:"mini-icon", x:1146, y:196, width:108, html:"Cotización<br>Enviada" },
+  { id:"mini-10", kind:"mini-icon", x:1220, y:208, width:54, html:"Email" },
+  { id:"actor-6", kind:"actor", x:1244, y:275, width:150, html:"Ejecutivo<br>Comercial" },
+  { id:"step-5", kind:"flow-card", x:1148, y:286, width:102, html:"Realizar seguimiento", badge:"5", step:"5" },
+  { id:"tag-4b", kind:"tag", x:1201, y:332, html:"Qcotizador" },
+  { id:"note-3", kind:"note", x:1200, y:349, width:180, html:"Al tercer día si no se obtiene respuesta aún." },
+  { id:"actor-7", kind:"actor", x:1244, y:381, width:150, html:"Ejecutivo<br>Comercial" },
+  { id:"step-6", kind:"flow-card", x:1148, y:389, width:102, html:"Realizar Negociación", badge:"6", step:"6" },
+  { id:"tag-4c", kind:"tag", x:1201, y:435, html:"Qcotizador" },
+  { id:"note-4", kind:"note", x:1200, y:452, width:192, html:"Ajustar precios, plazos y condiciones según las necesidades del cliente." },
 { id:"decision-label-7", kind:"decision-label", x:1088, y:543, width:95, html:"¿Cotización<br>aceptada?" },
 { id:"decision-3", kind:"decision", x:1191, y:545, width:18, height:18 },
 { id:"decision-label-8", kind:"decision-label", x:1178, y:584, width:45, html:"Si" },
 { id:"decision-label-9", kind:"decision-label", x:1247, y:548, width:44, html:"No" },
 { id:"actor-8", kind:"actor", x:1294, y:493, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-6-1", kind:"flow-card", x:1282, y:535, width:102, html:"Rechazar Cotización", badge:"6.1", badgeClass:"small", step:"6.1" },
-{ id:"tag-5", kind:"tag", x:1357, y:576, html:"Qcotizador" },
-{ id:"end-1", kind:"end-dot", x:1468, y:548, width:14, height:14 },
-{ id:"label-2", kind:"label", x:1428, y:566, width:92, html:"Cotización<br>Rechazada" },
+  { id:"step-6-1", kind:"flow-card", x:1282, y:535, width:102, html:"Rechazar Cotización", badge:"7", step:"7" },
+  { id:"tag-5", kind:"tag", x:1357, y:576, html:"Qcotizador" },
+  { id:"end-1", kind:"end-dot", x:1468, y:548, width:14, height:14 },
+  { id:"label-2", kind:"label", x:1428, y:566, width:92, html:"Cotización<br>Rechazada" },
 { id:"decision-label-10", kind:"decision-label", x:1080, y:640, width:110, html:"¿Cotización de<br>Cliente prospecto?" },
 { id:"decision-4", kind:"decision", x:1191, y:645, width:18, height:18 },
 { id:"decision-label-11", kind:"decision-label", x:1177, y:684, width:45, html:"No" },
 { id:"decision-label-12", kind:"decision-label", x:1246, y:648, width:44, html:"Si" },
-{ id:"boss-1", kind:"flow-card", x:1304, y:626, width:92, html:"Creación de<br>Cliente en<br>BOSS", badge:"", step:"" },
-{ id:"note-5", kind:"note", x:1348, y:684, width:160, html:"Se debe tener el cliente creado en BOSS para aceptar la cotización en sistema." },
-{ id:"actor-9", kind:"actor", x:1046, y:698, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-6-2", kind:"flow-card", x:1148, y:718, width:102, html:"Aceptar Cotización", badge:"6.2", badgeClass:"small", step:"6.2" },
-{ id:"tag-6", kind:"tag", x:1201, y:759, html:"Qcotizador" },
-{ id:"actor-10", kind:"actor", x:1257, y:798, width:150, html:"Ejecutivo<br>Comercial" },
-{ id:"step-7", kind:"flow-card", x:1148, y:816, width:102, html:"Crear o Actualizar<br>OL", badge:"7", step:"7" },
-{ id:"tag-7", kind:"tag", x:1201, y:857, html:"Qcotizador" },
+  { id:"boss-1", kind:"flow-card", x:1304, y:626, width:92, html:"Creación de<br>Cliente en<br>BOSS", badge:"7.1", badgeClass:"small", step:"7.1" },
+  { id:"note-5", kind:"note", x:1348, y:684, width:160, html:"Se debe tener el cliente creado en BOSS para aceptar la cotización en sistema." },
+  { id:"actor-9", kind:"actor", x:1046, y:698, width:150, html:"Ejecutivo<br>Comercial" },
+  { id:"step-6-2", kind:"flow-card", x:1148, y:718, width:102, html:"Aceptar Cotización", badge:"7.2", badgeClass:"small", step:"7.2" },
+  { id:"tag-6", kind:"tag", x:1201, y:759, html:"Qcotizador" },
+  { id:"actor-10", kind:"actor", x:1257, y:798, width:150, html:"Ejecutivo<br>Comercial" },
+  { id:"step-7", kind:"flow-card", x:1148, y:816, width:102, html:"Crear o Actualizar<br>OL", badge:"8", step:"8" },
+  { id:"tag-7", kind:"tag", x:1201, y:857, html:"Syscom" },
 { id:"end-2", kind:"end-dot", x:1193, y:889, width:14, height:14 },
 { id:"label-3", kind:"label", x:1142, y:907, width:118, html:"OL creada o<br>actualizada" }
 ]
@@ -1201,7 +1415,9 @@ items: [
 let cotizacionesLayout = loadCotizacionesLayout();
 let isEditingCotizaciones = false;
 let activeCotizacionesDrag = null;
+let selectedCotizacionesLineId = null;
 let cotizacionesZoom = loadCotizacionesZoom();
+let cotizacionesPalette = loadCotizacionesPalette();
 
 function loadCotizacionesLayout(){
 try{
@@ -1210,7 +1426,20 @@ const parsed = raw ? JSON.parse(raw) : null;
 if(!parsed || !Array.isArray(parsed.items) || !Array.isArray(parsed.lines)){
 return structuredClone(defaultCotizacionesLayout);
 }
-return parsed;
+return normalizeCotizacionesLayout(parsed);
+}catch(error){
+return structuredClone(defaultCotizacionesLayout);
+}
+}
+
+function loadCotizacionesBaseLayout(){
+try{
+const raw = window.localStorage.getItem(COTIZACIONES_BASE_LAYOUT_STORAGE_KEY);
+const parsed = raw ? JSON.parse(raw) : null;
+if(!parsed || !Array.isArray(parsed.items) || !Array.isArray(parsed.lines)){
+return structuredClone(defaultCotizacionesLayout);
+}
+return normalizeCotizacionesLayout(parsed);
 }catch(error){
 return structuredClone(defaultCotizacionesLayout);
 }
@@ -1218,6 +1447,10 @@ return structuredClone(defaultCotizacionesLayout);
 
 function saveCotizacionesLayout(){
 window.localStorage.setItem(COTIZACIONES_LAYOUT_STORAGE_KEY, JSON.stringify(cotizacionesLayout));
+}
+
+function saveCotizacionesBaseLayout(){
+window.localStorage.setItem(COTIZACIONES_BASE_LAYOUT_STORAGE_KEY, JSON.stringify(cotizacionesLayout));
 }
 
 function loadCotizacionesZoom(){
@@ -1236,6 +1469,33 @@ function saveCotizacionesZoom(){
 window.localStorage.setItem(COTIZACIONES_ZOOM_STORAGE_KEY, String(cotizacionesZoom));
 }
 
+function loadCotizacionesPalette(){
+try{
+const raw = String(window.localStorage.getItem(COTIZACIONES_PALETTE_STORAGE_KEY) || "").trim().toLowerCase();
+return raw === "blue" ? "blue" : "orange";
+}catch(error){
+return "orange";
+}
+}
+
+function saveCotizacionesPalette(){
+window.localStorage.setItem(COTIZACIONES_PALETTE_STORAGE_KEY, cotizacionesPalette);
+}
+
+function applyCotizacionesPalette(){
+document.body.dataset.palette = cotizacionesPalette;
+const orangeButton = document.getElementById("cotizacionesPaletteOrangeButton");
+const blueButton = document.getElementById("cotizacionesPaletteBlueButton");
+if(orangeButton){
+orangeButton.classList.toggle("is-active", cotizacionesPalette === "orange");
+orangeButton.setAttribute("aria-pressed", cotizacionesPalette === "orange" ? "true" : "false");
+}
+if(blueButton){
+blueButton.classList.toggle("is-active", cotizacionesPalette === "blue");
+blueButton.setAttribute("aria-pressed", cotizacionesPalette === "blue" ? "true" : "false");
+}
+}
+
 function clampCotizaciones(value, min, max){
 return Math.min(max, Math.max(min, value));
 }
@@ -1249,21 +1509,246 @@ return String(value || "")
 .replace(/'/g, "&#39;");
 }
 
+function normalizeCotizacionesLayout(layout){
+return {
+items: Array.isArray(layout.items) ? layout.items : structuredClone(defaultCotizacionesLayout.items),
+lines: (Array.isArray(layout.lines) ? layout.lines : structuredClone(defaultCotizacionesLayout.lines)).map(function(line, index){
+const normalized = Object.assign({}, line);
+normalized.id = normalized.id || "line-" + (index + 1);
+normalized.arrow = normalized.arrow !== false;
+if(normalized.from || normalized.to){
+if(normalized.from){
+normalized.from = Object.assign({}, normalized.from);
+}
+if(normalized.to){
+normalized.to = Object.assign({}, normalized.to);
+}
+if(Array.isArray(normalized.via)){
+normalized.via = normalized.via.map(function(point){
+return { x: Number(point.x) || 0, y: Number(point.y) || 0 };
+});
+}
+if(typeof normalized.auto !== "boolean"){
+normalized.auto = !Array.isArray(normalized.via);
+}
+return normalized;
+}
+normalized.from = { x: Number(normalized.x1) || 0, y: Number(normalized.y1) || 0 };
+normalized.to = { x: Number(normalized.x2) || 0, y: Number(normalized.y2) || 0 };
+normalized.auto = false;
+delete normalized.x1;
+delete normalized.x2;
+delete normalized.y1;
+delete normalized.y2;
+return normalized;
+})
+};
+}
+
+function getCotizacionesItemMetrics(item){
+const defaultWidths = {
+  "flow-card": 102,
+  "decision": 18,
+  "start-dot": 14,
+  "end-dot": 14,
+  "subactivity": 120,
+  "dashed-box": 145,
+  "tag": 54
+};
+const defaultHeights = {
+  "flow-card": 38,
+  "decision": 18,
+  "start-dot": 14,
+  "end-dot": 14,
+  "subactivity": 26,
+  "dashed-box": 92,
+  "tag": 14
+};
+return {
+  width: item.width || defaultWidths[item.kind] || 40,
+  height: item.height || defaultHeights[item.kind] || 20
+};
+}
+
+function getCotizacionesItemById(itemId){
+return cotizacionesLayout.items.find(function(entry){ return entry.id === itemId; }) || null;
+}
+
+function getCotizacionesAnchorPointForItem(item, side){
+if(!item){
+return { x: 0, y: 0 };
+}
+const metrics = getCotizacionesItemMetrics(item);
+const centerX = item.x + (metrics.width / 2);
+const centerY = item.y + (metrics.height / 2);
+if(side === "top"){
+return { x: centerX, y: item.y };
+}
+if(side === "right"){
+return { x: item.x + metrics.width, y: centerY };
+}
+if(side === "bottom"){
+return { x: centerX, y: item.y + metrics.height };
+}
+return { x: item.x, y: centerY };
+}
+
+function getCotizacionesEndpointPoint(endpoint, fallbackSide){
+if(endpoint && endpoint.itemId){
+const item = getCotizacionesItemById(endpoint.itemId);
+if(item){
+const point = getCotizacionesAnchorPointForItem(item, fallbackSide || endpoint.side || "right");
+return {
+  x: point.x + (Number(endpoint.dx) || 0),
+  y: point.y + (Number(endpoint.dy) || 0)
+};
+}
+}
+return {
+  x: Number(endpoint && endpoint.x) || 0,
+  y: Number(endpoint && endpoint.y) || 0
+};
+}
+
+function getCotizacionesAnchorStemPoint(point, side, distance){
+if(side === "top"){
+return { x: point.x, y: point.y - distance };
+}
+if(side === "right"){
+return { x: point.x + distance, y: point.y };
+}
+if(side === "bottom"){
+return { x: point.x, y: point.y + distance };
+}
+return { x: point.x - distance, y: point.y };
+}
+
+function resolveCotizacionesLineConnection(line){
+const fromItem = line.from && line.from.itemId ? getCotizacionesItemById(line.from.itemId) : null;
+const toItem = line.to && line.to.itemId ? getCotizacionesItemById(line.to.itemId) : null;
+let fromSide = line.from && line.from.side ? line.from.side : "right";
+let toSide = line.to && line.to.side ? line.to.side : "left";
+
+if(line.auto !== false && fromItem && toItem){
+const fromMetrics = getCotizacionesItemMetrics(fromItem);
+const toMetrics = getCotizacionesItemMetrics(toItem);
+const fromCenterX = fromItem.x + (fromMetrics.width / 2);
+const fromCenterY = fromItem.y + (fromMetrics.height / 2);
+const toCenterX = toItem.x + (toMetrics.width / 2);
+const toCenterY = toItem.y + (toMetrics.height / 2);
+const deltaX = toCenterX - fromCenterX;
+const deltaY = toCenterY - fromCenterY;
+
+if(line.axis === "horizontal"){
+fromSide = deltaX >= 0 ? "right" : "left";
+toSide = deltaX >= 0 ? "left" : "right";
+}else if(line.axis === "vertical"){
+fromSide = deltaY >= 0 ? "bottom" : "top";
+toSide = deltaY >= 0 ? "top" : "bottom";
+}else if(Math.abs(deltaX) > Math.abs(deltaY)){
+fromSide = deltaX >= 0 ? "right" : "left";
+toSide = deltaX >= 0 ? "left" : "right";
+}else{
+fromSide = deltaY >= 0 ? "bottom" : "top";
+toSide = deltaY >= 0 ? "top" : "bottom";
+}
+}
+
+return {
+fromItem: fromItem,
+toItem: toItem,
+fromSide: fromSide,
+toSide: toSide
+};
+}
+
+function dedupeCotizacionesConnectorPoints(points){
+return points.filter(function(point, index){
+if(index === 0){
+return true;
+}
+const previous = points[index - 1];
+return previous.x !== point.x || previous.y !== point.y;
+});
+}
+
+function getCotizacionesLinePoints(line){
+const connection = resolveCotizacionesLineConnection(line);
+const start = getCotizacionesEndpointPoint(line.from, connection.fromSide);
+const end = getCotizacionesEndpointPoint(line.to, connection.toSide);
+
+if(Array.isArray(line.via) && line.via.length){
+const points = [start].concat(line.via.map(function(point){
+return { x: Number(point.x) || 0, y: Number(point.y) || 0 };
+}), [end]);
+return dedupeCotizacionesConnectorPoints(points);
+}
+
+if(connection.fromItem && connection.toItem){
+const stem = 28;
+const startStem = getCotizacionesAnchorStemPoint(start, connection.fromSide, stem);
+const endStem = getCotizacionesAnchorStemPoint(end, connection.toSide, stem);
+const points = [start, startStem];
+
+if(connection.fromSide === "left" || connection.fromSide === "right"){
+const midX = (startStem.x + endStem.x) / 2;
+points.push({ x: midX, y: startStem.y });
+points.push({ x: midX, y: endStem.y });
+}else{
+const midY = (startStem.y + endStem.y) / 2;
+points.push({ x: startStem.x, y: midY });
+points.push({ x: endStem.x, y: midY });
+}
+
+points.push(endStem, end);
+return dedupeCotizacionesConnectorPoints(points);
+}
+
+return dedupeCotizacionesConnectorPoints([start, end]);
+}
+
+function buildCotizacionesPath(points){
+return points.map(function(point, index){
+return (index === 0 ? "M" : "L") + " " + point.x + " " + point.y;
+}).join(" ");
+}
+
+function getCotizacionesSystemIcon(label){
+return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='13' rx='2'/%3E%3Cpath d='M8 20h8'/%3E%3Cpath d='M12 17v3'/%3E%3C/svg%3E";
+}
+
+function getCotizacionesMiniIcon(label){
+const normalized = String(label || "").replace(/<br\s*\/?>/gi, " ").trim().toLowerCase();
+if(normalized === "llamado telefónico" || normalized === "llamado telefonico"){
+return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.1 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 3a2 2 0 0 1-.6 1.8l-1.3 1.3a16 16 0 0 0 6.4 6.4l1.3-1.3a2 2 0 0 1 1.8-.6l3 .5A2 2 0 0 1 22 16.9z'/%3E%3C/svg%3E";
+}
+if(normalized === "email"){
+return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Cpath d='m4 7 8 6 8-6'/%3E%3C/svg%3E";
+}
+if(normalized === "portal licitaciones"){
+return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='13' rx='2'/%3E%3Cpath d='M8 20h8'/%3E%3Cpath d='M12 17v3'/%3E%3Cpath d='M7 8h10'/%3E%3Cpath d='M7 11h6'/%3E%3C/svg%3E";
+}
+return "";
+}
+
 function getCotizacionesBounds(){
 if(isEditingCotizaciones){
 return { width: COTIZACIONES_EDITOR_WIDTH, height: COTIZACIONES_EDITOR_HEIGHT };
 }
-let maxX = COTIZACIONES_WIDTH;
-let maxY = COTIZACIONES_HEIGHT;
-cotizacionesLayout.items.forEach(function(item){
-maxX = Math.max(maxX, item.x + (item.width || 40) + 24);
-maxY = Math.max(maxY, item.y + (item.height || 40) + 24);
-});
-cotizacionesLayout.lines.forEach(function(line){
-maxX = Math.max(maxX, line.x1 + 24, line.x2 + 24);
-maxY = Math.max(maxY, line.y1 + 24, line.y2 + 24);
-});
-return { width: Math.ceil(maxX), height: Math.ceil(maxY) };
+  let maxX = COTIZACIONES_WIDTH;
+  let maxY = COTIZACIONES_HEIGHT;
+  cotizacionesLayout.items.forEach(function(item){
+  const metrics = getCotizacionesItemMetrics(item);
+  maxX = Math.max(maxX, item.x + metrics.width + 24);
+  maxY = Math.max(maxY, item.y + metrics.height + 24);
+  });
+  cotizacionesLayout.lines.forEach(function(line){
+  getCotizacionesLinePoints(line).forEach(function(point){
+  maxX = Math.max(maxX, point.x + 24);
+  maxY = Math.max(maxY, point.y + 24);
+  });
+  });
+  return { width: Math.ceil(maxX), height: Math.ceil(maxY) };
 }
 
 function renderCotizacionesMap(){
@@ -1271,6 +1756,9 @@ const diagramEl = document.getElementById("cotizacionesDiagram");
 const shellEl = document.getElementById("cotizacionesCanvasShell");
 const zoomLayerEl = document.getElementById("cotizacionesZoomLayer");
 const canvasEl = document.getElementById("cotizacionesCanvas");
+const arrowsEl = document.getElementById("cotizacionesArrows");
+const itemsEl = document.getElementById("cotizacionesItems");
+const handlesEl = document.getElementById("cotizacionesHandles");
 const viewportEl = document.getElementById("cotizacionesViewport");
 const modeChipEl = document.getElementById("cotizacionesModeChip");
 const editButtonEl = document.getElementById("toggleCotizacionesEditButton");
@@ -1278,7 +1766,8 @@ const floatingEditButtonEl = document.getElementById("cotizacionesEditModeButton
 const zoomValueEl = document.getElementById("cotizacionesZoomValue");
 const bounds = getCotizacionesBounds();
 const scaledWidth = Math.ceil(bounds.width * cotizacionesZoom);
-const scaledHeight = Math.ceil(bounds.height * cotizacionesZoom);
+const canvasHeight = bounds.height + COTIZACIONES_CANVAS_TOP_OFFSET;
+const scaledHeight = Math.ceil(canvasHeight * cotizacionesZoom);
 
 diagramEl.dataset.editing = isEditingCotizaciones ? "true" : "false";
 modeChipEl.textContent = isEditingCotizaciones ? "Modo edición" : "Modo publicación";
@@ -1289,25 +1778,95 @@ floatingEditButtonEl.title = isEditingCotizaciones ? "Volver a publicación" : "
 zoomLayerEl.style.width = scaledWidth + "px";
 zoomLayerEl.style.height = scaledHeight + "px";
 canvasEl.style.width = bounds.width + "px";
-canvasEl.style.height = bounds.height + "px";
+canvasEl.style.height = canvasHeight + "px";
 canvasEl.style.transform = `scale(${cotizacionesZoom})`;
+viewportEl.style.paddingTop = COTIZACIONES_CANVAS_TOP_OFFSET + "px";
+arrowsEl.style.top = COTIZACIONES_CANVAS_TOP_OFFSET + "px";
+itemsEl.style.top = COTIZACIONES_CANVAS_TOP_OFFSET + "px";
+handlesEl.style.top = COTIZACIONES_CANVAS_TOP_OFFSET + "px";
+arrowsEl.style.bottom = "0";
+itemsEl.style.bottom = "0";
+handlesEl.style.bottom = "0";
 shellEl.style.height = isEditingCotizaciones ? "" : scaledHeight + "px";
 if(!isEditingCotizaciones){
 shellEl.scrollLeft = 0;
 shellEl.scrollTop = 0;
 }
 zoomValueEl.textContent = Math.round(cotizacionesZoom * 100) + "%";
-viewportEl.innerHTML = renderCotizacionesLines(bounds);
+arrowsEl.onclick = function(event){
+if(!isEditingCotizaciones){
+return;
+}
+const connectorEl = event.target.closest(".connector-hit[data-line-id], .connector-line[data-line-id]");
+if(!connectorEl){
+return;
+}
+event.preventDefault();
+event.stopPropagation();
+selectCotizacionesLine(connectorEl.dataset.lineId);
+};
+viewportEl.onclick = function(event){
+if(!isEditingCotizaciones){
+return;
+}
+if(event.target === viewportEl || event.target.classList.contains("diagram-grid")){
+selectedCotizacionesLineId = null;
+renderCotizacionesMap();
+updateCotizacionesStatus("Seleccion de conector limpiada.");
+}
+};
+arrowsEl.innerHTML = renderCotizacionesLines(bounds);
+itemsEl.innerHTML = "";
+handlesEl.innerHTML = "";
 cotizacionesLayout.items.forEach(function(item){
-viewportEl.appendChild(createCotizacionesItem(item));
+itemsEl.appendChild(createCotizacionesItem(item));
 });
+if(isEditingCotizaciones){
+cotizacionesLayout.lines.forEach(function(line){
+if(selectedCotizacionesLineId !== line.id){
+return;
+}
+["from", "to"].forEach(function(endpointKey){
+const endpoint = line[endpointKey];
+if(!endpoint){
+return;
+}
+const connection = resolveCotizacionesLineConnection(line);
+const resolvedSide = endpointKey === "from" ? connection.fromSide : connection.toSide;
+const point = getCotizacionesEndpointPoint(endpoint, resolvedSide);
+const handle = document.createElement("button");
+handle.type = "button";
+handle.className = "arrow-handle";
+handle.style.left = point.x + "px";
+handle.style.top = point.y + "px";
+handle.dataset.side = resolvedSide;
+handle.dataset.lineId = line.id;
+handle.dataset.endpoint = endpointKey;
+handle.title = endpointKey === "from" ? "Mover origen del conector" : "Mover destino del conector";
+handle.setAttribute("aria-label", handle.title);
+handle.addEventListener("pointerdown", startCotizacionesLineHandleDrag);
+handlesEl.appendChild(handle);
+});
+});
+}
 }
 
 function renderCotizacionesLines(bounds){
 const linesMarkup = cotizacionesLayout.lines.map(function(line){
-return `<line x1="${line.x1}" y1="${line.y1}" x2="${line.x2}" y2="${line.y2}" stroke="#6c6c6c" stroke-width="1.3"${line.arrow ? ' marker-end="url(#cotizaciones-arrow)"' : ""}></line>`;
+const points = getCotizacionesLinePoints(line).map(function(point){
+return point.x + "," + point.y;
+}).join(" ");
+return `<g data-line-id="${escapeCotizacionesHtml(line.id)}"><polyline class="connector-hit" data-line-id="${escapeCotizacionesHtml(line.id)}" points="${points}"></polyline><polyline class="connector-line" data-line-id="${escapeCotizacionesHtml(line.id)}" points="${points}"${line.arrow === false ? "" : ' marker-end="url(#cotizaciones-arrow)"'}></polyline></g>`;
 }).join("");
 return `<svg viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true"><defs><marker id="cotizaciones-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6c6c6c"></path></marker></defs>${linesMarkup}</svg>`;
+}
+
+function selectCotizacionesLine(lineId){
+selectedCotizacionesLineId = lineId || null;
+renderCotizacionesMap();
+if(selectedCotizacionesLineId){
+updateCotizacionesStatus("Conector seleccionado: " + selectedCotizacionesLineId);
+}
 }
 
 function createCotizacionesItem(item){
@@ -1323,20 +1882,45 @@ if(item.height){
 el.style.height = item.height + "px";
 }
 
-if(item.kind === "flow-card"){
-el.innerHTML = `${item.badge ? `<div class="badge${item.badgeClass ? " " + item.badgeClass : ""}">${escapeCotizacionesHtml(item.badge)}</div>` : ""}${item.html || ""}`;
-if(item.step){
-el.addEventListener("click", function(event){
+  if(item.kind === "flow-card"){
+  el.innerHTML = `${item.badge ? `<div class="badge${item.badgeClass ? " " + item.badgeClass : ""}">${escapeCotizacionesHtml(item.badge)}</div>` : ""}${item.html || ""}`;
+  if(item.step){
+  el.addEventListener("click", function(event){
 if(isEditingCotizaciones){
 event.preventDefault();
 return;
 }
 openStep(item.step);
-});
-}
-}else{
-el.innerHTML = item.html || "";
-}
+  });
+  }
+  }else if(item.kind === "tag"){
+  const icon = getCotizacionesSystemIcon(item.html);
+  const iconEl = document.createElement("span");
+  const labelEl = document.createElement("span");
+  iconEl.className = "tag-icon";
+  iconEl.style.backgroundImage = `url("${icon}")`;
+  labelEl.className = "tag-label";
+  labelEl.textContent = String(item.html || "");
+  el.appendChild(iconEl);
+  el.appendChild(labelEl);
+  }else if(item.kind === "mini-icon"){
+  const icon = getCotizacionesMiniIcon(item.html);
+  if(icon){
+  const iconEl = document.createElement("span");
+  const labelEl = document.createElement("span");
+  el.classList.add("is-channel");
+  iconEl.className = "mini-icon-symbol";
+  iconEl.style.backgroundImage = `url("${icon}")`;
+  labelEl.className = "mini-icon-label";
+  labelEl.textContent = String(item.html || "").replace(/<br\s*\/?>/gi, " ");
+  el.appendChild(iconEl);
+  el.appendChild(labelEl);
+  }else{
+  el.innerHTML = item.html || "";
+  }
+  }else{
+  el.innerHTML = item.html || "";
+  }
 
 if(isEditingCotizaciones){
 const editButton = document.createElement("button");
@@ -1356,6 +1940,31 @@ el.addEventListener("pointerdown", startCotizacionesItemDrag);
 }
 
 return el;
+}
+
+function getCotizacionesAnchorableKinds(){
+return ["start-dot", "end-dot", "flow-card", "decision", "subactivity", "dashed-box"];
+}
+
+function getNearestCotizacionesAnchorTarget(pointer){
+let bestMatch = null;
+cotizacionesLayout.items.forEach(function(item){
+if(!getCotizacionesAnchorableKinds().includes(item.kind)){
+return;
+}
+["top", "right", "bottom", "left"].forEach(function(side){
+const anchor = getCotizacionesAnchorPointForItem(item, side);
+const distance = Math.hypot(pointer.x - anchor.x, pointer.y - anchor.y);
+if(!bestMatch || distance < bestMatch.distance){
+bestMatch = {
+itemId: item.id,
+side: side,
+distance: distance
+};
+}
+});
+});
+return bestMatch;
 }
 
 function editCotizacionesItem(itemId){
@@ -1384,19 +1993,65 @@ return;
 }
 event.preventDefault();
 activeCotizacionesDrag = {
+type: "item",
 id: itemId,
 startX: event.clientX,
 startY: event.clientY,
 originX: item.x,
 originY: item.y
 };
+selectedCotizacionesLineId = null;
 event.currentTarget.classList.add("is-dragging");
 window.addEventListener("pointermove", onCotizacionesPointerMove);
 window.addEventListener("pointerup", onCotizacionesPointerUp);
+updateCotizacionesStatus("Moviendo elemento: " + itemId);
+}
+
+function startCotizacionesLineHandleDrag(event){
+if(!isEditingCotizaciones){
+return;
+}
+const lineId = event.currentTarget.dataset.lineId;
+const endpoint = event.currentTarget.dataset.endpoint;
+if(!lineId || !endpoint){
+return;
+}
+event.preventDefault();
+event.stopPropagation();
+event.currentTarget.classList.add("is-dragging");
+activeCotizacionesDrag = {
+type: "line-endpoint",
+id: lineId,
+endpoint: endpoint
+};
+window.addEventListener("pointermove", onCotizacionesPointerMove);
+window.addEventListener("pointerup", onCotizacionesPointerUp);
+updateCotizacionesStatus("Ajustando unión del conector: " + lineId);
 }
 
 function onCotizacionesPointerMove(event){
 if(!activeCotizacionesDrag){
+return;
+}
+if(activeCotizacionesDrag.type === "line-endpoint"){
+const line = cotizacionesLayout.lines.find(function(entry){ return entry.id === activeCotizacionesDrag.id; });
+const viewportRect = document.getElementById("cotizacionesViewport").getBoundingClientRect();
+if(!line || !viewportRect){
+return;
+}
+const pointer = {
+x: (event.clientX - viewportRect.left) / cotizacionesZoom,
+y: ((event.clientY - viewportRect.top) / cotizacionesZoom) - COTIZACIONES_CANVAS_TOP_OFFSET
+};
+const nearest = getNearestCotizacionesAnchorTarget(pointer);
+if(nearest && nearest.distance <= 180){
+line[activeCotizacionesDrag.endpoint] = {
+itemId: nearest.itemId,
+side: nearest.side
+};
+line.auto = false;
+renderCotizacionesMap();
+}
 return;
 }
 const item = cotizacionesLayout.items.find(function(entry){ return entry.id === activeCotizacionesDrag.id; });
@@ -1415,6 +2070,9 @@ function onCotizacionesPointerUp(){
 if(!activeCotizacionesDrag){
 return;
 }
+document.querySelectorAll(".canvas-item.is-dragging, .canvas-item.is-selected, .arrow-handle.is-dragging").forEach(function(el){
+el.classList.remove("is-dragging", "is-selected");
+});
 activeCotizacionesDrag = null;
 window.removeEventListener("pointermove", onCotizacionesPointerMove);
 window.removeEventListener("pointerup", onCotizacionesPointerUp);
@@ -1428,6 +2086,9 @@ document.getElementById("cotizacionesDiagramStatus").textContent = message;
 
 function toggleCotizacionesEditing(){
 isEditingCotizaciones = !isEditingCotizaciones;
+if(!isEditingCotizaciones){
+selectedCotizacionesLineId = null;
+}
 renderCotizacionesMap();
 updateCotizacionesStatus(isEditingCotizaciones ? "Modo edición activo. Arrastra y edita los objetos del mapa." : "Vista en modo publicación.");
 }
@@ -1442,17 +2103,35 @@ updateCotizacionesStatus("No se pudo copiar el JSON. El navegador bloqueó el po
 }
 }
 
+function saveCurrentCotizacionesAsBase(){
+saveCotizacionesBaseLayout();
+updateCotizacionesStatus("Base del mapa guardada. Restablecer volvera a esta configuracion.");
+}
+
 function resetCotizacionesLayout(){
-cotizacionesLayout = structuredClone(defaultCotizacionesLayout);
+cotizacionesLayout = loadCotizacionesBaseLayout();
+selectedCotizacionesLineId = null;
 saveCotizacionesLayout();
 renderCotizacionesMap();
-updateCotizacionesStatus("Mapa de cotizaciones restablecido.");
+updateCotizacionesStatus("Mapa de cotizaciones restablecido a la base guardada.");
 }
 
 function setCotizacionesZoom(nextZoom){
 cotizacionesZoom = clampCotizaciones(Math.round(nextZoom * 100) / 100, COTIZACIONES_ZOOM_MIN, COTIZACIONES_ZOOM_MAX);
 saveCotizacionesZoom();
 renderCotizacionesMap();
+}
+
+function setCotizacionesPalette(nextPalette){
+const normalized = nextPalette === "blue" ? "blue" : "orange";
+if(cotizacionesPalette === normalized){
+applyCotizacionesPalette();
+return;
+}
+cotizacionesPalette = normalized;
+saveCotizacionesPalette();
+applyCotizacionesPalette();
+updateCotizacionesStatus(normalized === "blue" ? "Paleta azul PDF aplicada." : "Paleta naranjo aplicada.");
 }
 
 const stepContent = {
@@ -1592,38 +2271,79 @@ const stepContent = {
 <a class="doc-link" href="#" download>RG-CC-015 Condiciones Comerciales Ajustadas</a>
 </div>
 `,
-"6.1": `
-<h2>Rechazar Cotización</h2>
-<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
-<h3>Acción</h3>
-<p>Registrar el rechazo de la propuesta cuando el cliente no acepta la cotización.</p>
+  "6.1": `
+  <h2>Rechazar Cotización</h2>
+  <p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+  <h3>Acción</h3>
+  <p>Registrar el rechazo de la propuesta cuando el cliente no acepta la cotización.</p>
 <h3>Salida</h3>
 <p>Cotización rechazada y cerrada en el flujo.</p>
 <h3>Registros</h3>
-<div class="doc-links">
-<a class="doc-link" href="#" download>RG-CC-016 Registro de Rechazo de Cotización</a>
-</div>
-`,
-"6.2": `
-<h2>Aceptar Cotización</h2>
-<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
-<h3>Validación previa</h3>
-<p>Si el cliente es prospecto, primero debe existir en BOSS antes de aceptar la cotización en sistema.</p>
+  <div class="doc-links">
+  <a class="doc-link" href="#" download>RG-CC-016 Registro de Rechazo de Cotización</a>
+  </div>
+  `,
+  "7": `
+  <h2>Rechazar Cotización</h2>
+  <p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+  <h3>Acción</h3>
+  <p>Registrar el rechazo de la propuesta cuando el cliente no acepta la cotización.</p>
+  <h3>Salida</h3>
+  <p>Cotización rechazada y cerrada en el flujo.</p>
+  <h3>Registros</h3>
+  <div class="doc-links">
+  <a class="doc-link" href="#" download>RG-CC-016 Registro de Rechazo de Cotización</a>
+  </div>
+  `,
+  "6.2": `
+  <h2>Aceptar Cotización</h2>
+  <p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+  <h3>Validación previa</h3>
+  <p>Si el cliente es prospecto, primero debe existir en BOSS antes de aceptar la cotización en sistema.</p>
 <h3>Salida</h3>
 <p>Cotización aceptada para crear o actualizar la OL.</p>
 <h3>Registros</h3>
-<div class="doc-links">
-<a class="doc-link" href="#" download>RG-CC-017 Aceptación de Cotización</a>
-<a class="doc-link" href="#" download>RG-CC-018 Creación de Cliente Prospecto en BOSS</a>
-</div>
-`,
-"7": `
-<h2>Crear o Actualizar OL</h2>
-<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
-<h3>Pasos</h3>
-<ol>
-<li>Confirmar aceptación comercial.</li>
-<li>Crear o actualizar la OL.</li>
+  <div class="doc-links">
+  <a class="doc-link" href="#" download>RG-CC-017 Aceptación de Cotización</a>
+  <a class="doc-link" href="#" download>RG-CC-018 Creación de Cliente Prospecto en BOSS</a>
+  </div>
+  `,
+  "7.1": `
+  <h2>Creación de Cliente en BOSS</h2>
+  <p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: BOSS</span></p>
+  <h3>Condición</h3>
+  <p>Aplica cuando la cotización aceptada corresponde a un cliente prospecto que aún no existe en los sistemas corporativos.</p>
+  <h3>Acciones</h3>
+  <ol>
+  <li>Crear el cliente en BOSS.</li>
+  <li>Validar que la información maestra quede disponible para el cierre comercial.</li>
+  <li>Continuar con la aceptación y posterior creación o actualización de la OL.</li>
+  </ol>
+  <h3>Registros</h3>
+  <div class="doc-links">
+  <a class="doc-link" href="#" download>RG-CC-018 Creación de Cliente Prospecto en BOSS</a>
+  </div>
+  `,
+  "7.2": `
+  <h2>Aceptar Cotización</h2>
+  <p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+  <h3>Validación previa</h3>
+  <p>Si el cliente es prospecto, primero debe existir en BOSS antes de aceptar la cotización en sistema.</p>
+  <h3>Salida</h3>
+  <p>Cotización aceptada para crear o actualizar la OL.</p>
+  <h3>Registros</h3>
+  <div class="doc-links">
+  <a class="doc-link" href="#" download>RG-CC-017 Aceptación de Cotización</a>
+  <a class="doc-link" href="#" download>RG-CC-018 Creación de Cliente Prospecto en BOSS</a>
+  </div>
+  `,
+  "8": `
+  <h2>Crear o Actualizar OL</h2>
+  <p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Syscom</span></p>
+  <h3>Pasos</h3>
+  <ol>
+  <li>Confirmar aceptación comercial.</li>
+  <li>Crear o actualizar la OL.</li>
 <li>Dejar la orden lista para continuar el proceso.</li>
 </ol>
 <h3>Salida</h3>
@@ -1690,6 +2410,7 @@ linkEl.href = detail.link || (processId === "P1" ? "cotizaciones.html" : "index.
 
 document.getElementById("toggleCotizacionesEditButton").addEventListener("click", toggleCotizacionesEditing);
 document.getElementById("cotizacionesEditModeButton").addEventListener("click", toggleCotizacionesEditing);
+document.getElementById("saveCotizacionesBaseButton").addEventListener("click", saveCurrentCotizacionesAsBase);
 document.getElementById("copyCotizacionesLayoutButton").addEventListener("click", copyCotizacionesLayout);
 document.getElementById("resetCotizacionesLayoutButton").addEventListener("click", resetCotizacionesLayout);
 document.getElementById("cotizacionesZoomInButton").addEventListener("click", function(){
@@ -1700,6 +2421,12 @@ setCotizacionesZoom(cotizacionesZoom - COTIZACIONES_ZOOM_STEP);
 });
 document.getElementById("cotizacionesZoomResetButton").addEventListener("click", function(){
 setCotizacionesZoom(1);
+});
+document.getElementById("cotizacionesPaletteOrangeButton").addEventListener("click", function(){
+setCotizacionesPalette("orange");
+});
+document.getElementById("cotizacionesPaletteBlueButton").addEventListener("click", function(){
+setCotizacionesPalette("blue");
 });
 
 document.addEventListener("keydown", function(event){
@@ -1748,6 +2475,7 @@ URL.revokeObjectURL(url);
 });
 
 applyProcessNavigationLinks();
+applyCotizacionesPalette();
 renderCotizacionesMap();
 </script>
 </body>
