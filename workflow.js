@@ -4,6 +4,7 @@ const ITEM_DETAILS_STORAGE_KEY = "conemi-item-details-v1";
 const WORKFLOW_CATALOG_STORAGE_KEY = "conemi-workflow-catalog-v1";
 const WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-v1:";
 const WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-base-v1:";
+const WORKFLOW_PALETTE_STORAGE_KEY_PREFIX = "conemi-workflow-palette-v1:";
 const COTIZACIONES_WORKFLOW_TEMPLATE_VERSION = "cotizaciones-html-20260321-roles";
 const params = new URLSearchParams(window.location.search);
 const processId = params.get("process") || "";
@@ -144,6 +145,7 @@ const workflowSubtitle = workflowEntry
 const workflowToken = workflowId || processId || itemId || "WF";
 const workflowStorageKey = WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
 const workflowBaseStorageKey = WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
+const workflowPaletteStorageKey = WORKFLOW_PALETTE_STORAGE_KEY_PREFIX + workflowToken;
 const WORKFLOW_ZOOM_STORAGE_KEY_PREFIX = "conemi-workflow-zoom-v1:";
 const PUBLICATION_WIDTH = 1200;
 const PUBLICATION_HEIGHT = 380;
@@ -156,6 +158,10 @@ const WORKFLOW_ICON_PRESETS = {
   current: {
     label: "Actual",
     markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.3 4.8 5.2.8-3.8 3.8.9 5.3L12 15.2 7.4 17.7l.9-5.3L4.5 8.6l5.2-.8z"></path></svg>'
+  },
+  warning: {
+    label: "Alerta",
+    markup: '<svg class="workflow-icon-filled" viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffc107" d="M10.5 3.9a1.8 1.8 0 0 1 3 0l7 11.9A2.1 2.1 0 0 1 18.7 19H5.3a2.1 2.1 0 0 1-1.8-3.2Z"></path><path fill="#687282" d="M12 7.8c.9 0 1.4.6 1.4 1.5l-.4 4.5a1 1 0 0 1-2 0l-.4-4.5c0-.9.5-1.5 1.4-1.5Z"></path><circle cx="12" cy="16.8" r="1.35" fill="#687282"></circle></svg>'
   },
   role: {
     label: "Rol",
@@ -183,19 +189,52 @@ function getDefaultWorkflowItem(type){
   if(type === "icon"){
     return { width: 32, height: 32, fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#30424d" };
   }
+  if(type === "process"){
+    return { width: 260, height: 88, fontSize: 18, borderColor: "#355fb8", backgroundColor: "#ffffff", textColor: "#5b5b5b" };
+  }
   return { width: 260, height: 88, fontSize: 18, borderColor: "#d9c1a3", backgroundColor: "#f7f2ed", textColor: "#30424d" };
 }
 
+function normalizeThemeComparableColor(value){
+  return String(value || "").trim().toLowerCase();
+}
+
+function getThemedWorkflowColorToken(value, role){
+  const normalized = normalizeThemeComparableColor(value);
+  if(role === "node-border" && ["#d9c1a3", "#e9c59d", "#6fa8d8"].includes(normalized)){
+    return "var(--node-border)";
+  }
+  if(role === "node-fill" && ["#f7f2ed", "#eef5fb"].includes(normalized)){
+    return "var(--node-fill)";
+  }
+  if(role === "node-text" && ["#30424d", "#28507a"].includes(normalized)){
+    return "var(--node-text)";
+  }
+  if(role === "process-stroke" && ["#355fb8", "#3d78b8"].includes(normalized)){
+    return "var(--process-stroke)";
+  }
+  if(role === "process-fill" && ["#ffffff", "#eef5fb"].includes(normalized)){
+    return "var(--process-fill)";
+  }
+  if(role === "process-text" && ["#5b5b5b", "#28507a"].includes(normalized)){
+    return "var(--process-text)";
+  }
+  if(role === "accent-text" && ["#eb7a07", "#1f6fb2"].includes(normalized)){
+    return "var(--accent-text)";
+  }
+  return value;
+}
+
 function isInspectorEditableItem(item){
-  return Boolean(item && (item.type === "activity" || item.kind === "flow-card" || item.type === "text" || item.type === "icon" || item.type === "decision" || item.type === "entry" || item.type === "output"));
+  return Boolean(item && (item.type === "activity" || item.type === "process" || item.kind === "flow-card" || item.type === "text" || item.type === "icon" || item.type === "decision" || item.type === "entry" || item.type === "output"));
 }
 
 function isWorkflowResizableItem(item){
-  return Boolean(item && (item.type === "activity" || item.type === "decision" || item.type === "text" || item.type === "icon"));
+  return Boolean(item && (item.type === "activity" || item.type === "process" || item.type === "decision" || item.type === "text" || item.type === "icon"));
 }
 
 function canTransferWorkflowStyle(item){
-  return Boolean(item && (item.type === "activity" || item.type === "entry" || item.type === "output" || item.type === "text" || item.type === "icon"));
+  return Boolean(item && (item.type === "activity" || item.type === "process" || item.type === "entry" || item.type === "output" || item.type === "text" || item.type === "icon"));
 }
 
 function getDefaultEntryLabelLayout(){
@@ -229,7 +268,7 @@ function getWorkflowIconPreset(variant){
 }
 
 function getCotizacionesSystemIcon(label){
-  return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='13' rx='2'/%3E%3Cpath d='M8 20h8'/%3E%3Cpath d='M12 17v3'/%3E%3C/svg%3E";
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 20h8"></path><path d="M12 17v3"></path></svg>';
 }
 
 function getCotizacionesMiniIcon(label){
@@ -244,6 +283,40 @@ function getCotizacionesMiniIcon(label){
     return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23282828' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='13' rx='2'/%3E%3Cpath d='M8 20h8'/%3E%3Cpath d='M12 17v3'/%3E%3Cpath d='M7 8h10'/%3E%3Cpath d='M7 11h6'/%3E%3C/svg%3E";
   }
   return "";
+}
+
+function getWorkflowDashedBoxLineIcon(label){
+  const normalized = String(label || "").trim().toLowerCase();
+  if(normalized === "laboratorios/etfa"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3h6'/%3E%3Cpath d='M10 3v5l-4.6 7.4A3 3 0 0 0 8 20h8a3 3 0 0 0 2.6-4.6L14 8V3'/%3E%3Cpath d='M8.5 14h7'/%3E%3C/svg%3E";
+  }
+  if(normalized === "permisología" || normalized === "permisologia"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 3.5h6l4 4V19a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z'/%3E%3Cpath d='M14 3.5v4h4'/%3E%3Cpath d='m9 14 2 2 4-4'/%3E%3C/svg%3E";
+  }
+  if(normalized === "inspectores/otros" || normalized === "inspecciones/otros"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='2.5'/%3E%3Cpath d='M4.5 18a4.5 4.5 0 0 1 9 0'/%3E%3Cpath d='M15.5 8.5h4'/%3E%3Cpath d='M17.5 6.5v4'/%3E%3C/svg%3E";
+  }
+  if(normalized === "equipos/insumos"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4.5 7 12 11l7.5-4Z'/%3E%3Cpath d='M4.5 7v10L12 21l7.5-4V7'/%3E%3Cpath d='M12 11v10'/%3E%3C/svg%3E";
+  }
+  if(normalized === "logística" || normalized === "logistica"){
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7h10v8H3Z'/%3E%3Cpath d='M13 10h4l3 3v2h-7Z'/%3E%3Ccircle cx='8' cy='18' r='1.8'/%3E%3Ccircle cx='18' cy='18' r='1.8'/%3E%3C/svg%3E";
+  }
+  return "";
+}
+
+function buildWorkflowDashedBoxMarkup(html){
+  const lines = String(html || "")
+    .split(/<br\s*\/?>/i)
+    .map(function(line){ return stripHtml(line); })
+    .filter(Boolean);
+  if(!lines.length){
+    return "";
+  }
+  return lines.map(function(line){
+    const icon = getWorkflowDashedBoxLineIcon(line);
+    return `<div class="workflow-dashed-box-row"><span class="workflow-dashed-box-label">${escapeHtml(line)}</span>${icon ? `<span class="workflow-dashed-box-icon" style="background-image:url('${icon}')"></span>` : ""}</div>`;
+  }).join("");
 }
 
 function getCotizacionesWorkflowKindDefaults(kind){
@@ -270,7 +343,7 @@ function getWorkflowKindTextDefaults(kind){
     "actor": { fontSize: 11, textColor: "#777" },
     "flow-card": { fontSize: 12, textColor: "#30424d" },
     "decision-label": { fontSize: 12, textColor: "#30424d" },
-    "tag": { fontSize: 9, textColor: "#555" },
+    "tag": { fontSize: 10, textColor: "#eb7a07" },
     "note": { fontSize: 11, textColor: "#eb7a07" },
     "mini-icon": { fontSize: 9, textColor: "#555" },
     "label": { fontSize: 13, textColor: "#30424d" },
@@ -292,8 +365,8 @@ function normalizeWorkflowRoleKind(item){
 function normalizeCotizacionesWorkflowItems(items){
   return items.map(function(item){
     const normalizedKind = normalizeWorkflowRoleKind(item);
-    const defaults = getCotizacionesWorkflowKindDefaults(normalizedKind);
-    const textDefaults = getWorkflowKindTextDefaults(normalizedKind);
+    const defaults = normalizedKind ? getCotizacionesWorkflowKindDefaults(normalizedKind) : getDefaultWorkflowItem(item.type || "activity");
+    const textDefaults = normalizedKind ? getWorkflowKindTextDefaults(normalizedKind) : null;
     const entryLayout = normalizedKind === "actor" ? getDefaultActorLabelLayout() : null;
     return Object.assign({}, item, {
       kind: normalizedKind,
@@ -352,6 +425,7 @@ function getCotizacionesWorkflowTemplate(){
       { id:"actor-5", kind:"actor", x:1115, y:60, width:150, html:"Ejecutivo<br>Comercial" },
       { id:"step-4", kind:"flow-card", x:1148, y:122, width:102, html:"Notificar al<br>Cliente", badge:"4", step:"4" },
       { id:"tag-4", kind:"tag", x:1254, y:146, html:"Qcotizador" },
+      { id:"icon-warning-note-2", type:"icon", x:1174, y:184, width:20, height:20, iconVariant:"warning", title:"", labelOffsetX:0, labelOffsetY:0, labelWidth:0, labelHeight:0 },
       { id:"note-2", kind:"note", x:1201, y:177, width:155, html:"Se realiza correo personalizado al Cliente." },
       { id:"mini-9", kind:"mini-icon", x:1146, y:196, width:108, height:28, html:"Cotización<br>Enviada" },
       { id:"mini-10", kind:"mini-icon", x:1220, y:208, width:54, html:"Email" },
@@ -376,7 +450,7 @@ function getCotizacionesWorkflowTemplate(){
       { id:"decision-4", kind:"decision", x:1191, y:645, width:18, height:18 },
       { id:"decision-label-11", kind:"decision-label", x:1177, y:684, width:45, html:"No" },
       { id:"decision-label-12", kind:"decision-label", x:1246, y:648, width:44, html:"Si" },
-      { id:"boss-1", kind:"flow-card", x:1304, y:626, width:92, html:"Creación de<br>Cliente en<br>BOSS", badge:"7.1", badgeClass:"small", step:"7.1" },
+      { id:"boss-1", type:"process", x:1304, y:626, width:170, height:92, title:"Creación de\nCliente en\nBOSS" },
       { id:"note-5", kind:"note", x:1348, y:684, width:160, height:44, html:"Se debe tener el cliente creado en BOSS para aceptar la cotización en sistema." },
       { id:"actor-9", kind:"actor", x:1046, y:698, width:150, html:"Ejecutivo<br>Comercial" },
       { id:"step-6-2", kind:"flow-card", x:1148, y:718, width:102, html:"Aceptar Cotización", badge:"7.2", badgeClass:"small", step:"7.2" },
@@ -692,10 +766,18 @@ let workflowState = loadWorkflowState();
 let isEditingWorkflow = false;
 let activeDrag = null;
 let workflowZoom = loadWorkflowZoom();
+let workflowPalette = loadWorkflowPalette();
 let selectedWorkflowItemId = workflowState.items[0] ? workflowState.items[0].id : "";
 let selectedWorkflowConnectorId = "";
+let selectedWorkflowItemIds = selectedWorkflowItemId ? [selectedWorkflowItemId] : [];
+let selectedWorkflowConnectorIds = [];
 let openWorkflowConnectorToolbarId = "";
 let activeWorkflowAnchorPreview = null;
+let activeWorkflowSelectionBox = null;
+let suppressWorkflowViewportClick = false;
+let workflowUndoStack = [];
+let workflowRedoStack = [];
+let workflowLastSavedSnapshot = JSON.stringify(workflowState);
 let copiedWorkflowActivityStyle = null;
 let openWorkflowTransformMenuItemId = "";
 let isWorkflowPanning = false;
@@ -718,39 +800,99 @@ function loadWorkflowState(){
       return structuredClone(defaultWorkflowState);
     }
     parsed.items = parsed.items.map(function(item, index){
-      const normalizedKind = normalizeWorkflowRoleKind(item);
-      const normalizedType = item.type || (normalizedKind === "flow-card" ? "activity" : "activity");
+      const processDefaults = getDefaultWorkflowItem("process");
+      const normalizedSourceItem = workflowId === "wf-cotizaciones" && item && item.id === "boss-1"
+        ? Object.assign({}, item, {
+            type: "process",
+            kind: "",
+            title: htmlToPlainText(item.title || item.html || "Creación de\nCliente en\nBOSS") || "Creación de\nCliente en\nBOSS",
+            html: "",
+            badge: "",
+            badgeClass: "",
+            step: "",
+            width: Number.isFinite(item.width) ? item.width : processDefaults.width,
+            height: Number.isFinite(item.height) ? item.height : processDefaults.height,
+            fontSize: Number.isFinite(item.fontSize) ? item.fontSize : processDefaults.fontSize,
+            borderColor: item.borderColor || processDefaults.borderColor,
+            backgroundColor: item.backgroundColor || processDefaults.backgroundColor,
+            textColor: item.textColor || processDefaults.textColor
+          })
+        : item;
+      const normalizedKind = normalizeWorkflowRoleKind(normalizedSourceItem);
+      const normalizedType = normalizedSourceItem.type || (normalizedKind === "flow-card" ? "activity" : "activity");
       const defaults = getDefaultWorkflowItem(normalizedType);
       const entryLayout = hasWorkflowFloatingLabel(normalizedType)
         ? getDefaultEntryLabelLayout()
         : (normalizedKind === "actor" ? getDefaultActorLabelLayout() : null);
       const kindTextDefaults = normalizedKind ? getWorkflowKindTextDefaults(normalizedKind) : null;
-      const normalizedFontSize = Number.isFinite(item.fontSize)
-        ? item.fontSize
+      const normalizedFontSize = Number.isFinite(normalizedSourceItem.fontSize)
+        ? ((normalizedKind === "tag" && normalizedSourceItem.fontSize <= 9) ? 10 : normalizedSourceItem.fontSize)
         : (kindTextDefaults ? kindTextDefaults.fontSize : (normalizedKind === "flow-card" ? 12 : defaults.fontSize));
+      const normalizedTextColor = normalizedKind === "tag" && (!normalizedSourceItem.textColor || String(normalizedSourceItem.textColor).trim().toLowerCase() === "#555")
+        ? "#eb7a07"
+        : (normalizedSourceItem.textColor || (kindTextDefaults ? kindTextDefaults.textColor : defaults.textColor));
       return {
-        id: item.id || ("item-" + (index + 1)),
+        id: normalizedSourceItem.id || ("item-" + (index + 1)),
         type: normalizedType,
         kind: normalizedKind || "",
-        title: item.title || "Elemento",
-        html: item.html || "",
-        badge: item.badge || "",
-        badgeClass: item.badgeClass || "",
-        step: item.step || "",
-        x: Number.isFinite(item.x) ? item.x : 160,
-        y: Number.isFinite(item.y) ? item.y : 120,
-        width: Number.isFinite(item.width) ? item.width : defaults.width,
-        height: Number.isFinite(item.height) ? item.height : defaults.height,
+        title: Object.prototype.hasOwnProperty.call(normalizedSourceItem, "title") ? String(normalizedSourceItem.title || "") : "Elemento",
+        html: normalizedSourceItem.html || "",
+        badge: normalizedSourceItem.badge || "",
+        badgeClass: normalizedSourceItem.badgeClass || "",
+        step: normalizedSourceItem.step || "",
+        x: Number.isFinite(normalizedSourceItem.x) ? normalizedSourceItem.x : 160,
+        y: Number.isFinite(normalizedSourceItem.y) ? normalizedSourceItem.y : 120,
+        width: Number.isFinite(normalizedSourceItem.width) ? normalizedSourceItem.width : defaults.width,
+        height: Number.isFinite(normalizedSourceItem.height) ? normalizedSourceItem.height : defaults.height,
         fontSize: normalizedFontSize,
-        borderColor: item.borderColor || defaults.borderColor,
-        backgroundColor: item.backgroundColor || defaults.backgroundColor,
-        textColor: item.textColor || (kindTextDefaults ? kindTextDefaults.textColor : defaults.textColor),
-        iconVariant: item.iconVariant || "current",
-        labelOffsetX: entryLayout ? (Number.isFinite(item.labelOffsetX) ? item.labelOffsetX : entryLayout.labelOffsetX) : 0,
-        labelOffsetY: entryLayout ? (Number.isFinite(item.labelOffsetY) ? item.labelOffsetY : entryLayout.labelOffsetY) : 0,
-        labelWidth: entryLayout ? (Number.isFinite(item.labelWidth) ? item.labelWidth : entryLayout.labelWidth) : 0,
-        labelHeight: entryLayout ? (Number.isFinite(item.labelHeight) ? item.labelHeight : entryLayout.labelHeight) : 0
+        borderColor: normalizedSourceItem.borderColor || defaults.borderColor,
+        backgroundColor: normalizedSourceItem.backgroundColor || defaults.backgroundColor,
+        textColor: normalizedTextColor,
+        iconVariant: normalizedSourceItem.iconVariant || "current",
+        groupId: normalizedSourceItem.groupId || "",
+        labelOffsetX: entryLayout ? (Number.isFinite(normalizedSourceItem.labelOffsetX) ? normalizedSourceItem.labelOffsetX : entryLayout.labelOffsetX) : 0,
+        labelOffsetY: entryLayout ? (Number.isFinite(normalizedSourceItem.labelOffsetY) ? normalizedSourceItem.labelOffsetY : entryLayout.labelOffsetY) : 0,
+        labelWidth: entryLayout ? (Number.isFinite(normalizedSourceItem.labelWidth) ? normalizedSourceItem.labelWidth : entryLayout.labelWidth) : 0,
+        labelHeight: entryLayout ? (Number.isFinite(normalizedSourceItem.labelHeight) ? normalizedSourceItem.labelHeight : entryLayout.labelHeight) : 0
       };
+    });
+    if(workflowId === "wf-cotizaciones" && !parsed.items.some(function(item){ return item.id === "icon-warning-note-2"; })){
+      parsed.items.push({
+        id: "icon-warning-note-2",
+        type: "icon",
+        kind: "",
+        title: "",
+        html: "",
+        badge: "",
+        badgeClass: "",
+        step: "",
+        x: 1174,
+        y: 184,
+        width: 20,
+        height: 20,
+        fontSize: 12,
+        borderColor: "transparent",
+        backgroundColor: "transparent",
+        textColor: "#30424d",
+        iconVariant: "warning",
+        groupId: "",
+        labelOffsetX: 0,
+        labelOffsetY: 0,
+        labelWidth: 0,
+        labelHeight: 0
+      });
+    }
+    parsed.items = parsed.items.map(function(item){
+      if(workflowId === "wf-cotizaciones" && item && item.id === "icon-warning-note-2"){
+        return Object.assign({}, item, {
+          x: Number.isFinite(item.x) ? item.x : 1174,
+          y: Number.isFinite(item.y) ? item.y : 184,
+          width: 20,
+          height: 20,
+          iconVariant: "warning"
+        });
+      }
+      return item;
     });
     parsed.connectors = Array.isArray(parsed.connectors) ? parsed.connectors.map(function(connector, index){
       return {
@@ -774,7 +916,8 @@ function loadWorkflowState(){
           };
         }) : [],
         color: connector.color || "#7d7d7d",
-        strokeWidth: Number.isFinite(connector.strokeWidth) ? connector.strokeWidth : 2
+        strokeWidth: Number.isFinite(connector.strokeWidth) ? connector.strokeWidth : 2,
+        groupId: connector.groupId || ""
       };
     }) : [];
     return parsed;
@@ -783,8 +926,18 @@ function loadWorkflowState(){
   }
 }
 
-function saveWorkflowState(){
-  window.localStorage.setItem(workflowStorageKey, JSON.stringify(workflowState));
+function saveWorkflowState(options){
+  const settings = options || {};
+  const serialized = JSON.stringify(workflowState);
+  if(settings.trackHistory !== false && serialized !== workflowLastSavedSnapshot){
+    workflowUndoStack.push(workflowLastSavedSnapshot);
+    if(workflowUndoStack.length > 80){
+      workflowUndoStack.shift();
+    }
+    workflowRedoStack = [];
+  }
+  workflowLastSavedSnapshot = serialized;
+  window.localStorage.setItem(workflowStorageKey, serialized);
 }
 
 function loadWorkflowBaseState(){
@@ -820,6 +973,45 @@ function loadWorkflowZoom(){
 
 function saveWorkflowZoom(){
   window.localStorage.setItem(WORKFLOW_ZOOM_STORAGE_KEY_PREFIX + workflowToken, String(workflowZoom));
+}
+
+function loadWorkflowPalette(){
+  try{
+    const raw = String(window.localStorage.getItem(workflowPaletteStorageKey) || "").trim().toLowerCase();
+    return raw === "blue" ? "blue" : "orange";
+  }catch(error){
+    return "orange";
+  }
+}
+
+function saveWorkflowPalette(){
+  window.localStorage.setItem(workflowPaletteStorageKey, workflowPalette);
+}
+
+function applyWorkflowPalette(){
+  document.body.dataset.palette = workflowPalette;
+  const orangeButton = document.getElementById("workflowPaletteOrangeButton");
+  const blueButton = document.getElementById("workflowPaletteBlueButton");
+  if(orangeButton){
+    orangeButton.classList.toggle("is-active", workflowPalette === "orange");
+    orangeButton.setAttribute("aria-pressed", workflowPalette === "orange" ? "true" : "false");
+  }
+  if(blueButton){
+    blueButton.classList.toggle("is-active", workflowPalette === "blue");
+    blueButton.setAttribute("aria-pressed", workflowPalette === "blue" ? "true" : "false");
+  }
+}
+
+function setWorkflowPalette(nextPalette){
+  const normalized = nextPalette === "blue" ? "blue" : "orange";
+  if(workflowPalette === normalized){
+    applyWorkflowPalette();
+    return;
+  }
+  workflowPalette = normalized;
+  saveWorkflowPalette();
+  applyWorkflowPalette();
+  updateWorkflowStatus(normalized === "blue" ? "Paleta azul PDF aplicada." : "Paleta naranjo aplicada.");
 }
 
 function updateWorkflowStatus(message){
@@ -1376,6 +1568,49 @@ function getWorkflowConnectorToolbarPlacement(connector){
   };
 }
 
+function normalizeWorkflowSelectionRect(rect){
+  const startX = Number(rect.startX) || 0;
+  const startY = Number(rect.startY) || 0;
+  const currentX = Number(rect.currentX) || startX;
+  const currentY = Number(rect.currentY) || startY;
+  const x = Math.min(startX, currentX);
+  const y = Math.min(startY, currentY);
+  const width = Math.abs(currentX - startX);
+  const height = Math.abs(currentY - startY);
+  return { x, y, width, height };
+}
+
+function getWorkflowItemBounds(item){
+  return {
+    minX: item.x,
+    minY: item.y,
+    maxX: item.x + (item.width || 0),
+    maxY: item.y + (item.height || 0)
+  };
+}
+
+function doesWorkflowRectIntersectBounds(rect, bounds){
+  return rect.x <= bounds.maxX
+    && (rect.x + rect.width) >= bounds.minX
+    && rect.y <= bounds.maxY
+    && (rect.y + rect.height) >= bounds.minY;
+}
+
+function getWorkflowConnectorSelectionBounds(connector){
+  return getWorkflowConnectorBounds(getWorkflowEditableConnectorPoints(connector));
+}
+
+function renderWorkflowSelectionBox(){
+  if(!isEditingWorkflow || !activeWorkflowSelectionBox){
+    return "";
+  }
+  const rect = normalizeWorkflowSelectionRect(activeWorkflowSelectionBox);
+  if(rect.width < 2 && rect.height < 2){
+    return "";
+  }
+  return `<div class="workflow-selection-box" style="left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px"></div>`;
+}
+
 function getPublicationBounds(){
   let maxX = PUBLICATION_WIDTH;
   let maxY = PUBLICATION_HEIGHT;
@@ -1420,6 +1655,8 @@ function renderWorkflowCanvas(){
   const floatingToolsEl = document.getElementById("floatingWorkflowTools");
   const inlineToolsEl = document.getElementById("workflowDiagramInlineTools");
   const inspectorEl = document.getElementById("workflowInspector");
+  const undoButtonEl = document.getElementById("undoWorkflowButton");
+  const redoButtonEl = document.getElementById("redoWorkflowButton");
   const selectedItem = getSelectedWorkflowItem();
   const selectedConnector = getSelectedWorkflowConnector();
   const bounds = getCanvasBounds();
@@ -1427,6 +1664,7 @@ function renderWorkflowCanvas(){
   const scaledHeight = Math.ceil(bounds.height * workflowZoom);
   const isDraggingObject = Boolean(activeDrag && (
     activeDrag.mode === "item" ||
+    activeDrag.mode === "selection-move" ||
     activeDrag.mode === "item-resize" ||
     activeDrag.mode === "entry-label-move" ||
     activeDrag.mode === "actor-label-move" ||
@@ -1462,6 +1700,8 @@ function renderWorkflowCanvas(){
     }
   }
   editToolsEl.classList.toggle("is-visible", isEditingWorkflow);
+  undoButtonEl.disabled = !workflowUndoStack.length;
+  redoButtonEl.disabled = !workflowRedoStack.length;
   inspectorEl.classList.toggle("is-visible", Boolean(isEditingWorkflow && (isInspectorEditableItem(selectedItem) || selectedConnector)));
   floatingEditButtonEl.title = isEditingWorkflow ? "Volver a publicación" : "Entrar a edición";
   floatingEditButtonEl.setAttribute("aria-label", isEditingWorkflow ? "Volver a publicación" : "Entrar a edición");
@@ -1477,6 +1717,10 @@ function renderWorkflowCanvas(){
     canvasShellEl.scrollTop = 0;
   }
   zoomValueEl.textContent = Math.round(workflowZoom * 100) + "%";
+  selectedWorkflowItemIds = selectedWorkflowItemIds.filter(function(id){ return Boolean(getWorkflowItemById(id)); });
+  selectedWorkflowConnectorIds = selectedWorkflowConnectorIds.filter(function(id){
+    return workflowState.connectors.some(function(connector){ return connector.id === id; });
+  });
   if(selectedWorkflowItemId && !selectedItem){
     selectedWorkflowItemId = "";
   }
@@ -1487,25 +1731,30 @@ function renderWorkflowCanvas(){
   viewportEl.innerHTML = "";
   if(isEditingWorkflow){
     viewportEl.onclick = function(event){
+      if(suppressWorkflowViewportClick){
+        suppressWorkflowViewportClick = false;
+        return;
+      }
       if(event.target === viewportEl){
-        selectedWorkflowItemId = "";
-        selectedWorkflowConnectorId = "";
-        openWorkflowConnectorToolbarId = "";
+        clearWorkflowSelectionState();
         renderWorkflowCanvas();
         updateWorkflowStatus("Selección limpiada.");
       }
     };
+    viewportEl.onpointerdown = startWorkflowSelectionBox;
   }else{
     viewportEl.onclick = null;
+    viewportEl.onpointerdown = null;
   }
   viewportEl.insertAdjacentHTML("beforeend", renderWorkflowConnectors(bounds));
   viewportEl.insertAdjacentHTML("beforeend", renderWorkflowConnectorDraft());
   viewportEl.insertAdjacentHTML("beforeend", renderWorkflowAnchorPreview());
+  viewportEl.insertAdjacentHTML("beforeend", renderWorkflowSelectionBox());
   bindWorkflowConnectorInteractions();
   workflowState.items.forEach(function(item){
     const el = document.createElement("div");
     el.className = getWorkflowItemClassName(item);
-    if(item.id === selectedWorkflowItemId){
+    if(isWorkflowItemSelected(item.id)){
       el.classList.add("is-selected");
     }
     el.dataset.itemId = item.id;
@@ -1521,7 +1770,10 @@ function renderWorkflowCanvas(){
       el.style.height = item.height + "px";
     }
     el.style.fontSize = (item.fontSize || getDefaultWorkflowItem(item.type).fontSize) + "px";
-    el.style.color = item.textColor || getDefaultWorkflowItem(item.type).textColor;
+    el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, item.type === "process" ? "process-text" : "node-text");
+    if(item.type === "process"){
+      el.style.setProperty("--workflow-process-stroke", getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem("process").borderColor, "process-stroke"));
+    }
     if(item.kind){
       if(item.kind === "actor"){
         el.innerHTML = buildWorkflowActorMarkup(item);
@@ -1538,17 +1790,18 @@ function renderWorkflowCanvas(){
           });
         }
       }else if(item.kind === "flow-card"){
-        el.style.borderColor = item.borderColor || getDefaultWorkflowItem("activity").borderColor;
-        el.style.background = item.backgroundColor || getDefaultWorkflowItem("activity").backgroundColor;
+        el.style.borderColor = getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem("activity").borderColor, "node-border");
+        el.style.background = getThemedWorkflowColorToken(item.backgroundColor || getDefaultWorkflowItem("activity").backgroundColor, "node-fill");
         el.style.fontSize = (item.fontSize || getDefaultWorkflowItem("activity").fontSize) + "px";
-        el.style.color = item.textColor || getDefaultWorkflowItem("activity").textColor;
+        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("activity").textColor, "node-text");
         el.innerHTML = `${item.badge ? `<div class="badge${item.badgeClass ? " " + item.badgeClass : ""}">${escapeHtml(item.badge)}</div>` : ""}<div class="canvas-item-flow-content">${item.html || ""}</div>`;
       }else if(item.kind === "tag"){
+        el.style.color = getThemedWorkflowColorToken(item.textColor || "#eb7a07", "accent-text");
         const icon = getCotizacionesSystemIcon(item.html);
         const iconEl = document.createElement("span");
         const labelEl = document.createElement("span");
         iconEl.className = "tag-icon";
-        iconEl.style.backgroundImage = `url("${icon}")`;
+        iconEl.innerHTML = icon;
         labelEl.className = "tag-label";
         labelEl.textContent = String(item.html || "");
         el.appendChild(iconEl);
@@ -1568,13 +1821,15 @@ function renderWorkflowCanvas(){
         }else{
           el.innerHTML = item.html || "";
         }
+      }else if(item.kind === "dashed-box"){
+        el.innerHTML = buildWorkflowDashedBoxMarkup(item.html);
       }else{
-        el.style.color = item.textColor || getDefaultWorkflowItem("text").textColor;
+        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("text").textColor, item.kind === "note" ? "accent-text" : "node-text");
         el.innerHTML = item.html || "";
       }
     }else{
-      el.style.borderColor = item.borderColor || getDefaultWorkflowItem(item.type).borderColor;
-      el.style.background = item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor;
+      el.style.borderColor = getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem(item.type).borderColor, item.type === "process" ? "process-stroke" : "node-border");
+      el.style.background = getThemedWorkflowColorToken(item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor, item.type === "process" ? "process-fill" : "node-fill");
       if(isWorkflowTerminalType(item.type)){
         const dot = document.createElement("span");
         dot.className = item.type === "output" ? "workflow-output-dot" : "workflow-entry-dot";
@@ -1664,7 +1919,7 @@ function renderWorkflowCanvas(){
 
 function renderWorkflowConnectors(bounds){
   const lines = workflowState.connectors.map(function(connector){
-    const selectedClass = connector.id === selectedWorkflowConnectorId ? " is-selected" : "";
+    const selectedClass = isWorkflowConnectorSelected(connector.id) ? " is-selected" : "";
     const points = buildWorkflowConnectorPoints(connector).map(function(point){
       return point.x + "," + point.y;
     }).join(" ");
@@ -1770,6 +2025,9 @@ function getWorkflowItemClassName(item){
   if(item.kind){
     return "canvas-item " + item.kind + (isEditingWorkflow ? " is-draggable" : "");
   }
+  if(item.type === "process"){
+    return "workflow-node workflow-process";
+  }
   if(item.type === "text"){
     return "workflow-text";
   }
@@ -1796,6 +2054,69 @@ function getSelectedWorkflowConnector(){
   return workflowState.connectors.find(function(entry){ return entry.id === selectedWorkflowConnectorId; }) || null;
 }
 
+function dedupeWorkflowIds(ids){
+  return Array.from(new Set((Array.isArray(ids) ? ids : []).filter(Boolean)));
+}
+
+function setWorkflowSelectionState(itemIds, connectorIds, primaryItemId, primaryConnectorId){
+  selectedWorkflowItemIds = dedupeWorkflowIds(itemIds);
+  selectedWorkflowConnectorIds = dedupeWorkflowIds(connectorIds);
+  selectedWorkflowItemId = selectedWorkflowItemIds.length === 1 && !selectedWorkflowConnectorIds.length
+    ? (primaryItemId || selectedWorkflowItemIds[0])
+    : "";
+  selectedWorkflowConnectorId = selectedWorkflowConnectorIds.length === 1 && !selectedWorkflowItemIds.length
+    ? (primaryConnectorId || selectedWorkflowConnectorIds[0])
+    : "";
+  if(openWorkflowConnectorToolbarId && !selectedWorkflowConnectorIds.includes(openWorkflowConnectorToolbarId)){
+    openWorkflowConnectorToolbarId = "";
+  }
+}
+
+function clearWorkflowSelectionState(){
+  setWorkflowSelectionState([], [], "", "");
+  openWorkflowTransformMenuItemId = "";
+}
+
+function isWorkflowItemSelected(itemId){
+  return selectedWorkflowItemIds.includes(itemId);
+}
+
+function isWorkflowConnectorSelected(connectorId){
+  return selectedWorkflowConnectorIds.includes(connectorId);
+}
+
+function getWorkflowGroupSelection(groupId){
+  if(!groupId){
+    return { itemIds: [], connectorIds: [] };
+  }
+  return {
+    itemIds: workflowState.items.filter(function(item){ return item.groupId === groupId; }).map(function(item){ return item.id; }),
+    connectorIds: workflowState.connectors.filter(function(connector){ return connector.groupId === groupId; }).map(function(connector){ return connector.id; })
+  };
+}
+
+function getWorkflowSelectionForItem(itemId){
+  const item = getWorkflowItemById(itemId);
+  if(!item){
+    return { itemIds: [], connectorIds: [] };
+  }
+  if(item.groupId){
+    return getWorkflowGroupSelection(item.groupId);
+  }
+  return { itemIds: [itemId], connectorIds: [] };
+}
+
+function getWorkflowSelectionForConnector(connectorId){
+  const connector = workflowState.connectors.find(function(entry){ return entry.id === connectorId; });
+  if(!connector){
+    return { itemIds: [], connectorIds: [] };
+  }
+  if(connector.groupId){
+    return getWorkflowGroupSelection(connector.groupId);
+  }
+  return { itemIds: [], connectorIds: [connectorId] };
+}
+
 function buildWorkflowActorMarkup(item){
   const showResize = isEditingWorkflow && item.id === selectedWorkflowItemId;
   return `<span class="actor-icon" aria-hidden="true"></span><div class="workflow-actor-label-shell${showResize ? " is-selected" : ""}" style="--actor-label-offset-x:${item.labelOffsetX || 0}px;--actor-label-offset-y:${item.labelOffsetY || 0}px;width:${item.labelWidth || getDefaultActorLabelLayout().labelWidth}px;min-height:${item.labelHeight || getDefaultActorLabelLayout().labelHeight}px"><span class="workflow-item-label">${item.html || ""}</span>${showResize ? '<button type="button" class="workflow-entry-label-resize"></button>' : ""}</div>`;
@@ -1814,6 +2135,9 @@ function getWorkflowTransformType(item){
   if(item.kind === "actor"){
     return "role";
   }
+  if(item.type === "process"){
+    return "process";
+  }
   return item.type;
 }
 
@@ -1821,12 +2145,12 @@ function selectWorkflowItem(itemId){
   if(!isEditingWorkflow){
     return;
   }
-  selectedWorkflowItemId = itemId;
-  selectedWorkflowConnectorId = "";
+  const selection = getWorkflowSelectionForItem(itemId);
+  setWorkflowSelectionState(selection.itemIds, selection.connectorIds, selection.itemIds.length === 1 ? itemId : "", "");
   openWorkflowConnectorToolbarId = "";
   openWorkflowTransformMenuItemId = "";
   renderWorkflowCanvas();
-  updateWorkflowStatus("Objeto seleccionado para personalización.");
+  updateWorkflowStatus((selection.itemIds.length + selection.connectorIds.length) > 1 ? "Grupo seleccionado." : "Objeto seleccionado para personalización.");
 }
 
 function selectWorkflowConnector(connectorId, options){
@@ -1834,12 +2158,12 @@ function selectWorkflowConnector(connectorId, options){
     return;
   }
   const settings = options || {};
-  selectedWorkflowConnectorId = connectorId;
-  selectedWorkflowItemId = "";
+  const selection = getWorkflowSelectionForConnector(connectorId);
+  setWorkflowSelectionState(selection.itemIds, selection.connectorIds, "", selection.connectorIds.length === 1 ? connectorId : "");
   openWorkflowTransformMenuItemId = "";
   openWorkflowConnectorToolbarId = settings.openToolbar ? connectorId : "";
   renderWorkflowCanvas();
-  updateWorkflowStatus(settings.openToolbar ? "Panel del conector abierto." : "Conector seleccionado. Arrastra los extremos para reanclar.");
+  updateWorkflowStatus(settings.openToolbar ? "Panel del conector abierto." : ((selection.itemIds.length + selection.connectorIds.length) > 1 ? "Grupo seleccionado." : "Conector seleccionado. Arrastra los extremos para reanclar."));
 }
 
 function editWorkflowItem(itemId){
@@ -1903,6 +2227,51 @@ function duplicateWorkflowItem(itemId){
   updateWorkflowStatus("Objeto duplicado.");
 }
 
+function groupWorkflowSelection(){
+  const totalSelected = selectedWorkflowItemIds.length + selectedWorkflowConnectorIds.length;
+  if(totalSelected < 2){
+    updateWorkflowStatus("Selecciona al menos dos elementos para agrupar.");
+    return;
+  }
+  const groupId = "group-" + Date.now();
+  workflowState.items.forEach(function(item){
+    if(selectedWorkflowItemIds.includes(item.id)){
+      item.groupId = groupId;
+    }
+  });
+  workflowState.connectors.forEach(function(connector){
+    if(selectedWorkflowConnectorIds.includes(connector.id)){
+      connector.groupId = groupId;
+    }
+  });
+  saveWorkflowState();
+  renderWorkflowCanvas();
+  updateWorkflowStatus("Selección agrupada.");
+}
+
+function ungroupWorkflowSelection(){
+  let changed = false;
+  workflowState.items.forEach(function(item){
+    if(selectedWorkflowItemIds.includes(item.id) && item.groupId){
+      item.groupId = "";
+      changed = true;
+    }
+  });
+  workflowState.connectors.forEach(function(connector){
+    if(selectedWorkflowConnectorIds.includes(connector.id) && connector.groupId){
+      connector.groupId = "";
+      changed = true;
+    }
+  });
+  if(!changed){
+    updateWorkflowStatus("La selección no pertenece a un grupo.");
+    return;
+  }
+  saveWorkflowState();
+  renderWorkflowCanvas();
+  updateWorkflowStatus("Selección desagrupada.");
+}
+
 function deleteWorkflowConnector(connectorId){
   const connector = workflowState.connectors.find(function(entry){ return entry.id === connectorId; });
   if(!connector){
@@ -1917,6 +2286,34 @@ function deleteWorkflowConnector(connectorId){
   saveWorkflowState();
   renderWorkflowCanvas();
   updateWorkflowStatus("Conector eliminado del workflow.");
+}
+
+function deleteWorkflowSelection(){
+  if(!isEditingWorkflow || activeDrag){
+    return;
+  }
+  const itemIdsToDelete = dedupeWorkflowIds(selectedWorkflowItemIds);
+  const connectorIdsToDelete = dedupeWorkflowIds(selectedWorkflowConnectorIds.concat(
+    workflowState.connectors.filter(function(connector){
+      return itemIdsToDelete.includes(connector.from && connector.from.itemId)
+        || itemIdsToDelete.includes(connector.to && connector.to.itemId);
+    }).map(function(connector){
+      return connector.id;
+    })
+  ));
+  if(!itemIdsToDelete.length && !connectorIdsToDelete.length){
+    return;
+  }
+  workflowState.items = workflowState.items.filter(function(item){
+    return !itemIdsToDelete.includes(item.id);
+  });
+  workflowState.connectors = workflowState.connectors.filter(function(connector){
+    return !connectorIdsToDelete.includes(connector.id);
+  });
+  clearWorkflowSelectionState();
+  saveWorkflowState();
+  renderWorkflowCanvas();
+  updateWorkflowStatus("Selección eliminada del workflow.");
 }
 
 function toggleWorkflowTransformMenu(itemId){
@@ -2001,6 +2398,20 @@ function convertWorkflowItem(itemId, targetType){
     item.labelOffsetY = actorLabelLayout.labelOffsetY;
     item.labelWidth = actorLabelLayout.labelWidth;
     item.labelHeight = actorLabelLayout.labelHeight;
+  }else if(targetType === "process"){
+    const processDefaults = getDefaultWorkflowItem("process");
+    delete item.kind;
+    delete item.html;
+    delete item.badge;
+    delete item.badgeClass;
+    delete item.step;
+    item.title = sourceText || "Nuevo proceso";
+    item.width = processDefaults.width;
+    item.height = processDefaults.height;
+    item.fontSize = processDefaults.fontSize;
+    item.borderColor = processDefaults.borderColor;
+    item.backgroundColor = processDefaults.backgroundColor;
+    item.textColor = processDefaults.textColor;
   }else if(targetType === "text"){
     delete item.kind;
     delete item.html;
@@ -2174,6 +2585,7 @@ function syncWorkflowItemControls(el, item){
     menu.className = "workflow-item-transform-menu";
     [
       { type: "activity", label: "Actividad" },
+      { type: "process", label: "Proceso" },
       { type: "subactivity", label: "Subactividad" },
       { type: "role", label: "Rol" },
       { type: "entry", label: "Entrada" },
@@ -2283,12 +2695,19 @@ function renderWorkflowInspector(){
   }
   const minFontSize = item.type === "icon" ? 16 : 12;
   const maxFontSize = item.type === "icon" ? 40 : 32;
+  const defaultBackgroundColor = item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor;
+  const initialBackgroundInputColor = normalizeColorValue(
+    isTransparentColor(defaultBackgroundColor)
+      ? getDefaultWorkflowItem("activity").backgroundColor
+      : defaultBackgroundColor
+  );
   const draft = {
     title: item.kind ? (item.html || "") : item.title,
     badge: item.badge || "",
     fontSize: item.fontSize || getDefaultWorkflowItem(item.type).fontSize,
     borderColor: normalizeColorValue(item.borderColor || getDefaultWorkflowItem(item.type).borderColor),
-    backgroundColor: normalizeColorValue(item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor),
+    backgroundColor: defaultBackgroundColor,
+    backgroundColorInput: initialBackgroundInputColor,
     textColor: normalizeColorValue(item.textColor || getDefaultWorkflowItem(item.type).textColor),
     iconVariant: item.iconVariant || "current"
   };
@@ -2335,7 +2754,11 @@ function renderWorkflowInspector(){
       </div>
       <div class="workflow-inspector-color">
         <label for="workflowObjectBackgroundColor">Color de fondo</label>
-        <input id="workflowObjectBackgroundColor" type="color" value="${draft.backgroundColor}">
+        <input id="workflowObjectBackgroundColor" type="color" value="${draft.backgroundColorInput}"${isTransparentColor(draft.backgroundColor) ? " disabled" : ""}>
+        <label class="workflow-inspector-check" for="workflowObjectBackgroundTransparent">
+          <input id="workflowObjectBackgroundTransparent" type="checkbox"${isTransparentColor(draft.backgroundColor) ? " checked" : ""}>
+          <span>Fondo transparente</span>
+        </label>
       </div>
     </div>
     <div class="workflow-inspector-color-row">
@@ -2359,6 +2782,7 @@ function renderWorkflowInspector(){
   const valueEl = document.getElementById("workflowObjectFontSizeValue");
   const borderColorEl = document.getElementById("workflowObjectBorderColor");
   const backgroundColorEl = document.getElementById("workflowObjectBackgroundColor");
+  const backgroundTransparentEl = document.getElementById("workflowObjectBackgroundTransparent");
   const textColorEl = document.getElementById("workflowObjectTextColor");
   const iconVariantEl = document.getElementById("workflowIconVariant");
   const applyButton = document.getElementById("applyWorkflowInspectorButton");
@@ -2415,9 +2839,22 @@ function renderWorkflowInspector(){
     applyInspectorDraft(true);
   });
   backgroundColorEl.addEventListener("input", function(){
+    draft.backgroundColorInput = backgroundColorEl.value;
     draft.backgroundColor = backgroundColorEl.value;
     applyInspectorDraft(true);
   });
+  if(backgroundTransparentEl){
+    backgroundTransparentEl.addEventListener("change", function(){
+      if(backgroundTransparentEl.checked){
+        draft.backgroundColor = "transparent";
+        backgroundColorEl.disabled = true;
+      }else{
+        draft.backgroundColor = draft.backgroundColorInput || initialBackgroundInputColor;
+        backgroundColorEl.disabled = false;
+      }
+      applyInspectorDraft(true);
+    });
+  }
   textColorEl.addEventListener("input", function(){
     draft.textColor = textColorEl.value;
     applyInspectorDraft(true);
@@ -2447,12 +2884,21 @@ function renderWorkflowInspector(){
       }
       draft.fontSize = copiedWorkflowActivityStyle.fontSize;
       draft.borderColor = normalizeColorValue(copiedWorkflowActivityStyle.borderColor || draft.borderColor);
-      draft.backgroundColor = normalizeColorValue(copiedWorkflowActivityStyle.backgroundColor || draft.backgroundColor);
+      draft.backgroundColor = copiedWorkflowActivityStyle.backgroundColor || draft.backgroundColor;
+      draft.backgroundColorInput = normalizeColorValue(
+        isTransparentColor(draft.backgroundColor)
+          ? initialBackgroundInputColor
+          : draft.backgroundColor
+      );
       draft.textColor = normalizeColorValue(copiedWorkflowActivityStyle.textColor || draft.textColor);
       rangeEl.value = draft.fontSize;
       valueEl.value = draft.fontSize;
       borderColorEl.value = draft.borderColor;
-      backgroundColorEl.value = draft.backgroundColor;
+      backgroundColorEl.value = draft.backgroundColorInput;
+      backgroundColorEl.disabled = isTransparentColor(draft.backgroundColor);
+      if(backgroundTransparentEl){
+        backgroundTransparentEl.checked = isTransparentColor(draft.backgroundColor);
+      }
       textColorEl.value = draft.textColor;
       mutateSelectedWorkflowItem(function(target){
         applyWorkflowActivityStyleSnapshot(target, copiedWorkflowActivityStyle);
@@ -2473,6 +2919,9 @@ function mutateSelectedWorkflowItem(mutator){
 }
 
 function getInspectorTypeLabel(type){
+  if(type === "process"){
+    return "Proceso";
+  }
   if(type === "subactivity"){
     return "Subactividad";
   }
@@ -2511,7 +2960,10 @@ function applySelectedWorkflowItemPreview(item){
       el.style.width = item.width + "px";
       el.style.height = item.height + "px";
     }
-    el.style.color = item.textColor || getDefaultWorkflowItem(item.type).textColor;
+    el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, item.type === "process" ? "process-text" : "node-text");
+    if(item.type === "process"){
+      el.style.setProperty("--workflow-process-stroke", getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem("process").borderColor, "process-stroke"));
+    }
     if(item.kind){
       if(item.kind === "actor"){
         el.innerHTML = buildWorkflowActorMarkup(item);
@@ -2528,21 +2980,26 @@ function applySelectedWorkflowItemPreview(item){
           });
         }
       }else if(item.kind === "flow-card"){
-        el.style.borderColor = item.borderColor || getDefaultWorkflowItem("activity").borderColor;
-        el.style.background = item.backgroundColor || getDefaultWorkflowItem("activity").backgroundColor;
+        el.style.borderColor = getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem("activity").borderColor, "node-border");
+        el.style.background = getThemedWorkflowColorToken(item.backgroundColor || getDefaultWorkflowItem("activity").backgroundColor, "node-fill");
         el.style.fontSize = (item.fontSize || getDefaultWorkflowItem("activity").fontSize) + "px";
-        el.style.color = item.textColor || getDefaultWorkflowItem("activity").textColor;
+        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("activity").textColor, "node-text");
         el.innerHTML = `${item.badge ? `<div class="badge${item.badgeClass ? " " + item.badgeClass : ""}">${escapeHtml(item.badge)}</div>` : ""}<div class="canvas-item-flow-content">${item.html || ""}</div>`;
+      }else if(item.kind === "tag"){
+        el.style.color = getThemedWorkflowColorToken(item.textColor || "#eb7a07", "accent-text");
+        el.innerHTML = `<span class="tag-icon">${getCotizacionesSystemIcon(item.html)}</span><span class="tag-label">${escapeHtml(String(item.html || ""))}</span>`;
+      }else if(item.kind === "dashed-box"){
+        el.innerHTML = buildWorkflowDashedBoxMarkup(item.html);
       }else{
-        el.style.color = item.textColor || getDefaultWorkflowItem("text").textColor;
+        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("text").textColor, item.kind === "note" ? "accent-text" : "node-text");
         el.innerHTML = `${item.html || ""}`;
       }
       syncWorkflowItemControls(el, item);
     }else{
       el.style.fontSize = (item.fontSize || getDefaultWorkflowItem(item.type).fontSize) + "px";
-      el.style.borderColor = item.borderColor || getDefaultWorkflowItem(item.type).borderColor;
-      el.style.background = item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor;
-      el.style.color = item.textColor || getDefaultWorkflowItem(item.type).textColor;
+      el.style.borderColor = getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem(item.type).borderColor, item.type === "process" ? "process-stroke" : "node-border");
+      el.style.background = getThemedWorkflowColorToken(item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor, item.type === "process" ? "process-fill" : "node-fill");
+      el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, item.type === "process" ? "process-text" : "node-text");
       const labelEl = el.querySelector(".workflow-item-label");
       const labelShellEl = el.querySelector(".workflow-entry-label-shell");
       if(labelShellEl && hasWorkflowFloatingLabel(item.type)){
@@ -2589,10 +3046,11 @@ function normalizeColorValue(value){
       ? "#" + normalized.slice(1).split("").map(function(char){ return char + char; }).join("")
       : normalized;
   }
-  if(normalized === "transparent"){
-    return "#ffffff";
-  }
   return "#ffffff";
+}
+
+function isTransparentColor(value){
+  return String(value || "").trim().toLowerCase() === "transparent";
 }
 
 function buildWorkflowActivityStyleSnapshot(item){
@@ -2644,15 +3102,42 @@ function startWorkflowDrag(event){
     return;
   }
   event.preventDefault();
-  selectedWorkflowItemId = itemId;
-  activeDrag = {
-    mode: "item",
-    id: itemId,
-    startX: event.clientX,
-    startY: event.clientY,
-    originX: item.x,
-    originY: item.y
-  };
+  const selection = isWorkflowItemSelected(itemId)
+    ? { itemIds: selectedWorkflowItemIds.slice(), connectorIds: selectedWorkflowConnectorIds.slice() }
+    : getWorkflowSelectionForItem(itemId);
+  if(selection.itemIds.length + selection.connectorIds.length > 1){
+    setWorkflowSelectionState(selection.itemIds, selection.connectorIds, "", "");
+    activeDrag = {
+      mode: "selection-move",
+      startX: event.clientX,
+      startY: event.clientY,
+      itemOrigins: selection.itemIds.map(function(id){
+        const entry = getWorkflowItemById(id);
+        return entry ? { id: id, x: entry.x, y: entry.y } : null;
+      }).filter(Boolean),
+      connectorOrigins: selection.connectorIds.map(function(id){
+        const entry = workflowState.connectors.find(function(connector){ return connector.id === id; });
+        return entry ? {
+          id: id,
+          x1: entry.x1,
+          y1: entry.y1,
+          x2: entry.x2,
+          y2: entry.y2,
+          via: (entry.via || []).map(function(point){ return { x: point.x, y: point.y }; })
+        } : null;
+      }).filter(Boolean)
+    };
+  }else{
+    setWorkflowSelectionState([itemId], [], itemId, "");
+    activeDrag = {
+      mode: "item",
+      id: itemId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: item.x,
+      originY: item.y
+    };
+  }
   event.currentTarget.classList.add("is-dragging");
   window.addEventListener("pointermove", onWorkflowPointerMove);
   window.addEventListener("pointerup", onWorkflowPointerUp);
@@ -2680,6 +3165,32 @@ function startWorkflowEntryLabelDrag(event, itemId){
     originLabelOffsetX: item.labelOffsetX,
     originLabelOffsetY: item.labelOffsetY
   };
+  window.addEventListener("pointermove", onWorkflowPointerMove);
+  window.addEventListener("pointerup", onWorkflowPointerUp);
+}
+
+function startWorkflowSelectionBox(event){
+  if(!isEditingWorkflow || event.button !== 0){
+    return;
+  }
+  if(event.target !== event.currentTarget){
+    return;
+  }
+  const pointer = getWorkflowPointer(event);
+  event.preventDefault();
+  clearWorkflowSelectionState();
+  activeWorkflowSelectionBox = {
+    startX: pointer.x,
+    startY: pointer.y,
+    currentX: pointer.x,
+    currentY: pointer.y
+  };
+  activeDrag = {
+    mode: "selection-marquee",
+    startX: event.clientX,
+    startY: event.clientY
+  };
+  renderWorkflowCanvas();
   window.addEventListener("pointermove", onWorkflowPointerMove);
   window.addEventListener("pointerup", onWorkflowPointerUp);
 }
@@ -2817,6 +3328,15 @@ function onWorkflowPointerMove(event){
     shellEl.scrollTop = activeDrag.originScrollTop - (event.clientY - activeDrag.startY);
     return;
   }
+  if(activeDrag.mode === "selection-marquee"){
+    const pointer = getWorkflowPointer(event);
+    activeWorkflowSelectionBox = Object.assign({}, activeWorkflowSelectionBox || {}, {
+      currentX: pointer.x,
+      currentY: pointer.y
+    });
+    renderWorkflowCanvas();
+    return;
+  }
   if(activeDrag.mode === "connector-create"){
     const pointer = getWorkflowPointer(event);
     activeDrag.currentX = pointer.x;
@@ -2842,6 +3362,32 @@ function onWorkflowPointerMove(event){
     }else{
       applySelectedWorkflowItemPreview(item);
     }
+  }else if(activeDrag.mode === "selection-move"){
+    activeDrag.itemOrigins.forEach(function(origin){
+      const item = getWorkflowItemById(origin.id);
+      if(!item){
+        return;
+      }
+      item.x = clamp(origin.x + deltaX, 20, bounds.width - item.width - 20);
+      item.y = clamp(origin.y + deltaY, 20, bounds.height - item.height - 20);
+    });
+    activeDrag.connectorOrigins.forEach(function(origin){
+      const connector = workflowState.connectors.find(function(entry){ return entry.id === origin.id; });
+      if(!connector){
+        return;
+      }
+      connector.x1 = clamp(origin.x1 + deltaX, 20, bounds.width - 20);
+      connector.y1 = clamp(origin.y1 + deltaY, 20, bounds.height - 20);
+      connector.x2 = clamp(origin.x2 + deltaX, 20, bounds.width - 20);
+      connector.y2 = clamp(origin.y2 + deltaY, 20, bounds.height - 20);
+      connector.via = origin.via.map(function(point){
+        return {
+          x: clamp(point.x + deltaX, 20, bounds.width - 20),
+          y: clamp(point.y + deltaY, 20, bounds.height - 20)
+        };
+      });
+    });
+    shouldRender = true;
   }else if(activeDrag.mode === "entry-label-move"){
     const item = workflowState.items.find(function(entry){ return entry.id === activeDrag.id; });
     if(!item){
@@ -2936,6 +3482,27 @@ function onWorkflowPointerMove(event){
 function onWorkflowPointerUp(){
   if(!activeDrag){
     return;
+  }
+  if(activeDrag.mode === "selection-marquee"){
+    const rect = normalizeWorkflowSelectionRect(activeWorkflowSelectionBox || {});
+    if(rect.width > 4 || rect.height > 4){
+      const itemIds = workflowState.items.filter(function(item){
+        return doesWorkflowRectIntersectBounds(rect, getWorkflowItemBounds(item));
+      }).map(function(item){
+        return item.id;
+      });
+      const connectorIds = workflowState.connectors.filter(function(connector){
+        return doesWorkflowRectIntersectBounds(rect, getWorkflowConnectorSelectionBounds(connector));
+      }).map(function(connector){
+        return connector.id;
+      });
+      setWorkflowSelectionState(itemIds, connectorIds, "", "");
+      suppressWorkflowViewportClick = true;
+      updateWorkflowStatus((itemIds.length + connectorIds.length) ? "Selección múltiple creada." : "No se encontraron elementos en el área.");
+    }else{
+      clearWorkflowSelectionState();
+    }
+    activeWorkflowSelectionBox = null;
   }
   if(activeDrag.mode === "connector-create"){
     const sourceItem = getWorkflowItemById(activeDrag.sourceItemId);
@@ -3040,6 +3607,41 @@ function resetWorkflow(){
 function saveCurrentWorkflowAsBase(){
   saveWorkflowBaseState();
   updateWorkflowStatus("Base del workflow guardada. Restablecer volvera a este punto.");
+}
+
+function applyWorkflowSnapshot(snapshot){
+  workflowState = JSON.parse(snapshot);
+  workflowLastSavedSnapshot = snapshot;
+  clearWorkflowSelectionState();
+  activeWorkflowSelectionBox = null;
+  activeWorkflowAnchorPreview = null;
+  activeDrag = null;
+  window.localStorage.setItem(workflowStorageKey, snapshot);
+  renderWorkflowCanvas();
+}
+
+function undoWorkflow(){
+  if(!workflowUndoStack.length){
+    updateWorkflowStatus("No hay acciones para deshacer.");
+    return;
+  }
+  const currentSnapshot = JSON.stringify(workflowState);
+  const previousSnapshot = workflowUndoStack.pop();
+  workflowRedoStack.push(currentSnapshot);
+  applyWorkflowSnapshot(previousSnapshot);
+  updateWorkflowStatus("Se deshizo la última acción.");
+}
+
+function redoWorkflow(){
+  if(!workflowRedoStack.length){
+    updateWorkflowStatus("No hay acciones para rehacer.");
+    return;
+  }
+  const currentSnapshot = JSON.stringify(workflowState);
+  const nextSnapshot = workflowRedoStack.pop();
+  workflowUndoStack.push(currentSnapshot);
+  applyWorkflowSnapshot(nextSnapshot);
+  updateWorkflowStatus("Se rehizo la última acción.");
 }
 
 function getViewportCenter(){
@@ -3240,25 +3842,56 @@ function startWorkflowConnectorDrag(event){
   event.preventDefault();
   event.stopPropagation();
   activeWorkflowAnchorPreview = null;
-  selectedWorkflowConnectorId = connectorId;
-  openWorkflowConnectorToolbarId = "";
-  selectedWorkflowItemId = "";
-  connector.from = null;
-  connector.to = null;
-  connector.x1 = startPoint.x;
-  connector.y1 = startPoint.y;
-  connector.x2 = endPoint.x;
-  connector.y2 = endPoint.y;
-  activeDrag = {
-    mode: "connector-move",
-    id: connectorId,
-    startX: event.clientX,
-    startY: event.clientY,
-    originX1: startPoint.x,
-    originY1: startPoint.y,
-    originX2: endPoint.x,
-    originY2: endPoint.y
-  };
+  const selection = isWorkflowConnectorSelected(connectorId)
+    ? { itemIds: selectedWorkflowItemIds.slice(), connectorIds: selectedWorkflowConnectorIds.slice() }
+    : getWorkflowSelectionForConnector(connectorId);
+  if(selection.itemIds.length + selection.connectorIds.length > 1){
+    setWorkflowSelectionState(selection.itemIds, selection.connectorIds, "", "");
+    activeDrag = {
+      mode: "selection-move",
+      startX: event.clientX,
+      startY: event.clientY,
+      itemOrigins: selection.itemIds.map(function(id){
+        const entry = getWorkflowItemById(id);
+        return entry ? { id: id, x: entry.x, y: entry.y } : null;
+      }).filter(Boolean),
+      connectorOrigins: selection.connectorIds.map(function(id){
+        const entry = workflowState.connectors.find(function(connectorEntry){ return connectorEntry.id === id; });
+        if(!entry){
+          return null;
+        }
+        const entryStart = getWorkflowConnectorEndpointPoint(entry, "start");
+        const entryEnd = getWorkflowConnectorEndpointPoint(entry, "end");
+        return {
+          id: id,
+          x1: entryStart.x,
+          y1: entryStart.y,
+          x2: entryEnd.x,
+          y2: entryEnd.y,
+          via: (entry.via || []).map(function(point){ return { x: point.x, y: point.y }; })
+        };
+      }).filter(Boolean)
+    };
+  }else{
+    setWorkflowSelectionState([], [connectorId], "", connectorId);
+    openWorkflowConnectorToolbarId = "";
+    connector.from = null;
+    connector.to = null;
+    connector.x1 = startPoint.x;
+    connector.y1 = startPoint.y;
+    connector.x2 = endPoint.x;
+    connector.y2 = endPoint.y;
+    activeDrag = {
+      mode: "connector-move",
+      id: connectorId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX1: startPoint.x,
+      originY1: startPoint.y,
+      originX2: endPoint.x,
+      originY2: endPoint.y
+    };
+  }
   window.addEventListener("pointermove", onWorkflowPointerMove);
   window.addEventListener("pointerup", onWorkflowPointerUp);
 }
@@ -3381,6 +4014,29 @@ function nudgeSelectedWorkflowItem(event){
   updateWorkflowStatus("Objeto movido con teclado.");
 }
 
+function handleWorkflowKeyboardShortcuts(event){
+  if(isWorkflowTypingTarget(event.target)){
+    return;
+  }
+  if((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === "z"){
+    event.preventDefault();
+    undoWorkflow();
+    return;
+  }
+  if(((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") || ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "z")){
+    event.preventDefault();
+    redoWorkflow();
+    return;
+  }
+  if(!isEditingWorkflow || activeDrag){
+    return;
+  }
+  if(event.key === "Delete" || event.key === "Backspace"){
+    event.preventDefault();
+    deleteWorkflowSelection();
+  }
+}
+
 async function toggleWorkflowFullscreen(){
   const target = document.getElementById("workflowFullscreenTarget");
   if(!target){
@@ -3402,6 +4058,14 @@ async function toggleWorkflowFullscreen(){
 
 document.getElementById("toggleWorkflowModeButton").addEventListener("click", toggleWorkflowMode);
 document.getElementById("floatingWorkflowEditModeButton").addEventListener("click", toggleWorkflowMode);
+document.getElementById("workflowPaletteOrangeButton").addEventListener("click", function(){
+  setWorkflowPalette("orange");
+});
+document.getElementById("workflowPaletteBlueButton").addEventListener("click", function(){
+  setWorkflowPalette("blue");
+});
+document.getElementById("undoWorkflowButton").addEventListener("click", undoWorkflow);
+document.getElementById("redoWorkflowButton").addEventListener("click", redoWorkflow);
 document.getElementById("copyWorkflowLayoutButton").addEventListener("click", copyWorkflowLayoutToClipboard);
 document.getElementById("saveWorkflowBaseButton").addEventListener("click", saveCurrentWorkflowAsBase);
 document.getElementById("resetWorkflowButton").addEventListener("click", resetWorkflow);
@@ -3416,6 +4080,8 @@ document.getElementById("addWorkflowEntryButton").addEventListener("click", addW
 document.getElementById("addWorkflowOutputButton").addEventListener("click", addWorkflowOutput);
 document.getElementById("addWorkflowTextButton").addEventListener("click", addWorkflowText);
 document.getElementById("addWorkflowIconButton").addEventListener("click", addWorkflowIcon);
+document.getElementById("groupWorkflowSelectionButton").addEventListener("click", groupWorkflowSelection);
+document.getElementById("ungroupWorkflowSelectionButton").addEventListener("click", ungroupWorkflowSelection);
 document.getElementById("workflowCanvasShell").addEventListener("pointerdown", startWorkflowCanvasPan);
 document.getElementById("workflowCanvasShell").addEventListener("contextmenu", function(event){
   if(isEditingWorkflow){
@@ -3423,7 +4089,9 @@ document.getElementById("workflowCanvasShell").addEventListener("contextmenu", f
   }
 });
 document.addEventListener("keydown", nudgeSelectedWorkflowItem);
+document.addEventListener("keydown", handleWorkflowKeyboardShortcuts);
 document.addEventListener("fullscreenchange", renderWorkflowCanvas);
+applyWorkflowPalette();
 renderWorkflowCanvas();
 updateWorkflowStatus("Vista en modo publicación.");
 

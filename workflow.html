@@ -72,6 +72,8 @@
               <button class="floating-map-button" id="addWorkflowOutputButton" type="button" title="Agregar salida" aria-label="Agregar salida">◉</button>
               <button class="floating-map-button" id="addWorkflowTextButton" type="button" title="Agregar texto" aria-label="Agregar texto">T</button>
               <button class="floating-map-button" id="addWorkflowIconButton" type="button" title="Agregar icono" aria-label="Agregar icono">◎</button>
+              <button class="floating-map-button" id="groupWorkflowSelectionButton" type="button" title="Agrupar selección" aria-label="Agrupar selección">⊞</button>
+              <button class="floating-map-button" id="ungroupWorkflowSelectionButton" type="button" title="Desagrupar selección" aria-label="Desagrupar selección">⊟</button>
             </div>
             <div class="floating-map-tools" id="floatingWorkflowTools">
               <button class="floating-map-button" id="floatingWorkflowEditModeButton" type="button" title="Entrar a edición" aria-label="Entrar a edición">✎</button>
@@ -93,8 +95,14 @@
                   <span>Este mapa usa el mismo patrón del macroproceso principal, con una sola actividad inicial para cada workflow nuevo.</span>
                 </div>
                 <div class="diagram-actions">
+                  <div class="palette-switch" id="workflowPaletteSwitch" aria-label="Paleta de colores">
+                    <button class="palette-switch-button" id="workflowPaletteOrangeButton" type="button" data-palette-option="orange">Naranjo</button>
+                    <button class="palette-switch-button" id="workflowPaletteBlueButton" type="button" data-palette-option="blue">Azul PDF</button>
+                  </div>
                   <button class="diagram-button" id="toggleWorkflowModeButton" type="button">Editar mapa</button>
                   <div class="diagram-inline-tools" id="workflowDiagramInlineTools"></div>
+                  <button class="diagram-button" id="undoWorkflowButton" type="button">Deshacer</button>
+                  <button class="diagram-button" id="redoWorkflowButton" type="button">Rehacer</button>
                   <button class="diagram-button" id="saveWorkflowBaseButton" type="button">Guardar base</button>
                   <button class="diagram-button" id="copyWorkflowLayoutButton" type="button">Copiar JSON</button>
                   <button class="diagram-button" id="resetWorkflowButton" type="button">Restablecer</button>
