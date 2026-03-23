@@ -6,8 +6,12 @@ const WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-v1:";
 const WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-base-v1:";
 const WORKFLOW_JSON_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-json-v1:";
 const WORKFLOW_JSON_BASE_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-json-base-v1:";
+const WORKFLOW_JSON_DRAFT_REVISION_STORAGE_KEY_PREFIX = "conemi-workflow-layout-json-revision-v1:";
 const WORKFLOW_PALETTE_STORAGE_KEY_PREFIX = "conemi-workflow-palette-v1:";
 const WORKFLOW_SOURCE_STORAGE_KEY_PREFIX = "conemi-workflow-source-v1:";
+const WORKFLOW_JSON_DRAFT_REVISIONS = {
+  "wf-cotizaciones": "2026-03-23-cotizaciones-image-sync-2"
+};
 const COTIZACIONES_WORKFLOW_TEMPLATE_VERSION = "cotizaciones-html-20260321-roles";
 const PLANIFICACION_WORKFLOW_TEMPLATE_VERSION = "planificacion-html-20260323-scaled";
 const WORKFLOW_TEMPLATE_REPO_PATHS = {
@@ -161,6 +165,7 @@ const workflowStorageKey = WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
 const workflowBaseStorageKey = WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
 const workflowJsonStorageKey = WORKFLOW_JSON_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
 const workflowJsonBaseStorageKey = WORKFLOW_JSON_BASE_LAYOUT_STORAGE_KEY_PREFIX + workflowToken;
+const workflowJsonDraftRevisionStorageKey = WORKFLOW_JSON_DRAFT_REVISION_STORAGE_KEY_PREFIX + workflowToken;
 const workflowPaletteStorageKey = WORKFLOW_PALETTE_STORAGE_KEY_PREFIX + workflowToken;
 const workflowSourceStorageKey = WORKFLOW_SOURCE_STORAGE_KEY_PREFIX + workflowToken;
 const WORKFLOW_ZOOM_STORAGE_KEY_PREFIX = "conemi-workflow-zoom-v1:";
@@ -415,7 +420,7 @@ function buildWorkflowDashedBoxMarkup(html){
   }
   return lines.map(function(line){
     const icon = getWorkflowDashedBoxLineIcon(line);
-    return `<div class="workflow-dashed-box-row">${icon ? `<span class="workflow-dashed-box-icon" style="background-image:url('${icon}')"></span>` : ""}<span class="workflow-dashed-box-label">${escapeHtml(line)}</span></div>`;
+    return `<div class="workflow-dashed-box-row"><span class="workflow-dashed-box-label">${escapeHtml(line)}</span>${icon ? `<span class="workflow-dashed-box-icon" style="background-image:url('${icon}')"></span>` : ""}</div>`;
   }).join("");
 }
 
@@ -1150,7 +1155,9 @@ function saveWorkflowStateSource(){
 }
 
 function shouldLoadWorkflowDraft(){
-  if(window.location.protocol !== "file:" && !isEditingWorkflow){
+  const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const isLocalContext = window.location.protocol === "file:" || isLocalHost;
+  if(!isLocalContext && !isEditingWorkflow){
     return false;
   }
   return workflowStateSource === "storage" || workflowStateSource === "json";
@@ -1162,6 +1169,37 @@ function getActiveWorkflowLayoutStorageKey(){
 
 function getActiveWorkflowBaseStorageKey(){
   return workflowStateSource === "json" ? workflowJsonBaseStorageKey : workflowBaseStorageKey;
+}
+
+function getExpectedWorkflowJsonDraftRevision(){
+  return WORKFLOW_JSON_DRAFT_REVISIONS[workflowId] || "";
+}
+
+function shouldReseedWorkflowJsonDraft(){
+  if(workflowStateSource !== "json"){
+    return false;
+  }
+  const expectedRevision = getExpectedWorkflowJsonDraftRevision();
+  if(!expectedRevision){
+    return false;
+  }
+  try{
+    const currentRevision = String(window.localStorage.getItem(workflowJsonDraftRevisionStorageKey) || "");
+    return currentRevision !== expectedRevision;
+  }catch(error){
+    return true;
+  }
+}
+
+function markWorkflowJsonDraftRevision(){
+  if(workflowStateSource !== "json"){
+    return;
+  }
+  const expectedRevision = getExpectedWorkflowJsonDraftRevision();
+  if(!expectedRevision){
+    return;
+  }
+  window.localStorage.setItem(workflowJsonDraftRevisionStorageKey, expectedRevision);
 }
 
 let isEditingWorkflow = false;
@@ -1198,8 +1236,9 @@ function loadWorkflowState(options){
   const settings = options || {};
   const preferLocalStorage = settings.preferLocalStorage !== false;
   try{
-    let parsed = null;
-    if(preferLocalStorage){
+    let parsed = settings.initialState ? structuredClone(settings.initialState) : null;
+    const shouldReseedJsonDraft = preferLocalStorage && !parsed && shouldReseedWorkflowJsonDraft();
+    if(preferLocalStorage && !parsed && !shouldReseedJsonDraft){
       const raw = window.localStorage.getItem(getActiveWorkflowLayoutStorageKey());
       parsed = raw ? JSON.parse(raw) : null;
       if(parsed && Array.isArray(parsed.items) && parsed.items.length){
@@ -1504,6 +1543,11 @@ function loadWorkflowState(options){
         parsed.connectors = normalizePlanificacionSupportConnectors(parsed.items, parsed.connectors);
       }
     }
+    if(shouldReseedJsonDraft && parsed && Array.isArray(parsed.items) && parsed.items.length){
+      window.localStorage.setItem(getActiveWorkflowLayoutStorageKey(), JSON.stringify(parsed));
+      workflowLastResolvedStateOrigin = "repo-json";
+      markWorkflowJsonDraftRevision();
+    }
     return parsed;
   }catch(error){
     return getDefaultWorkflowStateSnapshot();
@@ -1522,6 +1566,7 @@ function saveWorkflowState(options){
   }
   workflowLastSavedSnapshot = serialized;
   window.localStorage.setItem(getActiveWorkflowLayoutStorageKey(), serialized);
+  markWorkflowJsonDraftRevision();
 }
 
 function loadWorkflowBaseState(){
@@ -1541,6 +1586,7 @@ function loadWorkflowBaseState(){
 
 function saveWorkflowBaseState(){
   window.localStorage.setItem(getActiveWorkflowBaseStorageKey(), JSON.stringify(workflowState));
+  markWorkflowJsonDraftRevision();
 }
 
 function loadWorkflowZoom(){
@@ -4772,8 +4818,66 @@ function exportWorkflowLayoutToJson(){
   updateWorkflowStatus("Workflow exportado a JSON.");
 }
 
+function importWorkflowLayoutFromFile(file){
+  if(!file){
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      const parsed = JSON.parse(String(reader.result || ""));
+      if(!parsed || !Array.isArray(parsed.items)){
+        throw new Error("invalid-workflow-json");
+      }
+      const normalized = createWorkflowStateFromTemplateDefinition(workflowId, parsed) || parsed;
+      if(!normalized || !Array.isArray(normalized.items)){
+        throw new Error("invalid-workflow-json");
+      }
+      workflowState = loadWorkflowState({
+        preferLocalStorage: false,
+        initialState: normalized
+      });
+      workflowLastResolvedStateOrigin = workflowStateSource === "json" ? "json-draft" : "storage";
+      workflowLastSavedSnapshot = JSON.stringify(workflowState);
+      workflowUndoStack = [];
+      workflowRedoStack = [];
+      clearWorkflowSelectionState();
+      activeWorkflowSelectionBox = null;
+      activeWorkflowAnchorPreview = null;
+      activeDrag = null;
+      selectedWorkflowItemId = isEditingWorkflow && workflowState.items[0] ? workflowState.items[0].id : "";
+      selectedWorkflowConnectorId = "";
+      window.localStorage.setItem(getActiveWorkflowLayoutStorageKey(), JSON.stringify(workflowState));
+      markWorkflowJsonDraftRevision();
+      renderWorkflowCanvas();
+      updateWorkflowStatus("Workflow importado en " + getWorkflowStateOriginLabel(workflowLastResolvedStateOrigin) + ".");
+    }catch(error){
+      updateWorkflowStatus("No se pudo importar el JSON del workflow.");
+    }
+  };
+  reader.onerror = function(){
+    updateWorkflowStatus("No se pudo leer el archivo seleccionado.");
+  };
+  reader.readAsText(file, "utf-8");
+}
+
 function resetWorkflow(){
   if(workflowStateSource === "json"){
+    const hasSavedJsonBase = Boolean(window.localStorage.getItem(getActiveWorkflowBaseStorageKey()));
+    if(hasSavedJsonBase){
+      const savedJsonBase = loadWorkflowBaseState();
+      workflowState = savedJsonBase;
+      workflowLastSavedSnapshot = JSON.stringify(workflowState);
+      workflowUndoStack = [];
+      workflowRedoStack = [];
+      clearWorkflowSelectionState();
+      activeWorkflowSelectionBox = null;
+      activeWorkflowAnchorPreview = null;
+      activeDrag = null;
+      renderWorkflowCanvas();
+      updateWorkflowStatus("Workflow restablecido a la base guardada del JSON.");
+      return;
+    }
     workflowState = getDefaultWorkflowStateSnapshot();
     workflowLastSavedSnapshot = JSON.stringify(workflowState);
     workflowUndoStack = [];
@@ -4805,6 +4909,7 @@ function applyWorkflowSnapshot(snapshot){
   activeWorkflowAnchorPreview = null;
   activeDrag = null;
   window.localStorage.setItem(getActiveWorkflowLayoutStorageKey(), snapshot);
+  markWorkflowJsonDraftRevision();
   renderWorkflowCanvas();
 }
 
@@ -5262,6 +5367,17 @@ document.getElementById("undoWorkflowButton").addEventListener("click", undoWork
 document.getElementById("redoWorkflowButton").addEventListener("click", redoWorkflow);
 document.getElementById("copyWorkflowLayoutButton").addEventListener("click", copyWorkflowLayoutToClipboard);
 document.getElementById("exportWorkflowLayoutButton").addEventListener("click", exportWorkflowLayoutToJson);
+document.getElementById("importWorkflowLayoutButton").addEventListener("click", function(){
+  document.getElementById("importWorkflowLayoutInput").click();
+});
+document.getElementById("importWorkflowLayoutInput").addEventListener("change", function(event){
+  const input = event.currentTarget;
+  const file = input && input.files && input.files[0] ? input.files[0] : null;
+  importWorkflowLayoutFromFile(file);
+  if(input){
+    input.value = "";
+  }
+});
 document.getElementById("saveWorkflowBaseButton").addEventListener("click", saveCurrentWorkflowAsBase);
 document.getElementById("resetWorkflowButton").addEventListener("click", resetWorkflow);
 document.getElementById("workflowZoomInButton").addEventListener("click", zoomWorkflowIn);
