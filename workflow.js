@@ -1085,8 +1085,8 @@ function getInitialWorkflowState(){
 }
 
 const defaultWorkflowState = getInitialWorkflowState();
-let workflowState = loadWorkflowState();
 let isEditingWorkflow = false;
+let workflowState = loadWorkflowState({ preferLocalStorage: isEditingWorkflow });
 let activeDrag = null;
 let workflowZoom = loadWorkflowZoom();
 let workflowPalette = loadWorkflowPalette();
@@ -1113,12 +1113,17 @@ document.getElementById("workflowPill").textContent = workflowToken;
 document.getElementById("workflowHeading").textContent = workflowTitle;
 renderSidebarTree();
 
-function loadWorkflowState(){
+function loadWorkflowState(options){
+  const settings = options || {};
+  const preferLocalStorage = settings.preferLocalStorage !== false;
   try{
-    const raw = window.localStorage.getItem(workflowStorageKey);
-    let parsed = raw ? JSON.parse(raw) : null;
+    let parsed = null;
+    if(preferLocalStorage){
+      const raw = window.localStorage.getItem(workflowStorageKey);
+      parsed = raw ? JSON.parse(raw) : null;
+    }
     if(!parsed || !Array.isArray(parsed.items) || !parsed.items.length){
-      return structuredClone(defaultWorkflowState);
+      parsed = structuredClone(defaultWorkflowState);
     }
     parsed.items = parsed.items.map(function(item, index){
       const processDefaults = getDefaultWorkflowItem("process");
@@ -4596,9 +4601,24 @@ function startWorkflowCanvasPan(event){
 
 function toggleWorkflowMode(){
   isEditingWorkflow = !isEditingWorkflow;
+  workflowState = loadWorkflowState({ preferLocalStorage: isEditingWorkflow });
+  workflowLastSavedSnapshot = JSON.stringify(workflowState);
+  workflowUndoStack = [];
+  workflowRedoStack = [];
+  activeWorkflowSelectionBox = null;
+  activeWorkflowAnchorPreview = null;
+  activeDrag = null;
+  selectedWorkflowItemIds = [];
+  selectedWorkflowConnectorIds = [];
   if(!isEditingWorkflow){
     openWorkflowTransformMenuItemId = "";
     selectedWorkflowConnectorId = "";
+  }
+  if(isEditingWorkflow && !workflowState.items.some(function(item){ return item.id === selectedWorkflowItemId; })){
+    selectedWorkflowItemId = workflowState.items[0] ? workflowState.items[0].id : "";
+  }
+  if(!isEditingWorkflow){
+    selectedWorkflowItemId = "";
   }
   renderWorkflowCanvas();
   updateWorkflowStatus(isEditingWorkflow ? "Modo edición activo. Puedes arrastrar elementos y agregar actividad, conector, texto o icono." : "Vista en modo publicación.");
