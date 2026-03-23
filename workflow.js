@@ -6,11 +6,13 @@ const WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-v1:";
 const WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-base-v1:";
 const WORKFLOW_PALETTE_STORAGE_KEY_PREFIX = "conemi-workflow-palette-v1:";
 const COTIZACIONES_WORKFLOW_TEMPLATE_VERSION = "cotizaciones-html-20260321-roles";
+const PLANIFICACION_WORKFLOW_TEMPLATE_VERSION = "planificacion-html-20260323-scaled";
 const params = new URLSearchParams(window.location.search);
 const processId = params.get("process") || "";
 const itemId = params.get("item") || "";
 const workflowId = params.get("workflow") || "";
 const COTIZACIONES_WORKFLOW_URL = "workflow.html?workflow=wf-cotizaciones";
+const PLANIFICACION_WORKFLOW_URL = "workflow.html?workflow=wf-planificacion";
 const WORKFLOW_TOOL_ICONS = {
   edit: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 11.8 11.9 3a1.4 1.4 0 0 1 2 2L5 13.8 2.5 14.5z"></path><path d="m10.8 4.1 1.1 1.1"></path></svg>',
   delete: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.3 3.3h5.4"></path><path d="M6.2 3.3V2.5h3.6v.8"></path><path d="M4.4 4.6 5 13.2c.1.7.6 1.3 1.4 1.3h3.2c.8 0 1.3-.6 1.4-1.3l.6-8.6"></path><path d="M6.7 6.3v5.1"></path><path d="M9.3 6.3v5.1"></path></svg>',
@@ -21,7 +23,7 @@ const WORKFLOW_TOOL_ICONS = {
 };
 const PROCESS_TREE = [
   { areaId: "A", areaLabel: "Comercial", nodes: [{ id: "P1", label: "Cotizaciones", href: COTIZACIONES_WORKFLOW_URL }] },
-  { areaId: "B", areaLabel: "Operaciones", nodes: [{ id: "P2", label: "Planificación" }, { id: "P3", label: "Ejecución Servicios en Terreno" }, { id: "P4", label: "Integración con Laboratorios" }] },
+  { areaId: "B", areaLabel: "Operaciones", nodes: [{ id: "P2", label: "Planificación", href: PLANIFICACION_WORKFLOW_URL }, { id: "P3", label: "Ejecución Servicios en Terreno" }, { id: "P4", label: "Integración con Laboratorios" }] },
   { areaId: "C", areaLabel: "Área Técnica", nodes: [{ id: "P5", label: "Control y Seguimiento Técnico" }, { id: "P6", label: "Elaboración de Informes" }] }
 ];
 
@@ -74,6 +76,10 @@ function getItemTitle(){
 }
 
 function getWorkflowEntry(){
+  const builtInEntries = {
+    "wf-cotizaciones": { id: "wf-cotizaciones", title: "Workflow Cotizaciones", pageName: "workflow.html?workflow=wf-cotizaciones", url: COTIZACIONES_WORKFLOW_URL },
+    "wf-planificacion": { id: "wf-planificacion", title: "Workflow Planificación", pageName: "workflow.html?workflow=wf-planificacion", url: PLANIFICACION_WORKFLOW_URL }
+  };
   if(!workflowId){
     return null;
   }
@@ -82,9 +88,9 @@ function getWorkflowEntry(){
     const parsed = raw ? JSON.parse(raw) : [];
     return (Array.isArray(parsed) ? parsed : []).find(function(entry){
       return entry.id === workflowId;
-    }) || null;
+    }) || builtInEntries[workflowId] || null;
   }catch(error){
-    return null;
+    return builtInEntries[workflowId] || null;
   }
 }
 
@@ -100,9 +106,9 @@ function getLinkedProcessIdFromDetails(){
     const parsed = raw ? JSON.parse(raw) : {};
     return Object.keys(parsed).find(function(key){
       return parsed[key] && parsed[key].link === workflowEntry.url;
-    }) || "";
+    }) || (workflowId === "wf-cotizaciones" ? "P1" : (workflowId === "wf-planificacion" ? "P2" : ""));
   }catch(error){
-    return "";
+    return workflowId === "wf-cotizaciones" ? "P1" : (workflowId === "wf-planificacion" ? "P2" : "");
   }
 }
 
@@ -195,6 +201,18 @@ const WORKFLOW_ICON_PRESETS = {
     label: "Grupo inspectores",
     markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6.1" r="2.6"></circle><circle cx="6.6" cy="11" r="2.2"></circle><circle cx="17.4" cy="11" r="2.2"></circle><path d="M9 18.8v-2.2a2.6 2.6 0 0 1 2.6-2.6h.8a2.6 2.6 0 0 1 2.6 2.6v2.2"></path><path d="M3.3 18.8v-1.8a2.4 2.4 0 0 1 2.4-2.4h1.8a2.4 2.4 0 0 1 2.4 2.4v1.8"></path><path d="M14.1 18.8v-1.8a2.4 2.4 0 0 1 2.4-2.4h1.8a2.4 2.4 0 0 1 2.4 2.4v1.8"></path></svg>'
   },
+  personMessage: {
+    label: "Persona mensaje",
+    markup: '<svg class="workflow-icon-filled" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.2" cy="7.2" r="3.2" fill="#8c8c8c"></circle><path fill="#8c8c8c" d="M2.8 18.8c.4-3.3 2.6-5.4 5.4-5.4 3 0 5.2 2.1 5.6 5.4Z"></path><path fill="#ffffff" stroke="#7a7a7a" stroke-width="1.2" d="M12.5 4.3h7.2a1.8 1.8 0 0 1 1.8 1.8v5.7a1.8 1.8 0 0 1-1.8 1.8h-2.8l-2.5 2.4v-2.4h-1.9a1.8 1.8 0 0 1-1.8-1.8V6.1a1.8 1.8 0 0 1 1.8-1.8Z"></path><path d="M14.2 7.4h4.9M14.2 10h4.1M14.2 12.6h3.3" stroke="#7a7a7a" stroke-width="1.3" stroke-linecap="round"></path></svg>'
+  },
+  email: {
+    label: "Email",
+    markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2"></rect><path d="m4.8 7.5 7.2 5.5 7.2-5.5"></path></svg>'
+  },
+  phone: {
+    label: "Teléfono",
+    markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 4.5h2.7l1.1 3.7-1.8 1.7a13.4 13.4 0 0 0 4.9 4.9l1.7-1.8 3.7 1.1v2.7a1.8 1.8 0 0 1-1.8 1.8A13.2 13.2 0 0 1 5.4 6.3 1.8 1.8 0 0 1 7.2 4.5Z"></path></svg>'
+  },
   role: {
     label: "Rol",
     markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 19a6.5 6.5 0 0 1 13 0"></path></svg>'
@@ -231,9 +249,20 @@ function normalizeThemeComparableColor(value){
   return String(value || "").trim().toLowerCase();
 }
 
+function normalizeWorkflowArrowMode(value){
+  const normalized = String(value || "").trim().toLowerCase();
+  if(normalized === "none" || normalized === "start" || normalized === "end" || normalized === "both"){
+    return normalized;
+  }
+  if(value === false){
+    return "none";
+  }
+  return "end";
+}
+
 function getThemedWorkflowColorToken(value, role){
   const normalized = normalizeThemeComparableColor(value);
-  if(role === "node-border" && ["#d9c1a3", "#e9c59d", "#6fa8d8"].includes(normalized)){
+  if(role === "node-border" && ["#d9c1a3", "#e9c59d", "#f3a454", "#6fa8d8"].includes(normalized)){
     return "var(--node-border)";
   }
   if(role === "node-fill" && ["#f7f2ed", "#eef5fb"].includes(normalized)){
@@ -277,7 +306,13 @@ function isInspectorEditableItem(item){
 }
 
 function isWorkflowResizableItem(item){
-  return Boolean(item && (item.type === "activity" || item.type === "process" || item.type === "decision" || item.type === "text" || item.type === "icon"));
+  if(!item){
+    return false;
+  }
+  if(item.kind === "subactivity" || item.kind === "actor"){
+    return false;
+  }
+  return Boolean(item.type === "activity" || item.type === "process" || item.type === "decision" || item.type === "text" || item.type === "icon");
 }
 
 function canTransferWorkflowStyle(item){
@@ -308,6 +343,13 @@ function getDefaultActorLabelLayout(){
     labelWidth: 110,
     labelHeight: 24
   };
+}
+
+function getWorkflowActorMaxWidth(item){
+  const labelWidth = Number.isFinite(item && item.labelWidth) && item.labelWidth > 0
+    ? item.labelWidth
+    : getDefaultActorLabelLayout().labelWidth;
+  return Math.max(34, labelWidth + 12);
 }
 
 function getWorkflowIconPreset(variant){
@@ -739,6 +781,10 @@ function getWorkflowAnchorSidesForItem(item){
 
 function createCotizacionesWorkflowState(){
   const template = getCotizacionesWorkflowTemplate();
+  return createWorkflowStateFromTemplate(template, getCotizacionesWorkflowAnchorPoint);
+}
+
+function createWorkflowStateFromTemplate(template, anchorResolver){
   const itemsById = template.items.reduce(function(acc, item){
     acc[item.id] = item;
     return acc;
@@ -750,7 +796,7 @@ function createCotizacionesWorkflowState(){
     const fromItem = line.from && line.from.itemId ? itemsById[line.from.itemId] : null;
     const toItem = line.to && line.to.itemId ? itemsById[line.to.itemId] : null;
     if(fromItem){
-      points.push(getCotizacionesWorkflowAnchorPoint(fromItem, line.from.side || "right"));
+      points.push(anchorResolver(fromItem, line.from.side || "right"));
     }
     if(Array.isArray(line.via)){
       line.via.forEach(function(point){
@@ -758,7 +804,7 @@ function createCotizacionesWorkflowState(){
       });
     }
     if(toItem){
-      points.push(getCotizacionesWorkflowAnchorPoint(toItem, line.to.side || "left"));
+      points.push(anchorResolver(toItem, line.to.side || "left"));
     }
     for(let index = 0; index < points.length - 1; index += 1){
       const start = points[index];
@@ -777,21 +823,161 @@ function createCotizacionesWorkflowState(){
           itemId: line.to.itemId,
           side: line.to.side || "left"
         } : null,
-        via: []
+        via: [],
+        color: line.color || "#7d7d7d",
+        strokeWidth: Number.isFinite(line.strokeWidth) ? line.strokeWidth : 2,
+        dashed: Boolean(line.dashed),
+        arrow: line.arrow !== false,
+        groupId: line.groupId || ""
       });
     }
   });
 
   return {
-    templateVersion: COTIZACIONES_WORKFLOW_TEMPLATE_VERSION,
+    templateVersion: template.templateVersion || "",
     items: structuredClone(template.items),
     connectors: connectors
   };
 }
 
+function scaleWorkflowState(state, factor){
+  const next = structuredClone(state);
+  next.items = (next.items || []).map(function(item){
+    const scaled = Object.assign({}, item, {
+      x: Math.round((Number(item.x) || 0) * factor),
+      y: Math.round((Number(item.y) || 0) * factor)
+    });
+    if(Number.isFinite(item.width)){
+      scaled.width = Math.max(16, Math.round(item.width * factor));
+    }
+    if(Number.isFinite(item.height)){
+      scaled.height = Math.max(16, Math.round(item.height * factor));
+    }
+    if(Number.isFinite(item.fontSize)){
+      scaled.fontSize = Math.max(8, Math.round(item.fontSize * factor * 10) / 10);
+    }
+    if(Number.isFinite(item.labelOffsetX)){
+      scaled.labelOffsetX = Math.round(item.labelOffsetX * factor);
+    }
+    if(Number.isFinite(item.labelOffsetY)){
+      scaled.labelOffsetY = Math.round(item.labelOffsetY * factor);
+    }
+    if(Number.isFinite(item.labelWidth)){
+      scaled.labelWidth = Math.max(0, Math.round(item.labelWidth * factor));
+    }
+    if(Number.isFinite(item.labelHeight)){
+      scaled.labelHeight = Math.max(0, Math.round(item.labelHeight * factor));
+    }
+    return scaled;
+  });
+  next.connectors = (next.connectors || []).map(function(connector){
+    return Object.assign({}, connector, {
+      x1: Math.round((Number(connector.x1) || 0) * factor),
+      y1: Math.round((Number(connector.y1) || 0) * factor),
+      x2: Math.round((Number(connector.x2) || 0) * factor),
+      y2: Math.round((Number(connector.y2) || 0) * factor),
+      strokeWidth: Number.isFinite(connector.strokeWidth) ? Math.max(1, Math.round(connector.strokeWidth * factor * 10) / 10) : connector.strokeWidth,
+      via: Array.isArray(connector.via) ? connector.via.map(function(point){
+        return {
+          x: Math.round((Number(point.x) || 0) * factor),
+          y: Math.round((Number(point.y) || 0) * factor)
+        };
+      }) : []
+    });
+  });
+  return next;
+}
+
+function getPlanificacionWorkflowTemplate(){
+  return {
+    templateVersion: PLANIFICACION_WORKFLOW_TEMPLATE_VERSION,
+    items: [
+      { id: "entry-p2", type: "entry", title: "Cotización\nAceptada", x: 42, y: 160, width: 16, height: 16, fontSize: 12, labelOffsetX: -28, labelOffsetY: 8, labelWidth: 96, labelHeight: 32 },
+      { id: "actor-p2-1", type: "activity", kind: "actor", x: 124, y: 26, width: 150, height: 44, html: "Ejecutivo<br>Comercial", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -6, labelOffsetY: 18 },
+      { id: "step-p2-1", type: "activity", kind: "flow-card", x: 132, y: 88, width: 102, height: 54, html: "Asignar Administrador<br>de Contrato", badge: "1", step: "p2-1", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "tag-p2-1", type: "activity", kind: "tag", x: 240, y: 112, width: 82, height: 18, html: "Qinspecciones", fontSize: 10, textColor: "#eb7a07" },
+      { id: "icon-p2-1", type: "icon", x: 192, y: 147, width: 20, height: 20, iconVariant: "warning", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#30424d" },
+      { id: "note-p2-1", type: "text", x: 196, y: 152, width: 260, height: 48, title: "Asignar tareas, plazos, responsables\ny plan, según corresponda.", fontSize: 13, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "icon-p2-email", type: "icon", x: 216, y: 208, width: 18, height: 18, iconVariant: "documentOk", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#30424d" },
+      { id: "text-p2-info", type: "text", x: 128, y: 226, width: 212, height: 40, title: "Informar al Coordinador de\nContrato la OL asignada", fontSize: 13, borderColor: "transparent", backgroundColor: "transparent", textColor: "#5d6470" },
+      { id: "actor-p2-2", type: "activity", kind: "actor", x: 270, y: 196, width: 150, height: 44, html: "Ejecutivo<br>Comercial", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -4, labelOffsetY: 18 },
+      { id: "actor-p2-3", type: "activity", kind: "actor", x: 286, y: 282, width: 150, height: 44, html: "Asistente<br>Técnico", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -6, labelOffsetY: 18 },
+      { id: "step-p2-2", type: "activity", kind: "flow-card", x: 132, y: 328, width: 102, height: 54, html: "Revisar la OL", badge: "2", step: "p2-2", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "tag-p2-2", type: "activity", kind: "tag", x: 200, y: 382, width: 82, height: 18, html: "Qinspecciones", fontSize: 10, textColor: "#eb7a07" },
+      { id: "step-p2-3", type: "activity", kind: "flow-card", x: 116, y: 454, width: 102, height: 54, html: "Planificar Servicios de<br>Muestreo y Análisis", badge: "3", step: "p2-3", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "icon-p2-doc", type: "icon", x: 222, y: 544, width: 24, height: 24, iconVariant: "documentStack", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#30424d" },
+      { id: "text-p2-doc", type: "text", x: 252, y: 536, width: 250, height: 62, title: "Subcontratos\nde laboratorios\nSe debe indicar si los servicios\nsolicitados son ETFA.", fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "icon-p2-doc2", type: "icon", x: 222, y: 614, width: 24, height: 24, iconVariant: "documentOk", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#30424d" },
+      { id: "text-p2-doc2", type: "text", x: 252, y: 606, width: 250, height: 48, title: "Documentación\nSe genera la documentación para\nterreno y se revisan los permisos.", fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "icon-p2-team", type: "icon", x: 220, y: 676, width: 24, height: 24, iconVariant: "inspectorsGroup", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#6f7f91" },
+      { id: "text-p2-team", type: "text", x: 252, y: 668, width: 270, height: 52, title: "Equipo de Trabajo\nSe asigna al Asistente Muestreador y\nal Inspector Ambiental, según aplique.", fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "icon-p2-micro", type: "icon", x: 220, y: 738, width: 24, height: 24, iconVariant: "microscope", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#6f7f91" },
+      { id: "text-p2-micro", type: "text", x: 252, y: 730, width: 280, height: 52, title: "Equipos de muestreo\nSe revisa la disponibilidad de equipos y si\nestán en condiciones óptimas (calibración).", fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "icon-p2-log", type: "icon", x: 220, y: 804, width: 24, height: 24, iconVariant: "airplane", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#6f7f91" },
+      { id: "text-p2-log", type: "text", x: 252, y: 796, width: 280, height: 50, title: "Logística (FXR)\nSe coordina transporte, hospedaje, alimentación,\nropa de trabajo y otros requerimientos.", fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "actor-p2-4", type: "activity", kind: "actor", x: 432, y: 382, width: 150, height: 44, html: "Asistente<br>Técnico", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -6, labelOffsetY: 18 },
+      { id: "step-p2-4", type: "activity", kind: "flow-card", x: 392, y: 454, width: 102, height: 54, html: "Coordinar los servicios<br>con Cliente", badge: "4", step: "p2-4", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "actor-p2-5", type: "activity", kind: "actor", x: 632, y: 382, width: 150, height: 44, html: "Asistente<br>Técnico", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -6, labelOffsetY: 18 },
+      { id: "step-p2-5", type: "activity", kind: "flow-card", x: 594, y: 454, width: 102, height: 54, html: "Calendarizar Servicios", badge: "5", step: "p2-5", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "tag-p2-5", type: "activity", kind: "tag", x: 700, y: 470, width: 82, height: 18, html: "Qinspecciones", fontSize: 10, textColor: "#eb7a07" },
+      { id: "actor-p2-6", type: "activity", kind: "actor", x: 854, y: 382, width: 150, height: 44, html: "Asistente<br>Técnico", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -6, labelOffsetY: 18 },
+      { id: "step-p2-6", type: "activity", kind: "flow-card", x: 818, y: 454, width: 102, height: 54, html: "Crear Órdenes de<br>Inspecciones", badge: "6", step: "p2-6", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "tag-p2-6", type: "activity", kind: "tag", x: 924, y: 470, width: 82, height: 18, html: "Qinspecciones", fontSize: 10, textColor: "#eb7a07" },
+      { id: "icon-p2-warn2", type: "icon", x: 832, y: 528, width: 20, height: 20, iconVariant: "warning", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#30424d" },
+      { id: "note-p2-6", type: "text", x: 836, y: 534, width: 250, height: 70, title: "Asignar supervisor por localidad y\noperación. Se asignan las fechas\ntentativas para ejecutar los\nservicios de muestreo y mediciones.", fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "actor-p2-j1", type: "activity", kind: "actor", x: 1082, y: 388, width: 150, height: 44, html: "Jefe de<br>Operaciones", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -4, labelOffsetY: 18 },
+      { id: "mini-p2-ols", type: "activity", kind: "mini-icon", x: 1080, y: 484, width: 108, height: 28, html: "Revisar el sistema (OIs)", fontSize: 9, textColor: "#555" },
+      { id: "decision-p2-1", type: "decision", x: 1292, y: 476, width: 24, height: 24, title: "?", fontSize: 12, borderColor: "#d9c1a3", backgroundColor: "#ffffff", textColor: "#30424d" },
+      { id: "text-p2-q", type: "text", x: 1234, y: 420, width: 160, height: 40, title: "¿Es factible ejecutar\nla planificación?", fontSize: 13, borderColor: "transparent", backgroundColor: "transparent", textColor: "#5d6470" },
+      { id: "actor-p2-j2", type: "activity", kind: "actor", x: 1512, y: 382, width: 150, height: 44, html: "Jefe de<br>Operaciones", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -4, labelOffsetY: 18 },
+      { id: "step-p2-7", type: "activity", kind: "flow-card", x: 1480, y: 454, width: 102, height: 54, html: "Asignar Muestreador<br>Ambiental", badge: "7", step: "p2-7", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "icon-p2-warn3", type: "icon", x: 1564, y: 520, width: 20, height: 20, iconVariant: "warning", title: "", borderColor: "transparent", backgroundColor: "transparent", textColor: "#30424d" },
+      { id: "note-p2-7", type: "text", x: 1568, y: 526, width: 180, height: 44, title: "Se pone en firme la\nfecha de ejecución.", fontSize: 12, borderColor: "transparent", backgroundColor: "transparent", textColor: "#1f6fb2" },
+      { id: "tag-p2-7a", type: "activity", kind: "tag", x: 1588, y: 494, width: 82, height: 18, html: "Qinspecciones", fontSize: 10, textColor: "#eb7a07" },
+      { id: "tag-p2-7b", type: "activity", kind: "tag", x: 1604, y: 516, width: 54, height: 18, html: "QETFA", fontSize: 10, textColor: "#eb7a07" },
+      { id: "output-p2", type: "output", title: "Planificación aceptada\ne Inspector asignado", x: 1820, y: 474, width: 16, height: 16, fontSize: 12, labelOffsetX: 20, labelOffsetY: 8, labelWidth: 170, labelHeight: 36 },
+      { id: "actor-p2-j3", type: "activity", kind: "actor", x: 1338, y: 616, width: 150, height: 44, html: "Jefe de<br>Operaciones", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -4, labelOffsetY: 18 },
+      { id: "step-p2-6-1", type: "activity", kind: "flow-card", x: 1248, y: 684, width: 102, height: 54, html: "Modificar fechas en<br>sistema", badge: "6.1", badgeClass: "small", step: "p2-6.1", fontSize: 12, borderColor: "#f3a454", backgroundColor: "#f7f2ed", textColor: "#30424d" },
+      { id: "tag-p2-6-1", type: "activity", kind: "tag", x: 1354, y: 708, width: 82, height: 18, html: "Qinspecciones", fontSize: 10, textColor: "#eb7a07" }
+    ],
+    lines: [
+      { id: "p2-line-1", from: { itemId: "entry-p2", side: "right-middle" }, via: [{ x: 58, y: 115 }], to: { itemId: "step-p2-1", side: "left-middle" } },
+      { id: "p2-line-2", from: { itemId: "step-p2-1", side: "bottom-middle" }, to: { itemId: "step-p2-2", side: "top-middle" } },
+      { id: "p2-line-3", from: { itemId: "step-p2-2", side: "bottom-middle" }, to: { itemId: "step-p2-3", side: "top-middle" } },
+      { id: "p2-line-4", from: { itemId: "step-p2-3", side: "right-middle" }, to: { itemId: "step-p2-4", side: "left-middle" } },
+      { id: "p2-line-5", from: { itemId: "step-p2-4", side: "right-middle" }, to: { itemId: "step-p2-5", side: "left-middle" } },
+      { id: "p2-line-6", from: { itemId: "step-p2-5", side: "right-middle" }, to: { itemId: "step-p2-6", side: "left-middle" } },
+      { id: "p2-line-7", from: { itemId: "step-p2-6", side: "right-middle" }, to: { itemId: "mini-p2-ols", side: "left-middle" } },
+      { id: "p2-line-8", from: { itemId: "mini-p2-ols", side: "right-middle" }, to: { itemId: "decision-p2-1", side: "left-middle" } },
+      { id: "p2-line-9", from: { itemId: "decision-p2-1", side: "right-middle" }, to: { itemId: "step-p2-7", side: "left-middle" } },
+      { id: "p2-line-10", from: { itemId: "step-p2-7", side: "right-middle" }, to: { itemId: "output-p2", side: "left-middle" } },
+      { id: "p2-line-11", from: { itemId: "decision-p2-1", side: "bottom-middle" }, via: [{ x: 1304, y: 711 }], to: { itemId: "step-p2-6-1", side: "top-middle" } },
+      { id: "p2-line-12", from: { itemId: "step-p2-6-1", side: "right-middle" }, via: [{ x: 1582, y: 711 }, { x: 1582, y: 508 }], to: { itemId: "step-p2-7", side: "bottom-middle" } },
+      { id: "p2-support-1", from: { itemId: "step-p2-3", side: "bottom-middle" }, via: [{ x: 167, y: 846 }], dashed: true, arrow: false, color: "#989898", strokeWidth: 1.4 },
+      { id: "p2-support-2", x1: 167, y1: 556, x2: 220, y2: 556, dashed: true, arrow: false, color: "#989898", strokeWidth: 1.4 },
+      { id: "p2-support-3", x1: 167, y1: 626, x2: 220, y2: 626, dashed: true, arrow: false, color: "#989898", strokeWidth: 1.4 },
+      { id: "p2-support-4", x1: 167, y1: 688, x2: 218, y2: 688, dashed: true, arrow: false, color: "#989898", strokeWidth: 1.4 },
+      { id: "p2-support-5", x1: 167, y1: 750, x2: 218, y2: 750, dashed: true, arrow: false, color: "#989898", strokeWidth: 1.4 },
+      { id: "p2-support-6", x1: 167, y1: 816, x2: 218, y2: 816, dashed: true, arrow: false, color: "#989898", strokeWidth: 1.4 }
+    ]
+  };
+}
+
+function createPlanificacionWorkflowState(){
+  const template = getPlanificacionWorkflowTemplate();
+  const baseState = createWorkflowStateFromTemplate(template, function(item, side){
+    const geometry = getWorkflowAnchorGeometryFromRect(item.x, item.y, item.width || 0, item.height || 0, item);
+    return getWorkflowAnchorPointFromGeometry(geometry, side);
+  });
+  return scaleWorkflowState(baseState, 0.9);
+}
+
 function getInitialWorkflowState(){
   if(workflowId === "wf-cotizaciones"){
     return createCotizacionesWorkflowState();
+  }
+  if(workflowId === "wf-planificacion"){
+    return createPlanificacionWorkflowState();
   }
   return {
   items: [
@@ -844,7 +1030,7 @@ renderSidebarTree();
 function loadWorkflowState(){
   try{
     const raw = window.localStorage.getItem(workflowStorageKey);
-    const parsed = raw ? JSON.parse(raw) : null;
+    let parsed = raw ? JSON.parse(raw) : null;
     if(!parsed || !Array.isArray(parsed.items) || !parsed.items.length){
       return structuredClone(defaultWorkflowState);
     }
@@ -1106,9 +1292,43 @@ function loadWorkflowState(){
         }) : [],
         color: connector.color || "#7d7d7d",
         strokeWidth: Number.isFinite(connector.strokeWidth) ? connector.strokeWidth : 2,
+        dashed: Boolean(connector.dashed),
+        arrow: normalizeWorkflowArrowMode(connector.arrow),
         groupId: connector.groupId || ""
       };
     }) : [];
+    if(workflowId === "wf-planificacion"){
+      const supportConnectors = [
+        { id: "p2-support-1", from: { itemId: "step-p2-3", side: "bottom-middle" }, x1: 150, y1: 457, x2: 150, y2: 761, via: [{ x: 150, y: 761 }], dashed: true, arrow: "none", color: "#989898", strokeWidth: 1.4 },
+        { id: "p2-support-2", from: null, to: null, x1: 150, y1: 500, x2: 198, y2: 500, via: [], dashed: true, arrow: "none", color: "#989898", strokeWidth: 1.4 },
+        { id: "p2-support-3", from: null, to: null, x1: 150, y1: 563, x2: 198, y2: 563, via: [], dashed: true, arrow: "none", color: "#989898", strokeWidth: 1.4 },
+        { id: "p2-support-4", from: null, to: null, x1: 150, y1: 619, x2: 196, y2: 619, via: [], dashed: true, arrow: "none", color: "#989898", strokeWidth: 1.4 },
+        { id: "p2-support-5", from: null, to: null, x1: 150, y1: 675, x2: 196, y2: 675, via: [], dashed: true, arrow: "none", color: "#989898", strokeWidth: 1.4 },
+        { id: "p2-support-6", from: null, to: null, x1: 150, y1: 735, x2: 196, y2: 735, via: [], dashed: true, arrow: "none", color: "#989898", strokeWidth: 1.4 }
+      ];
+      supportConnectors.forEach(function(connector){
+        if(!parsed.connectors.some(function(entry){ return entry.id === connector.id; })){
+          parsed.connectors.push(connector);
+        }
+      });
+      parsed.connectors = parsed.connectors.map(function(connector){
+        if(connector.id === "p2-line-1"){
+          return Object.assign({}, connector, {
+            from: { itemId: "entry-p2", side: "right-middle" },
+            to: { itemId: "step-p2-1", side: "left-middle" },
+            via: [{ x: 58, y: 115 }],
+            arrow: "end"
+          });
+        }
+        return connector;
+      });
+      parsed.connectors = normalizePlanificacionSupportConnectors(parsed.items, parsed.connectors);
+      if(parsed.templateVersion !== PLANIFICACION_WORKFLOW_TEMPLATE_VERSION){
+        parsed = scaleWorkflowState(parsed, 0.9);
+        parsed.templateVersion = PLANIFICACION_WORKFLOW_TEMPLATE_VERSION;
+        parsed.connectors = normalizePlanificacionSupportConnectors(parsed.items, parsed.connectors);
+      }
+    }
     return parsed;
   }catch(error){
     return structuredClone(defaultWorkflowState);
@@ -1374,6 +1594,137 @@ const WORKFLOW_STEP_CONTENT = {
 </div>
 `
 };
+
+Object.assign(WORKFLOW_STEP_CONTENT, {
+  "p2-1": `
+<h2>Asignar Administrador de Contrato</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qinspecciones</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Tomar la cotización aceptada como entrada de planificación.</li>
+<li>Asignar administrador de contrato y base del servicio.</li>
+<li>Definir tareas, plazos, responsables y plan preliminar.</li>
+</ol>
+<h3>Salida</h3>
+<p>Administrador de contrato asignado y planificación inicial registrada.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Asignación inicial del contrato</a>
+</div>
+`,
+  "p2-2": `
+<h2>Revisar la OL</h2>
+<p><span class="pill">Responsable: Asistente Técnico</span><span class="pill">Sistema: Qinspecciones</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Revisar la orden de laboratorio u orden operativa base.</li>
+<li>Validar alcance, servicios y antecedentes disponibles.</li>
+<li>Confirmar que la información permita continuar la planificación.</li>
+</ol>
+<h3>Salida</h3>
+<p>Orden revisada y lista para planificación de servicios.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Revisión de orden operativa</a>
+</div>
+`,
+  "p2-3": `
+<h2>Planificar Servicios de Muestreo y Análisis</h2>
+<p><span class="pill">Responsable: Asistente Técnico</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Definir subcontratos, documentación, equipos y logística.</li>
+<li>Preparar recursos de terreno y condiciones de ejecución.</li>
+<li>Dejar lista la base para coordinar con cliente y calendarizar.</li>
+</ol>
+<h3>Salida</h3>
+<p>Plan de servicio preliminar con recursos críticos identificados.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Plan preliminar del servicio</a>
+</div>
+`,
+  "p2-4": `
+<h2>Coordinar los servicios con Cliente</h2>
+<p><span class="pill">Responsable: Asistente Técnico</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Coordinar condiciones de ejecución y disponibilidad con el cliente.</li>
+<li>Confirmar ventanas de atención y observaciones relevantes.</li>
+<li>Alinear la planificación con el alcance confirmado.</li>
+</ol>
+<h3>Salida</h3>
+<p>Coordinación con cliente validada para calendarizar.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Confirmación de coordinación con cliente</a>
+</div>
+`,
+  "p2-5": `
+<h2>Calendarizar Servicios</h2>
+<p><span class="pill">Responsable: Asistente Técnico</span><span class="pill">Sistema: Qinspecciones</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Calendarizar fechas tentativas de los servicios.</li>
+<li>Ordenar la secuencia de muestreo, mediciones y análisis.</li>
+<li>Preparar la creación de órdenes de inspección.</li>
+</ol>
+<h3>Salida</h3>
+<p>Servicios calendarizados en forma preliminar.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Agenda preliminar de servicios</a>
+</div>
+`,
+  "p2-6": `
+<h2>Crear Órdenes de Inspecciones</h2>
+<p><span class="pill">Responsable: Asistente Técnico</span><span class="pill">Sistema: Qinspecciones</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Crear órdenes de inspección en el sistema.</li>
+<li>Asignar supervisor por localidad y operación.</li>
+<li>Registrar fechas tentativas de ejecución.</li>
+</ol>
+<h3>Salida</h3>
+<p>Órdenes de inspección creadas para revisión operativa.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Órdenes de inspección</a>
+</div>
+`,
+  "p2-6.1": `
+<h2>Modificar fechas en sistema</h2>
+<p><span class="pill">Responsable: Jefe de Operaciones</span><span class="pill">Sistema: Qinspecciones</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Actualizar fechas y restricciones detectadas en revisión.</li>
+<li>Reprogramar servicios cuando la planificación no sea factible.</li>
+<li>Dejar el sistema listo para una nueva validación.</li>
+</ol>
+<h3>Salida</h3>
+<p>Fechas corregidas en sistema.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Historial de reprogramación</a>
+</div>
+`,
+  "p2-7": `
+<h2>Asignar Muestreador Ambiental</h2>
+<p><span class="pill">Responsable: Jefe de Operaciones</span><span class="pill">Sistemas: Qinspecciones / QETFA</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Asignar muestreador e inspector según factibilidad.</li>
+<li>Dejar confirmada la fecha de ejecución.</li>
+<li>Cerrar la planificación con recursos definidos.</li>
+</ol>
+<h3>Salida</h3>
+<p>Planificación aceptada e inspector asignado.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>Asignación final de recursos</a>
+</div>
+`
+});
 
 function getWorkflowPublicationStepId(item){
   if(!item){
@@ -1743,6 +2094,76 @@ function getWorkflowConnectorEndpointSide(connector, endpointKey){
   return "center";
 }
 
+function normalizePlanificacionSupportConnectors(items, connectors){
+  const itemsById = (items || []).reduce(function(acc, item){
+    acc[item.id] = item;
+    return acc;
+  }, {});
+  const source = itemsById["step-p2-3"];
+  if(!source){
+    return connectors;
+  }
+  const trunkStart = getWorkflowAnchorPointFromGeometry(
+    getWorkflowAnchorGeometryFromRect(source.x, source.y, source.width || 0, source.height || 0, source),
+    "bottom-middle"
+  );
+  const branchTargets = [
+    { connectorId: "p2-support-2", itemId: "icon-p2-doc" },
+    { connectorId: "p2-support-3", itemId: "icon-p2-doc2" },
+    { connectorId: "p2-support-4", itemId: "icon-p2-team" },
+    { connectorId: "p2-support-5", itemId: "icon-p2-micro" },
+    { connectorId: "p2-support-6", itemId: "icon-p2-log" }
+  ].map(function(entry){
+    const item = itemsById[entry.itemId];
+    if(!item){
+      return null;
+    }
+    return {
+      connectorId: entry.connectorId,
+      targetX: Math.round(item.x - 8),
+      targetY: Math.round(item.y + ((item.height || 24) / 2))
+    };
+  }).filter(Boolean);
+  if(!branchTargets.length){
+    return connectors;
+  }
+  const trunkBottomY = branchTargets[branchTargets.length - 1].targetY + 24;
+  return (connectors || []).map(function(connector){
+    if(connector.id === "p2-support-1"){
+      return Object.assign({}, connector, {
+        from: { itemId: "step-p2-3", side: "bottom-middle" },
+        to: null,
+        x1: trunkStart.x,
+        y1: trunkStart.y,
+        x2: trunkStart.x,
+        y2: trunkBottomY,
+        via: [{ x: trunkStart.x, y: trunkBottomY }],
+        dashed: true,
+        arrow: "none",
+        color: "#989898",
+        strokeWidth: 1.4
+      });
+    }
+    const branch = branchTargets.find(function(entry){ return entry.connectorId === connector.id; });
+    if(branch){
+      return Object.assign({}, connector, {
+        from: null,
+        to: null,
+        x1: trunkStart.x,
+        y1: branch.targetY,
+        x2: branch.targetX,
+        y2: branch.targetY,
+        via: [],
+        dashed: true,
+        arrow: "none",
+        color: "#989898",
+        strokeWidth: 1.4
+      });
+    }
+    return connector;
+  });
+}
+
 function getWorkflowAnchorEdge(side){
   const normalizedSide = normalizeWorkflowAnchorSide(side);
   return normalizedSide === "center" ? "center" : normalizedSide.split("-")[0];
@@ -2018,22 +2439,78 @@ function renderWorkflowSelectionBox(){
   return `<div class="workflow-selection-box" style="left:${rect.x}px;top:${rect.y}px;width:${rect.width}px;height:${rect.height}px"></div>`;
 }
 
+function getWorkflowItemPublicationBounds(item){
+  const left = Number.isFinite(item.x) ? item.x : 0;
+  const top = Number.isFinite(item.y) ? item.y : 0;
+  const width = Number.isFinite(item.width) ? item.width : 0;
+  const height = Number.isFinite(item.height) ? item.height : 0;
+  let minX = left;
+  let minY = top;
+  let maxX = left + width;
+  let maxY = top + height;
+
+  if(hasWorkflowFloatingLabel(item.type) || item.type === "icon"){
+    const labelOffsetX = Number.isFinite(item.labelOffsetX) ? item.labelOffsetX : 0;
+    const labelOffsetY = Number.isFinite(item.labelOffsetY) ? item.labelOffsetY : 0;
+    const labelWidth = Number.isFinite(item.labelWidth) ? item.labelWidth : 0;
+    const labelHeight = Number.isFinite(item.labelHeight) ? item.labelHeight : 0;
+    minX = Math.min(minX, left + labelOffsetX);
+    minY = Math.min(minY, top + labelOffsetY);
+    maxX = Math.max(maxX, left + labelOffsetX + labelWidth);
+    maxY = Math.max(maxY, top + labelOffsetY + labelHeight);
+  }
+
+  if(item.kind === "actor"){
+    const actorWidth = getWorkflowActorMaxWidth(item);
+    const labelOffsetX = Number.isFinite(item.labelOffsetX) ? item.labelOffsetX : 0;
+    const labelOffsetY = Number.isFinite(item.labelOffsetY) ? item.labelOffsetY : 0;
+    const labelWidth = Number.isFinite(item.labelWidth) ? item.labelWidth : getDefaultActorLabelLayout().labelWidth;
+    const labelHeight = Number.isFinite(item.labelHeight) ? item.labelHeight : getDefaultActorLabelLayout().labelHeight;
+    minX = Math.min(minX, left + labelOffsetX);
+    minY = Math.min(minY, top + labelOffsetY);
+    maxX = Math.max(maxX, left + actorWidth, left + labelOffsetX + labelWidth);
+    maxY = Math.max(maxY, top + 22, top + labelOffsetY + labelHeight);
+  }
+
+  return { minX, minY, maxX, maxY };
+}
+
 function getPublicationBounds(){
-  let maxX = PUBLICATION_WIDTH;
-  let maxY = PUBLICATION_HEIGHT;
+  const publicationPadding = 72;
+  let contentMinX = Infinity;
+  let contentMinY = Infinity;
+  let contentMaxX = -Infinity;
+  let contentMaxY = -Infinity;
   workflowState.items.forEach(function(item){
-    maxX = Math.max(maxX, item.x + item.width + 36);
-    maxY = Math.max(maxY, item.y + item.height + 36);
+    const bounds = getWorkflowItemPublicationBounds(item);
+    contentMinX = Math.min(contentMinX, bounds.minX);
+    contentMinY = Math.min(contentMinY, bounds.minY);
+    contentMaxX = Math.max(contentMaxX, bounds.maxX);
+    contentMaxY = Math.max(contentMaxY, bounds.maxY);
   });
   workflowState.connectors.forEach(function(connector){
     buildWorkflowConnectorPoints(connector).forEach(function(point){
-      maxX = Math.max(maxX, point.x + 36);
-      maxY = Math.max(maxY, point.y + 36);
+      contentMinX = Math.min(contentMinX, point.x);
+      contentMinY = Math.min(contentMinY, point.y);
+      contentMaxX = Math.max(contentMaxX, point.x);
+      contentMaxY = Math.max(contentMaxY, point.y);
     });
   });
+  if(!Number.isFinite(contentMinX) || !Number.isFinite(contentMinY) || !Number.isFinite(contentMaxX) || !Number.isFinite(contentMaxY)){
+    return {
+      width: PUBLICATION_WIDTH,
+      height: PUBLICATION_HEIGHT,
+      offsetX: 0,
+      offsetY: 0
+    };
+  }
+  const width = Math.max(PUBLICATION_WIDTH, Math.ceil((contentMaxX - contentMinX) + (publicationPadding * 2)));
+  const height = Math.max(PUBLICATION_HEIGHT, Math.ceil((contentMaxY - contentMinY) + (publicationPadding * 2)));
   return {
-    width: Math.ceil(maxX),
-    height: Math.ceil(maxY)
+    width: width,
+    height: height,
+    offsetX: Math.round(publicationPadding - contentMinX),
+    offsetY: Math.round(publicationPadding - contentMinY)
   };
 }
 
@@ -2120,6 +2597,8 @@ function renderWorkflowCanvas(){
   canvasEl.style.height = bounds.height + "px";
   canvasEl.style.setProperty("--workflow-zoom", String(workflowZoom));
   canvasEl.style.transform = `scale(${workflowZoom})`;
+  viewportEl.style.transform = isEditingWorkflow ? "" : `translate(${bounds.offsetX || 0}px, ${bounds.offsetY || 0}px)`;
+  viewportEl.style.transformOrigin = "top left";
   canvasShellEl.style.height = isEditingWorkflow ? "" : scaledHeight + "px";
   if(!isEditingWorkflow){
     canvasShellEl.scrollLeft = 0;
@@ -2138,6 +2617,13 @@ function renderWorkflowCanvas(){
     openWorkflowConnectorToolbarId = "";
   }
   viewportEl.innerHTML = "";
+  let publicationLimitEl = canvasEl.querySelector(".workflow-publication-limit");
+  if(!publicationLimitEl){
+    publicationLimitEl = document.createElement("div");
+    publicationLimitEl.className = "workflow-publication-limit";
+    canvasEl.appendChild(publicationLimitEl);
+  }
+  publicationLimitEl.style.display = isEditingWorkflow ? "none" : "block";
   if(isEditingWorkflow){
     viewportEl.onclick = function(event){
       if(suppressWorkflowViewportClick){
@@ -2170,8 +2656,9 @@ function renderWorkflowCanvas(){
     el.style.left = item.x + "px";
     el.style.top = item.y + "px";
     if(item.kind === "actor"){
+      const actorWidth = getWorkflowActorMaxWidth(item);
       el.style.width = "fit-content";
-      el.style.maxWidth = item.width + "px";
+      el.style.maxWidth = actorWidth + "px";
       el.style.height = "auto";
       el.style.minHeight = item.height + "px";
     }else{
@@ -2330,10 +2817,14 @@ function renderWorkflowCanvas(){
 function renderWorkflowConnectors(bounds){
   const lines = workflowState.connectors.map(function(connector){
     const selectedClass = isWorkflowConnectorSelected(connector.id) ? " is-selected" : "";
+    const dashedClass = connector.dashed ? " is-dashed" : "";
+    const arrowMode = normalizeWorkflowArrowMode(connector.arrow);
     const points = buildWorkflowConnectorPoints(connector).map(function(point){
       return point.x + "," + point.y;
     }).join(" ");
-    return `<polyline class="workflow-connector-hit${selectedClass}" data-connector-id="${connector.id}" data-drag="move" points="${points}"></polyline><polyline class="${selectedClass ? "is-selected" : ""}" data-connector-id="${connector.id}" data-drag="move" points="${points}" stroke="${escapeHtml(connector.color || "#7d7d7d")}" stroke-width="${connector.strokeWidth || 2}"></polyline>`;
+    const markerStart = (arrowMode === "start" || arrowMode === "both") ? ' marker-start="url(#workflow-arrow)"' : ' marker-start="none"';
+    const markerEnd = (arrowMode === "end" || arrowMode === "both") ? ' marker-end="url(#workflow-arrow)"' : ' marker-end="none"';
+    return `<polyline class="workflow-connector-hit${selectedClass}" data-connector-id="${connector.id}" data-drag="move" points="${points}"></polyline><polyline class="${selectedClass ? "is-selected" : ""}${dashedClass}" data-connector-id="${connector.id}" data-drag="move" points="${points}" stroke="${escapeHtml(connector.color || "#7d7d7d")}" stroke-width="${connector.strokeWidth || 2}"${markerStart}${markerEnd}></polyline>`;
   }).join("");
   const handles = isEditingWorkflow ? workflowState.connectors.map(function(connector){
     const start = getWorkflowConnectorEndpointPoint(connector, "start");
@@ -2353,7 +2844,7 @@ function renderWorkflowConnectors(bounds){
     const placement = getWorkflowConnectorToolbarPlacement(connector);
     return `<div class="workflow-connector-toolbar${connector.id === openWorkflowConnectorToolbarId ? " is-visible" : ""}${placement.toolbarClass}" data-connector-toolbar="${connector.id}" style="left:${placement.x}px;top:${placement.y}px"><button class="workflow-toolbar-close workflow-connector-close" type="button" data-connector-close="${connector.id}" title="Cerrar panel" aria-label="Cerrar panel">${WORKFLOW_TOOL_ICONS.close}</button><button class="workflow-item-tool is-edit" type="button" data-connector-action="edit" data-connector-id="${connector.id}" title="Editar" aria-label="Editar">${WORKFLOW_TOOL_ICONS.edit}</button><button class="workflow-item-tool is-delete" type="button" data-connector-action="delete" data-connector-id="${connector.id}" title="Eliminar" aria-label="Eliminar">${WORKFLOW_TOOL_ICONS.delete}</button></div>`;
   }).join("") : "";
-  return `<svg class="workflow-connectors" viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true"><defs><marker id="workflow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7d7d7d"></path></marker></defs>${lines}</svg>${handles}${bendHandles}${toolbars}`;
+  return `<svg class="workflow-connectors" viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true"><defs><marker id="workflow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7d7d7d"></path></marker></defs>${lines}</svg>${handles}${bendHandles}${toolbars}`;
 }
 
 function renderWorkflowAnchorPreview(){
@@ -2529,7 +3020,9 @@ function getWorkflowSelectionForConnector(connectorId){
 
 function buildWorkflowActorMarkup(item){
   const showResize = isEditingWorkflow && item.id === selectedWorkflowItemId;
-  return `<span class="actor-icon" aria-hidden="true"></span><div class="workflow-actor-label-shell${showResize ? " is-selected" : ""}" style="--actor-label-offset-x:${item.labelOffsetX || 0}px;--actor-label-offset-y:${item.labelOffsetY || 0}px;width:${item.labelWidth || getDefaultActorLabelLayout().labelWidth}px;min-height:${item.labelHeight || getDefaultActorLabelLayout().labelHeight}px"><span class="workflow-item-label">${item.html || ""}</span>${showResize ? '<button type="button" class="workflow-entry-label-resize"></button>' : ""}</div>`;
+  const labelWidth = item.labelWidth || getDefaultActorLabelLayout().labelWidth;
+  const labelHeight = item.labelHeight || getDefaultActorLabelLayout().labelHeight;
+  return `<span class="actor-icon" aria-hidden="true"></span><div class="workflow-actor-label-shell${showResize ? " is-selected" : ""}" style="--actor-label-offset-x:${item.labelOffsetX || 0}px;--actor-label-offset-y:${item.labelOffsetY || 0}px;max-width:${labelWidth}px;min-height:${labelHeight}px"><span class="workflow-item-label">${item.html || ""}</span>${showResize ? '<button type="button" class="workflow-entry-label-resize"></button>' : ""}</div>`;
 }
 
 function getWorkflowTransformType(item){
@@ -2789,6 +3282,11 @@ function convertWorkflowItem(itemId, targetType){
     item.borderColor = "transparent";
     item.backgroundColor = "transparent";
     item.textColor = "#30424d";
+    delete item.labelOffsetX;
+    delete item.labelOffsetY;
+    delete item.labelWidth;
+    delete item.labelHeight;
+    delete item.iconVariant;
   }else if(targetType === "role"){
     item.type = "activity";
     item.kind = "actor";
@@ -2868,7 +3366,7 @@ function convertWorkflowItem(itemId, targetType){
     item.labelWidth = labelLayout.labelWidth;
     item.labelHeight = labelLayout.labelHeight;
   }
-  if(!["activity", "subactivity", "role"].includes(targetType) || workflowId !== "wf-cotizaciones"){
+  if(targetType !== "subactivity" && targetType !== "role" && (!["activity", "subactivity", "role"].includes(targetType) || workflowId !== "wf-cotizaciones")){
     delete item.kind;
     delete item.html;
     delete item.badge;
@@ -3063,6 +3561,22 @@ function renderWorkflowInspector(){
         <input class="workflow-inspector-range" id="workflowConnectorStroke" type="range" min="1" max="6" step="0.5" value="${connector.strokeWidth || 2}">
         <input class="workflow-inspector-input" id="workflowConnectorStrokeValue" type="number" min="1" max="6" step="0.5" value="${connector.strokeWidth || 2}">
       </div>
+      <div class="workflow-inspector-group">
+        <label for="workflowConnectorLineStyle">Tipo de línea</label>
+        <select class="workflow-inspector-input" id="workflowConnectorLineStyle">
+          <option value="solid"${connector.dashed ? "" : " selected"}>Sólida</option>
+          <option value="dashed"${connector.dashed ? " selected" : ""}>Punteada</option>
+        </select>
+      </div>
+      <div class="workflow-inspector-group">
+        <label for="workflowConnectorArrowMode">Sentido de flecha</label>
+        <select class="workflow-inspector-input" id="workflowConnectorArrowMode">
+          <option value="none"${normalizeWorkflowArrowMode(connector.arrow) === "none" ? " selected" : ""}>Sin flecha</option>
+          <option value="end"${normalizeWorkflowArrowMode(connector.arrow) === "end" ? " selected" : ""}>Al final</option>
+          <option value="start"${normalizeWorkflowArrowMode(connector.arrow) === "start" ? " selected" : ""}>Al inicio</option>
+          <option value="both"${normalizeWorkflowArrowMode(connector.arrow) === "both" ? " selected" : ""}>En ambos sentidos</option>
+        </select>
+      </div>
       <div class="workflow-inspector-actions is-apply-row">
         <button class="workflow-inspector-button is-primary" id="applyWorkflowConnectorButton" type="button">Aplicar</button>
       </div>
@@ -3070,6 +3584,8 @@ function renderWorkflowInspector(){
     const colorEl = document.getElementById("workflowConnectorColor");
     const strokeEl = document.getElementById("workflowConnectorStroke");
     const strokeValueEl = document.getElementById("workflowConnectorStrokeValue");
+    const lineStyleEl = document.getElementById("workflowConnectorLineStyle");
+    const arrowModeEl = document.getElementById("workflowConnectorArrowMode");
     function applyConnectorDraft(live){
       const target = getSelectedWorkflowConnector();
       if(!target){
@@ -3077,6 +3593,8 @@ function renderWorkflowInspector(){
       }
       target.color = colorEl.value;
       target.strokeWidth = clamp(Number(strokeEl.value) || 2, 1, 6);
+      target.dashed = lineStyleEl.value === "dashed";
+      target.arrow = normalizeWorkflowArrowMode(arrowModeEl.value);
       saveWorkflowState();
       renderWorkflowCanvas();
       if(!live){
@@ -3098,6 +3616,8 @@ function renderWorkflowInspector(){
       strokeValueEl.value = strokeEl.value;
       applyConnectorDraft(true);
     });
+    lineStyleEl.addEventListener("change", function(){ applyConnectorDraft(true); });
+    arrowModeEl.addEventListener("change", function(){ applyConnectorDraft(true); });
     document.getElementById("applyWorkflowConnectorButton").addEventListener("click", function(){
       applyConnectorDraft(false);
     });
@@ -3362,8 +3882,9 @@ function applySelectedWorkflowItemPreview(item){
     el.style.left = item.x + "px";
     el.style.top = item.y + "px";
     if(item.kind === "actor"){
+      const actorWidth = getWorkflowActorMaxWidth(item);
       el.style.width = "fit-content";
-      el.style.maxWidth = item.width + "px";
+      el.style.maxWidth = actorWidth + "px";
       el.style.height = "auto";
       el.style.minHeight = item.height + "px";
     }else{

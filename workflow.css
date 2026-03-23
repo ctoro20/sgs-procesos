@@ -205,6 +205,11 @@ height:auto;
 overflow:visible;
 }
 
+.diagram[data-editing="false"] .diagram-canvas-shell{
+display:flex;
+justify-content:center;
+}
+
 .diagram[data-editing="true"] .diagram-canvas-shell{
 height:calc(100vh - 250px);
 min-height:680px;
@@ -224,6 +229,10 @@ cursor:grabbing;
 .diagram-zoom-layer{
 position:relative;
 transform-origin:top left;
+}
+
+.diagram[data-editing="false"] .diagram-zoom-layer{
+margin:0 auto;
 }
 
 .diagram-canvas{
@@ -259,6 +268,33 @@ width:100%;
 height:100%;
 }
 
+.workflow-publication-limit{
+position:absolute;
+top:0;
+right:0;
+bottom:0;
+width:0;
+border-right:1px dashed rgba(31,111,178,.42);
+pointer-events:none;
+z-index:2;
+}
+
+.workflow-publication-limit::before{
+content:"Límite publicación";
+position:absolute;
+top:10px;
+right:8px;
+padding:3px 8px;
+border-radius:999px;
+background:rgba(255,255,255,.92);
+border:1px solid rgba(31,111,178,.16);
+color:#5c738a;
+font-size:11px;
+font-weight:700;
+white-space:nowrap;
+transform:translateX(100%);
+}
+
 .workflow-connectors{
 position:absolute;
 inset:0;
@@ -276,6 +312,10 @@ fill:none;
 marker-end:url(#workflow-arrow);
 pointer-events:auto;
 cursor:grab;
+}
+
+.workflow-connectors polyline.is-dashed{
+stroke-dasharray:4 4;
 }
 
 .workflow-connectors-draft polyline.is-draft{
@@ -1362,6 +1402,8 @@ position:relative;
 display:flex;
 align-items:center;
 justify-content:center;
+width:fit-content;
+max-width:100%;
 min-height:24px;
 transform:translate(var(--actor-label-offset-x, 0px), var(--actor-label-offset-y, 0px));
 cursor:default;
@@ -1373,7 +1415,8 @@ cursor:grab;
 
 .canvas-item.actor .workflow-actor-label-shell .workflow-item-label{
 display:block;
-width:100%;
+width:auto;
+max-width:100%;
 text-align:center;
 line-height:1.15;
 word-break:break-word;

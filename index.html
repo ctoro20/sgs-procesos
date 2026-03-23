@@ -1562,6 +1562,7 @@ P2: `
 <li>Plan de trabajo o programación operacional.</li>
 <li>Asignación de recursos y agenda de ejecución.</li>
 </ol>
+<a class="action-link" href="workflow.html?workflow=wf-planificacion">Ver flujo detallado</a>
 `,
 P3: `
 <h2>Ejecución Servicios en Terreno</h2>
@@ -1691,7 +1692,8 @@ let processDetails = loadProcessDetails();
 const defaultItemDetails = buildDefaultItemDetails();
 let itemDetails = loadItemDetails();
 const defaultWorkflowCatalog = [
-{ id: "wf-cotizaciones", title: "Workflow Cotizaciones", pageName: "workflow.html?workflow=wf-cotizaciones", url: "workflow.html?workflow=wf-cotizaciones" }
+{ id: "wf-cotizaciones", title: "Workflow Cotizaciones", pageName: "workflow.html?workflow=wf-cotizaciones", url: "workflow.html?workflow=wf-cotizaciones" },
+{ id: "wf-planificacion", title: "Workflow Planificación", pageName: "workflow.html?workflow=wf-planificacion", url: "workflow.html?workflow=wf-planificacion" }
 ];
 let workflowCatalog = loadWorkflowCatalog();
 
