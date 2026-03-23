@@ -2,6 +2,8 @@
 const PROCESS_DETAILS_STORAGE_KEY = "conemi-process-details-v1";
 const ITEM_DETAILS_STORAGE_KEY = "conemi-item-details-v1";
 const WORKFLOW_CATALOG_STORAGE_KEY = "conemi-workflow-catalog-v1";
+const PROCESS_FILES_DB_NAME = "conemi-process-files-db";
+const PROCESS_FILES_STORE = "files";
 const WORKFLOW_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-v1:";
 const WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-base-v1:";
 const WORKFLOW_JSON_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-json-v1:";
@@ -19,6 +21,12 @@ const WORKFLOW_TEMPLATE_REPO_PATHS = {
   "wf-planificacion": "data/workflows/wf-planificacion.base.json"
 };
 const workflowTemplateRepoCache = Object.create(null);
+const WORKFLOW_DETAIL_REPO_PATHS = {
+  "wf-cotizaciones": "data/workflow-details/wf-cotizaciones.details.json",
+  "wf-planificacion": "data/workflow-details/wf-planificacion.details.json"
+};
+const WORKFLOW_DETAIL_PUBLISHED_ROOT = "https://ctoro20.github.io/sgs-procesos/";
+const workflowDetailRepoCache = Object.create(null);
 const params = new URLSearchParams(window.location.search);
 const processId = params.get("process") || "";
 const itemId = params.get("item") || "";
@@ -169,6 +177,8 @@ const workflowJsonDraftRevisionStorageKey = WORKFLOW_JSON_DRAFT_REVISION_STORAGE
 const workflowPaletteStorageKey = WORKFLOW_PALETTE_STORAGE_KEY_PREFIX + workflowToken;
 const workflowSourceStorageKey = WORKFLOW_SOURCE_STORAGE_KEY_PREFIX + workflowToken;
 const WORKFLOW_ZOOM_STORAGE_KEY_PREFIX = "conemi-workflow-zoom-v1:";
+const WORKFLOW_PUBLICATION_ZOOM_STORAGE_KEY_PREFIX = "conemi-workflow-publication-zoom-v1:";
+const WORKFLOW_API_BASE = "/api";
 const PUBLICATION_WIDTH = 1200;
 const PUBLICATION_HEIGHT = 380;
 const EDITOR_WIDTH = 2200;
@@ -545,6 +555,126 @@ function loadWorkflowTemplateDefinitionFromRepo(targetWorkflowId, options){
   }
   workflowTemplateRepoCache[targetWorkflowId] = null;
   return null;
+}
+
+function getWorkflowDetailRepoPath(targetWorkflowId){
+  return WORKFLOW_DETAIL_REPO_PATHS[targetWorkflowId] || "";
+}
+
+function extractWorkflowDetailHeading(content){
+  const match = String(content || "").match(/<h2>([\s\S]*?)<\/h2>/i);
+  return match ? stripHtml(match[1]) : "";
+}
+
+function stripWorkflowDetailHeading(content){
+  return String(content || "").replace(/^\s*<h2>[\s\S]*?<\/h2>\s*/i, "").trim();
+}
+
+function extractWorkflowSectionText(content, title){
+  const match = String(content || "").match(new RegExp(`<h3>${title}<\\/h3>\\s*<p>([\\s\\S]*?)<\\/p>`, "i"));
+  return match ? stripHtml(match[1]) : "";
+}
+
+function extractWorkflowSectionList(content, title){
+  const match = String(content || "").match(new RegExp(`<h3>${title}<\\/h3>\\s*<ol>([\\s\\S]*?)<\\/ol>`, "i"));
+  if(!match){
+    return [];
+  }
+  return Array.from(match[1].matchAll(/<li>([\s\S]*?)<\/li>/gi)).map(function(entry){
+    return stripHtml(entry[1]);
+  });
+}
+
+function normalizeWorkflowDetailEntry(detailKey, entry){
+  const normalized = typeof entry === "string" ? { title: "", content: entry } : (entry || {});
+  const content = String(normalized.content || normalized.html || "");
+  const extractedTitle = extractWorkflowDetailHeading(content);
+  return {
+    title: String(normalized.title || extractedTitle || ("Detalle " + detailKey)).trim(),
+    objective: normalizeWorkflowRichTextField(
+      normalized.objective || extractWorkflowSectionText(content, "Objetivo"),
+      "paragraph"
+    ),
+    roles: normalizeWorkflowRichTextField(
+      normalized.roles || extractWorkflowSectionList(content, "Roles y responsabilidades"),
+      "list"
+    ),
+    description: normalizeWorkflowRichTextField(
+      normalized.description || extractWorkflowSectionList(content, "Descripción de actividades"),
+      "list"
+    ),
+    policies: normalizeWorkflowRichTextField(
+      normalized.policies || extractWorkflowSectionList(content, "Políticas y reglas"),
+      "list"
+    ),
+    records: normalizeWorkflowRichTextField(
+      normalized.records || extractWorkflowSectionList(content, "Registros generados"),
+      "list"
+    ),
+    link: String(normalized.link || "").trim()
+  };
+}
+
+function normalizeWorkflowDetailsDefinition(targetWorkflowId, definition){
+  const normalized = {
+    workflowId: targetWorkflowId,
+    title: (definition && definition.title) || (getWorkflowEntry() || {}).title || "Workflow",
+    details: {}
+  };
+  const sourceDetails = definition && definition.details ? definition.details : {};
+  Object.keys(sourceDetails).forEach(function(detailKey){
+    normalized.details[detailKey] = normalizeWorkflowDetailEntry(detailKey, sourceDetails[detailKey]);
+  });
+  return normalized;
+}
+
+function buildWorkflowDetailsDefinitionFromEmbeddedContent(targetWorkflowId){
+  const details = {};
+  Object.keys(WORKFLOW_STEP_CONTENT).forEach(function(stepKey){
+    if(targetWorkflowId === "wf-planificacion" && stepKey.indexOf("p2-") === 0){
+      details[stepKey.replace(/^p2-/, "")] = normalizeWorkflowDetailEntry(stepKey, WORKFLOW_STEP_CONTENT[stepKey]);
+    }else if(targetWorkflowId !== "wf-planificacion" && stepKey.indexOf("p2-") !== 0){
+      details[stepKey] = normalizeWorkflowDetailEntry(stepKey, WORKFLOW_STEP_CONTENT[stepKey]);
+    }
+  });
+  return {
+    workflowId: targetWorkflowId,
+    title: (getWorkflowEntry() || {}).title || "Workflow",
+    details: details
+  };
+}
+
+function loadWorkflowDetailsDefinitionFromRepo(targetWorkflowId, options){
+  const settings = options || {};
+  const bypassCache = settings.bypassCache === true;
+  const detailPath = getWorkflowDetailRepoPath(targetWorkflowId);
+  const requestPath = canUseWorkflowPersistenceApi() && targetWorkflowId
+    ? `${WORKFLOW_API_BASE}/workflow-details/${encodeURIComponent(targetWorkflowId)}?t=${Date.now()}`
+    : detailPath;
+  if(!detailPath){
+    return buildWorkflowDetailsDefinitionFromEmbeddedContent(targetWorkflowId);
+  }
+  if(!bypassCache && Object.prototype.hasOwnProperty.call(workflowDetailRepoCache, targetWorkflowId)){
+    const cached = workflowDetailRepoCache[targetWorkflowId];
+    return cached ? structuredClone(cached) : buildWorkflowDetailsDefinitionFromEmbeddedContent(targetWorkflowId);
+  }
+  try{
+    const request = new XMLHttpRequest();
+    request.open("GET", requestPath, false);
+    request.setRequestHeader("Cache-Control", "no-store");
+    request.send();
+    const hasSuccessfulStatus = (request.status >= 200 && request.status < 300) || (request.status === 0 && request.responseText);
+    if(hasSuccessfulStatus && request.responseText){
+      const parsed = JSON.parse(request.responseText);
+      const normalized = normalizeWorkflowDetailsDefinition(targetWorkflowId, parsed);
+      workflowDetailRepoCache[targetWorkflowId] = structuredClone(normalized);
+      return structuredClone(normalized);
+    }
+  }catch(error){
+  }
+  const fallback = buildWorkflowDetailsDefinitionFromEmbeddedContent(targetWorkflowId);
+  workflowDetailRepoCache[targetWorkflowId] = structuredClone(fallback);
+  return fallback;
 }
 
 function getWorkflowStateOriginLabel(origin){
@@ -1140,35 +1270,23 @@ function getDefaultWorkflowStateSnapshot(){
 }
 
 function loadWorkflowStateSource(){
-  try{
-    const raw = String(window.localStorage.getItem(workflowSourceStorageKey) || "").trim().toLowerCase();
-    if(raw === "json" || raw === "storage"){
-      return raw;
-    }
-  }catch(error){
-  }
-  return window.location.protocol === "file:" ? "storage" : "json";
+  return "json";
 }
 
 function saveWorkflowStateSource(){
-  window.localStorage.setItem(workflowSourceStorageKey, workflowStateSource);
+  workflowStateSource = "json";
 }
 
 function shouldLoadWorkflowDraft(){
-  const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  const isLocalContext = window.location.protocol === "file:" || isLocalHost;
-  if(!isLocalContext && !isEditingWorkflow){
-    return false;
-  }
-  return workflowStateSource === "storage" || workflowStateSource === "json";
+  return false;
 }
 
 function getActiveWorkflowLayoutStorageKey(){
-  return workflowStateSource === "json" ? workflowJsonStorageKey : workflowStorageKey;
+  return workflowJsonStorageKey;
 }
 
 function getActiveWorkflowBaseStorageKey(){
-  return workflowStateSource === "json" ? workflowJsonBaseStorageKey : workflowBaseStorageKey;
+  return workflowJsonBaseStorageKey;
 }
 
 function getExpectedWorkflowJsonDraftRevision(){
@@ -1192,9 +1310,6 @@ function shouldReseedWorkflowJsonDraft(){
 }
 
 function markWorkflowJsonDraftRevision(){
-  if(workflowStateSource !== "json"){
-    return;
-  }
   const expectedRevision = getExpectedWorkflowJsonDraftRevision();
   if(!expectedRevision){
     return;
@@ -1206,8 +1321,13 @@ let isEditingWorkflow = false;
 let workflowStateSource = loadWorkflowStateSource();
 let workflowLastResolvedStateOrigin = "";
 let workflowState = loadWorkflowState({ preferLocalStorage: shouldLoadWorkflowDraft() });
+let workflowDetailsState = null;
+let workflowPublicationPanelMode = "view";
+let workflowPublicationDetailKey = "";
+let workflowPublicationDetailItemId = "";
 let activeDrag = null;
 let workflowZoom = loadWorkflowZoom();
+let workflowPublicationZoom = loadWorkflowPublicationZoom();
 let workflowPalette = loadWorkflowPalette();
 let selectedWorkflowItemId = workflowState.items[0] ? workflowState.items[0].id : "";
 let selectedWorkflowConnectorId = "";
@@ -1242,7 +1362,7 @@ function loadWorkflowState(options){
       const raw = window.localStorage.getItem(getActiveWorkflowLayoutStorageKey());
       parsed = raw ? JSON.parse(raw) : null;
       if(parsed && Array.isArray(parsed.items) && parsed.items.length){
-        workflowLastResolvedStateOrigin = workflowStateSource === "json" ? "json-draft" : "storage";
+        workflowLastResolvedStateOrigin = "json-draft";
       }
     }
     if(!parsed || !Array.isArray(parsed.items) || !parsed.items.length){
@@ -1565,27 +1685,27 @@ function saveWorkflowState(options){
     workflowRedoStack = [];
   }
   workflowLastSavedSnapshot = serialized;
-  window.localStorage.setItem(getActiveWorkflowLayoutStorageKey(), serialized);
-  markWorkflowJsonDraftRevision();
-}
-
-function loadWorkflowBaseState(){
   try{
-    const raw = window.localStorage.getItem(getActiveWorkflowBaseStorageKey());
-    const parsed = raw ? JSON.parse(raw) : null;
-    if(!parsed || !Array.isArray(parsed.items) || !parsed.items.length){
-      return getDefaultWorkflowStateSnapshot();
-    }
-    workflowLastResolvedStateOrigin = "base-storage";
-    window.localStorage.setItem(getActiveWorkflowLayoutStorageKey(), JSON.stringify(parsed));
-    return loadWorkflowState();
+    window.localStorage.setItem(getActiveWorkflowLayoutStorageKey(), serialized);
   }catch(error){
-    return getDefaultWorkflowStateSnapshot();
+  }
+  markWorkflowJsonDraftRevision();
+  if(settings.persist !== false && canUseWorkflowPersistenceApi()){
+    persistWorkflowStateToApi().catch(function(){
+      updateWorkflowStatus("No se pudo guardar el workflow en archivo JSON.");
+    });
   }
 }
 
+function loadWorkflowBaseState(){
+  return getDefaultWorkflowStateSnapshot();
+}
+
 function saveWorkflowBaseState(){
-  window.localStorage.setItem(getActiveWorkflowBaseStorageKey(), JSON.stringify(workflowState));
+  try{
+    window.localStorage.setItem(getActiveWorkflowBaseStorageKey(), JSON.stringify(workflowState));
+  }catch(error){
+  }
   markWorkflowJsonDraftRevision();
 }
 
@@ -1604,6 +1724,17 @@ function loadWorkflowZoom(){
 
 function saveWorkflowZoom(){
   window.localStorage.setItem(WORKFLOW_ZOOM_STORAGE_KEY_PREFIX + workflowToken, String(workflowZoom));
+}
+
+function loadWorkflowPublicationZoom(){
+  return 1;
+}
+
+function saveWorkflowPublicationZoom(){
+  try{
+    window.localStorage.removeItem(WORKFLOW_PUBLICATION_ZOOM_STORAGE_KEY_PREFIX + workflowToken);
+  }catch(error){
+  }
 }
 
 function loadWorkflowPalette(){
@@ -1945,8 +2076,14 @@ Object.assign(WORKFLOW_STEP_CONTENT, {
 <div class="doc-links">
 <a class="doc-link" href="#" download>Asignación final de recursos</a>
 </div>
-`
+  `
 });
+
+workflowDetailsState = loadWorkflowDetailsDefinitionFromRepo(workflowId || "wf-cotizaciones");
+
+function isWorkflowDetailEditableItem(item){
+  return Boolean(item && ((item.kind === "flow-card" && item.step) || (item.type === "process" && item.id === "boss-1")));
+}
 
 function getWorkflowPublicationStepId(item){
   if(!item){
@@ -1961,26 +2098,848 @@ function getWorkflowPublicationStepId(item){
   return "";
 }
 
-function openStep(step){
-  const normalizedStep = String(step || "").trim();
-  const content = WORKFLOW_STEP_CONTENT[normalizedStep] || "<h2>Sin detalle</h2><p>No hay contenido configurado para esta actividad.</p>";
-  const titleMatch = content.match(/<h2>(.*?)<\/h2>/);
-  let rendered = content;
-  if(titleMatch){
-    rendered = content.replace(
-      titleMatch[0],
-      `<div class="content-title"><span class="content-step-badge">${escapeHtml(normalizedStep || "•")}</span><h2>${titleMatch[1]}</h2></div>`
-    );
+function getWorkflowDetailEntry(detailKey){
+  const normalizedKey = String(detailKey || "").trim();
+  const stored = workflowDetailsState && workflowDetailsState.details ? workflowDetailsState.details[normalizedKey] : null;
+  if(stored){
+    return {
+      key: normalizedKey,
+      title: stored.title || ("Detalle " + normalizedKey),
+      objective: stored.objective || "",
+      roles: stored.roles || "",
+      description: stored.description || stored.content || "",
+      policies: stored.policies || "",
+      records: stored.records || "",
+      link: stored.link || ""
+    };
   }
+  const fallbackContent = WORKFLOW_STEP_CONTENT[workflowId === "wf-planificacion" ? ("p2-" + normalizedKey) : normalizedKey] || "";
+  return normalizeWorkflowDetailEntry(normalizedKey, {
+    title: "",
+    content: fallbackContent || "<p>No hay contenido configurado para esta actividad.</p>",
+    link: ""
+  });
+}
+
+function getWorkflowItemDisplayTitle(item){
+  if(!item){
+    return "";
+  }
+  const rawTitle = String(item.title || "").trim();
+  if(rawTitle && !/^elemento(?:\s+\d+)?$/i.test(rawTitle)){
+    return rawTitle;
+  }
+  if(item.html){
+    return String(item.html)
+      .replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  return "";
+}
+
+function getWorkflowDetailDisplayTitle(detailKey, entry, item){
+  const itemTitle = getWorkflowItemDisplayTitle(item);
+  if(itemTitle){
+    return itemTitle;
+  }
+  const entryTitle = String((entry && entry.title) || "").trim();
+  if(entryTitle && !/^detalle\b/i.test(entryTitle)){
+    return entryTitle;
+  }
+  return "Actividad " + String(detailKey || "").replace(/^p2-/, "").trim();
+}
+
+function serializeWorkflowDetailsState(){
+  return {
+    workflowId: workflowId || workflowToken,
+    title: (workflowDetailsState && workflowDetailsState.title) || workflowTitle,
+    details: structuredClone((workflowDetailsState && workflowDetailsState.details) || {})
+  };
+}
+
+function canUseWorkflowPersistenceApi(){
+  return window.location.protocol !== "file:" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+}
+
+async function persistWorkflowBaseToApi(){
+  if(!canUseWorkflowPersistenceApi() || !workflowId){
+    return false;
+  }
+  const response = await fetch(`${WORKFLOW_API_BASE}/workflows/${encodeURIComponent(workflowId)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(workflowState)
+  });
+  if(!response.ok){
+    throw new Error("workflow-save-failed");
+  }
+  return true;
+}
+
+async function persistWorkflowStateToApi(){
+  if(!canUseWorkflowPersistenceApi() || !workflowId){
+    return false;
+  }
+  const response = await fetch(`${WORKFLOW_API_BASE}/workflows/${encodeURIComponent(workflowId)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(workflowState)
+  });
+  if(!response.ok){
+    throw new Error("workflow-save-failed");
+  }
+  return true;
+}
+
+async function persistWorkflowDetailsToApi(){
+  if(!canUseWorkflowPersistenceApi() || !workflowId){
+    return false;
+  }
+  const response = await fetch(`${WORKFLOW_API_BASE}/workflow-details/${encodeURIComponent(workflowId)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(serializeWorkflowDetailsState())
+  });
+  if(!response.ok){
+    throw new Error("workflow-detail-save-failed");
+  }
+  return true;
+}
+
+function getWorkflowDetailFileOwnerKey(){
+  if(!workflowPublicationDetailItemId){
+    return "";
+  }
+  return `${workflowId || workflowToken}:${workflowPublicationDetailItemId}`;
+}
+
+function openWorkflowFilesDb(){
+  return new Promise(function(resolve, reject){
+    const request = window.indexedDB.open(PROCESS_FILES_DB_NAME, 1);
+    request.onupgradeneeded = function(){
+      const db = request.result;
+      if(!db.objectStoreNames.contains(PROCESS_FILES_STORE)){
+        const store = db.createObjectStore(PROCESS_FILES_STORE, { keyPath: "id" });
+        store.createIndex("processId", "processId", { unique: false });
+      }
+    };
+    request.onsuccess = function(){ resolve(request.result); };
+    request.onerror = function(){ reject(request.error); };
+  });
+}
+
+async function getWorkflowDetailFiles(ownerKey){
+  if(canUseWorkflowPersistenceApi()){
+    const response = await fetch(`${WORKFLOW_API_BASE}/files/${encodeURIComponent(ownerKey)}`, { cache: "no-store" });
+    if(!response.ok){
+      throw new Error("file-list-failed");
+    }
+    return await response.json();
+  }
+  const db = await openWorkflowFilesDb();
+  return new Promise(function(resolve, reject){
+    const tx = db.transaction(PROCESS_FILES_STORE, "readonly");
+    const store = tx.objectStore(PROCESS_FILES_STORE).index("processId");
+    const request = store.getAll(ownerKey);
+    request.onsuccess = function(){ resolve(request.result || []); };
+    request.onerror = function(){ reject(request.error); };
+  });
+}
+
+async function saveWorkflowDetailFile(ownerKey, file){
+  if(canUseWorkflowPersistenceApi()){
+    const base64 = await new Promise(function(resolve, reject){
+      const reader = new FileReader();
+      reader.onload = function(){
+        const result = String(reader.result || "");
+        resolve(result.split(",").pop() || "");
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const response = await fetch(`${WORKFLOW_API_BASE}/files/${encodeURIComponent(ownerKey)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: file.name,
+        displayName: getFileBaseName(file.name),
+        type: file.type,
+        size: file.size,
+        base64: base64
+      })
+    });
+    if(!response.ok){
+      throw new Error("file-save-failed");
+    }
+    return await response.json();
+  }
+  const db = await openWorkflowFilesDb();
+  return new Promise(function(resolve, reject){
+    const tx = db.transaction(PROCESS_FILES_STORE, "readwrite");
+    tx.objectStore(PROCESS_FILES_STORE).put({
+      id: `${ownerKey}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      processId: ownerKey,
+      name: file.name,
+      displayName: getFileBaseName(file.name),
+      type: file.type,
+      size: file.size,
+      blob: file,
+      createdAt: new Date().toISOString()
+    });
+    tx.oncomplete = function(){ resolve(); };
+    tx.onerror = function(){ reject(tx.error); };
+  });
+}
+
+async function deleteWorkflowDetailFile(fileId){
+  if(canUseWorkflowPersistenceApi()){
+    const response = await fetch(`${WORKFLOW_API_BASE}/files/item/${encodeURIComponent(fileId)}`, { method: "DELETE" });
+    if(!response.ok){
+      throw new Error("file-delete-failed");
+    }
+    return true;
+  }
+  const db = await openWorkflowFilesDb();
+  return new Promise(function(resolve, reject){
+    const tx = db.transaction(PROCESS_FILES_STORE, "readwrite");
+    tx.objectStore(PROCESS_FILES_STORE).delete(fileId);
+    tx.oncomplete = function(){ resolve(); };
+    tx.onerror = function(){ reject(tx.error); };
+  });
+}
+
+async function updateWorkflowDetailFileDisplayName(fileId, nextName){
+  if(canUseWorkflowPersistenceApi()){
+    const response = await fetch(`${WORKFLOW_API_BASE}/files/item/${encodeURIComponent(fileId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ displayName: nextName })
+    });
+    if(!response.ok){
+      throw new Error("file-rename-failed");
+    }
+    return await response.json();
+  }
+  const db = await openWorkflowFilesDb();
+  return new Promise(function(resolve, reject){
+    const tx = db.transaction(PROCESS_FILES_STORE, "readwrite");
+    const store = tx.objectStore(PROCESS_FILES_STORE);
+    const request = store.get(fileId);
+    request.onsuccess = function(){
+      const record = request.result;
+      if(!record){
+        resolve();
+        return;
+      }
+      record.displayName = nextName;
+      store.put(record);
+    };
+    request.onerror = function(){ reject(request.error); };
+    tx.oncomplete = function(){ resolve(); };
+    tx.onerror = function(){ reject(tx.error); };
+  });
+}
+
+function formatFileDate(value){
+  if(!value){
+    return "";
+  }
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())){
+    return "";
+  }
+  return date.toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function getFileExtension(fileName){
+  const normalized = String(fileName || "").trim();
+  const lastDot = normalized.lastIndexOf(".");
+  if(lastDot <= 0 || lastDot === normalized.length - 1){
+    return "";
+  }
+  return normalized.slice(lastDot + 1);
+}
+
+function getFileBaseName(fileName){
+  const normalized = String(fileName || "").trim();
+  const lastDot = normalized.lastIndexOf(".");
+  if(lastDot <= 0){
+    return normalized;
+  }
+  return normalized.slice(0, lastDot);
+}
+
+async function downloadWorkflowDetailFile(fileId){
+  if(canUseWorkflowPersistenceApi()){
+    window.open(`${WORKFLOW_API_BASE}/files/download/${encodeURIComponent(fileId)}`, "_blank");
+    return;
+  }
+  const db = await openWorkflowFilesDb();
+  const file = await new Promise(function(resolve, reject){
+    const tx = db.transaction(PROCESS_FILES_STORE, "readonly");
+    const request = tx.objectStore(PROCESS_FILES_STORE).get(fileId);
+    request.onsuccess = function(){ resolve(request.result); };
+    request.onerror = function(){ reject(request.error); };
+  });
+  if(!file){
+    return;
+  }
+  const url = URL.createObjectURL(file.blob);
+  const link = document.createElement("a");
+  link.href = url;
+  const extension = getFileExtension(file.name);
+  const displayName = file.displayName || getFileBaseName(file.name);
+  link.download = extension ? `${displayName}.${extension}` : displayName;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function handleWorkflowDetailFileUpload(){
+  const inputEl = document.getElementById("workflowDetailFiles");
+  const ownerKey = getWorkflowDetailFileOwnerKey();
+  if(!inputEl || !ownerKey || !inputEl.files || !inputEl.files.length){
+    return;
+  }
+  for(const file of Array.from(inputEl.files)){
+    await saveWorkflowDetailFile(ownerKey, file);
+  }
+  inputEl.value = "";
+}
+
+async function renderWorkflowDetailFiles(containerId, editable){
+  const container = document.getElementById(containerId);
+  const ownerKey = getWorkflowDetailFileOwnerKey();
+  if(!container || !ownerKey){
+    return;
+  }
+  container.dataset.editable = editable ? "true" : "false";
+  const files = await getWorkflowDetailFiles(ownerKey).catch(function(){ return []; });
+  if(!files.length){
+    container.classList.add("is-empty");
+    container.innerHTML = `<div class="process-files-empty">No hay archivos asociados todavía.</div>`;
+    return;
+  }
+  container.classList.remove("is-empty");
+  container.innerHTML = files.map(function(file){
+    const displayName = file.displayName || getFileBaseName(file.name);
+    const fileType = escapeHtml((getFileExtension(file.name) || (file.type || "archivo").split("/").pop()).toUpperCase());
+    const uploadDate = formatFileDate(file.createdAt);
+    const secondaryText = `${fileType}${uploadDate ? ` · ${uploadDate}` : ""}`;
+    const editableActions = editable
+      ? `<button class="process-file-action" data-rename-file-id="${file.id}" type="button" title="Cambiar nombre visible" aria-label="Cambiar nombre visible">✎</button><button class="process-file-action" data-delete-file-id="${file.id}" type="button" title="Eliminar archivo" aria-label="Eliminar archivo">🗑</button>`
+      : "";
+    const renameShell = editable
+      ? `<div class="process-file-rename-shell" data-file-rename-shell="${file.id}" hidden><input class="process-file-name-input" data-file-rename-input="${file.id}" type="text" value="${escapeHtmlAttribute(displayName)}"><div class="process-file-actions"><button class="process-file-action" data-save-file-name-id="${file.id}" type="button" title="Guardar nombre" aria-label="Guardar nombre">✓</button><button class="process-file-action" data-cancel-file-name-id="${file.id}" type="button" title="Cancelar" aria-label="Cancelar">↺</button></div></div>`
+      : "";
+    const displayShell = `<div class="process-file-display-shell" data-file-display-shell="${file.id}"><div class="process-file-name" data-file-name="${file.id}">${escapeHtml(displayName)}</div><div class="process-file-meta-line">${secondaryText}</div></div>`;
+    const actionShell = `<div class="process-file-actions" data-file-actions-shell="${file.id}">${editableActions}<button class="process-file-action" data-download-file-id="${file.id}" type="button" title="Descargar archivo" aria-label="Descargar archivo">↓</button></div>`;
+    return `<div class="process-file-row" data-file-id="${file.id}"><div class="process-file-meta">${displayShell}${renameShell}</div>${actionShell}</div>`;
+  }).join("");
+  container.querySelectorAll("[data-download-file-id]").forEach(function(button){
+    button.addEventListener("click", function(){
+      downloadWorkflowDetailFile(button.dataset.downloadFileId);
+    });
+  });
+  container.querySelectorAll("[data-delete-file-id]").forEach(function(button){
+    button.addEventListener("click", async function(){
+      await deleteWorkflowDetailFile(button.dataset.deleteFileId);
+      renderWorkflowDetailFiles(containerId, editable);
+    });
+  });
+  container.querySelectorAll("[data-rename-file-id]").forEach(function(button){
+    button.addEventListener("click", function(){
+      const fileId = button.dataset.renameFileId;
+      const card = container.querySelector(`[data-file-id="${fileId}"]`);
+      if(!card){ return; }
+      const displayShellEl = card.querySelector(`[data-file-display-shell="${fileId}"]`);
+      const shellEl = card.querySelector(`[data-file-rename-shell="${fileId}"]`);
+      const inputEl = card.querySelector(`[data-file-rename-input="${fileId}"]`);
+      const actionsEl = card.querySelector(`[data-file-actions-shell="${fileId}"]`);
+      if(!displayShellEl || !shellEl || !inputEl || !actionsEl){ return; }
+      displayShellEl.hidden = true;
+      actionsEl.hidden = true;
+      shellEl.hidden = false;
+      inputEl.focus();
+      inputEl.select();
+    });
+  });
+  container.querySelectorAll("[data-cancel-file-name-id]").forEach(function(button){
+    button.addEventListener("click", function(){
+      renderWorkflowDetailFiles(containerId, editable);
+    });
+  });
+  container.querySelectorAll("[data-save-file-name-id]").forEach(function(button){
+    button.addEventListener("click", async function(){
+      const fileId = button.dataset.saveFileNameId;
+      const inputEl = container.querySelector(`[data-file-rename-input="${fileId}"]`);
+      if(!inputEl || !inputEl.value.trim()){
+        return;
+      }
+      await updateWorkflowDetailFileDisplayName(fileId, inputEl.value.trim());
+      renderWorkflowDetailFiles(containerId, editable);
+    });
+  });
+}
+
+function getDefaultWorkflowCatalog(){
+  return [
+    { id: "wf-cotizaciones", title: "Workflow Cotizaciones", pageName: "workflow.html?workflow=wf-cotizaciones", url: COTIZACIONES_WORKFLOW_URL },
+    { id: "wf-planificacion", title: "Workflow Planificación", pageName: "workflow.html?workflow=wf-planificacion", url: PLANIFICACION_WORKFLOW_URL }
+  ];
+}
+
+function loadWorkflowCatalogForEditor(){
+  const defaults = getDefaultWorkflowCatalog();
+  try{
+    const raw = window.localStorage.getItem(WORKFLOW_CATALOG_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    const merged = defaults.concat(Array.isArray(parsed) ? parsed : []);
+    const seen = new Set();
+    return merged.filter(function(entry){
+      if(!entry || !entry.id || seen.has(entry.id)){
+        return false;
+      }
+      seen.add(entry.id);
+      return true;
+    });
+  }catch(error){
+    return defaults;
+  }
+}
+
+function renderWorkflowLinkOptions(selectedUrl){
+  const options = ['<option value="">Sin workflow asociado</option>'].concat(
+    loadWorkflowCatalogForEditor().map(function(entry){
+      const url = entry.url || `workflow.html?workflow=${encodeURIComponent(entry.id)}`;
+      const pageName = entry.pageName || url;
+      return `<option value="${escapeHtmlAttribute(url)}"${url === selectedUrl ? " selected" : ""}>${escapeHtml(entry.title || entry.id)} · ${escapeHtml(pageName)}</option>`;
+    })
+  );
+  return options.join("");
+}
+
+function escapeHtmlAttribute(value){
+  return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
+function convertPlainTextToParagraphs(value){
+  return String(value || "").split(/\n+/).map(function(line){
+    const trimmed = line.trim();
+    return trimmed ? `<p>${escapeHtml(trimmed)}</p>` : "";
+  }).join("") || "<p></p>";
+}
+
+function convertListToHtml(value){
+  const items = Array.isArray(value) ? value : String(value || "").split("\n").map(function(line){
+    return line.trim();
+  }).filter(Boolean);
+  if(!items.length){
+    return "<ul><li></li></ul>";
+  }
+  return `<ul>${items.map(function(item){ return `<li>${escapeHtml(item)}</li>`; }).join("")}</ul>`;
+}
+
+function sanitizeWorkflowRichTextHtml(value){
+  const template = document.createElement("template");
+  template.innerHTML = String(value || "");
+  const allowedTags = { P:true, BR:true, STRONG:true, B:true, EM:true, I:true, U:true, UL:true, OL:true, LI:true };
+  function cleanNode(node){
+    Array.from(node.childNodes).forEach(function(child){
+      if(child.nodeType === Node.TEXT_NODE){
+        return;
+      }
+      if(child.nodeType !== Node.ELEMENT_NODE){
+        child.remove();
+        return;
+      }
+      if(!allowedTags[child.tagName]){
+        const fragment = document.createDocumentFragment();
+        while(child.firstChild){
+          fragment.appendChild(child.firstChild);
+        }
+        child.replaceWith(fragment);
+        cleanNode(node);
+        return;
+      }
+      Array.from(child.attributes).forEach(function(attr){
+        child.removeAttribute(attr.name);
+      });
+      cleanNode(child);
+    });
+  }
+  cleanNode(template.content);
+  const normalized = template.innerHTML.trim();
+  return normalized || "<p></p>";
+}
+
+function normalizeWorkflowRichTextField(value, mode){
+  if(Array.isArray(value)){
+    return convertListToHtml(value);
+  }
+  if(typeof value !== "string"){
+    return mode === "list" ? "<ul><li></li></ul>" : "<p></p>";
+  }
+  const trimmed = value.trim();
+  if(!trimmed){
+    return mode === "list" ? "<ul><li></li></ul>" : "<p></p>";
+  }
+  if(trimmed.indexOf("<") !== -1 && trimmed.indexOf(">") !== -1){
+    const sanitized = sanitizeWorkflowRichTextHtml(trimmed);
+    const template = document.createElement("template");
+    template.innerHTML = sanitized;
+    const hasList = Boolean(template.content.querySelector("ul,ol,li"));
+    const hasParagraph = Boolean(template.content.querySelector("p"));
+    const plainText = template.content.textContent.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+    if(mode === "list"){
+      if(hasList){
+        return sanitized;
+      }
+      return convertListToHtml(plainText);
+    }
+    if(hasParagraph && plainText){
+      return sanitized;
+    }
+    if(hasList && plainText){
+      return convertPlainTextToParagraphs(plainText);
+    }
+    return convertPlainTextToParagraphs(plainText);
+  }
+  return mode === "list" ? convertListToHtml(trimmed) : convertPlainTextToParagraphs(trimmed);
+}
+
+function renderWorkflowRichTextHtml(value){
+  return sanitizeWorkflowRichTextHtml(value);
+}
+
+function isWorkflowRichTextEmpty(value){
+  const normalized = sanitizeWorkflowRichTextHtml(value || "").replace(/&nbsp;/g, " ").trim();
+  return !normalized || normalized === "<p></p>" || normalized === "<ul></ul>" || normalized === "<ol></ol>" || normalized === "<ul><li></li></ul>" || normalized === "<ol><li></li></ol>";
+}
+
+function renderWorkflowRichTextEditor(editorId, value, placeholder){
+  return `
+<div class="rich-editor" data-editor-id="${editorId}">
+<div class="rich-editor-toolbar">
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="bold" title="Negrita" aria-label="Negrita"><strong>B</strong></button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="italic" title="Cursiva" aria-label="Cursiva"><em>I</em></button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="underline" title="Subrayado" aria-label="Subrayado"><u>U</u></button>
+<span class="rich-editor-divider" aria-hidden="true"></span>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="insertUnorderedList" title="Lista" aria-label="Lista">• List</button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="insertOrderedList" title="Lista numerada" aria-label="Lista numerada">1.</button>
+<button class="rich-editor-button" type="button" data-editor-target="${editorId}" data-command="formatBlock" data-value="p" title="Párrafo" aria-label="Párrafo">P</button>
+</div>
+<div class="rich-editor-content" id="${editorId}" contenteditable="true" data-placeholder="${escapeHtmlAttribute(placeholder)}">${renderWorkflowRichTextHtml(value)}</div>
+</div>`;
+}
+
+function initWorkflowRichTextEditors(container){
+  container.querySelectorAll(".rich-editor-button").forEach(function(button){
+    button.addEventListener("click", function(){
+      const targetId = button.dataset.editorTarget;
+      const editor = document.getElementById(targetId);
+      if(!editor){
+        return;
+      }
+      editor.focus();
+      const command = button.dataset.command;
+      const value = button.dataset.value || null;
+      if(command === "formatBlock" && value){
+        document.execCommand(command, false, `<${value}>`);
+        return;
+      }
+      document.execCommand(command, false, value);
+    });
+  });
+}
+
+function getWorkflowRichEditorValue(editorId, mode){
+  const editor = document.getElementById(editorId);
+  if(!editor){
+    return normalizeWorkflowRichTextField("", mode);
+  }
+  return normalizeWorkflowRichTextField(editor.innerHTML, mode);
+}
+
+function renderWorkflowDetailView(detailKey){
+  const entry = getWorkflowDetailEntry(detailKey);
+  const detailItem = workflowPublicationDetailItemId ? getWorkflowItemById(workflowPublicationDetailItemId) : null;
+  const title = escapeHtml(getWorkflowDetailDisplayTitle(detailKey, entry, detailItem) || "Sin detalle");
+  const detailBadge = detailItem && detailItem.badge
+    ? String(detailItem.badge)
+    : String(detailKey || "•").replace(/^p2-/, "");
+  function renderDetailSection(titleText, value){
+    return `<h3>${titleText}</h3>${
+      isWorkflowRichTextEmpty(value)
+        ? '<p class="workflow-detail-empty">Sin contenido.</p>'
+        : renderWorkflowRichTextHtml(value)
+    }`;
+  }
+  return `
+    <div class="content-title" data-item-id="${escapeHtmlAttribute(workflowPublicationDetailItemId || detailKey)}">
+      <div class="content-title-main">
+        <span class="content-step-badge">${escapeHtml(detailBadge || "•")}</span>
+        <h2>${title}</h2>
+      </div>
+    </div>
+    ${renderDetailSection("Objetivo", entry.objective)}
+    ${renderDetailSection("Roles y responsabilidades", entry.roles)}
+    ${renderDetailSection("Descripción", entry.description)}
+    ${renderDetailSection("Políticas y reglas", entry.policies)}
+    ${renderDetailSection("Registros", entry.records)}
+    <h3>Archivos asociados</h3>
+    <div class="process-files" id="workflowDetailFilesList"><div class="process-editor-note">Cargando archivos...</div></div>
+    ${isEditingWorkflow && workflowPublicationDetailItemId ? '<div class="workflow-detail-actions"><button class="diagram-button" id="editWorkflowDetailButton" type="button">Modo edición</button></div>' : ""}
+  `;
+}
+
+function renderWorkflowDetailEditor(detailKey){
+  const entry = getWorkflowDetailEntry(detailKey);
+  const item = workflowPublicationDetailItemId ? getWorkflowItemById(workflowPublicationDetailItemId) : null;
+  const displayTitle = getWorkflowDetailDisplayTitle(detailKey, entry, item);
+  return `
+    <div class="process-editor">
+      <div class="process-editor-body">
+      ${item && item.badge ? `
+      <div class="process-editor-group">
+        <label for="workflowDetailBadgeInput">Numeral</label>
+        <input class="process-editor-input is-numeral" id="workflowDetailBadgeInput" type="text" value="${escapeHtml(item.badge || "")}">
+      </div>` : ""}
+      <div class="process-editor-group">
+        <label for="workflowDetailTitleInput">Titulo</label>
+        <input class="process-editor-input" id="workflowDetailTitleInput" type="text" value="${escapeHtml(displayTitle || "")}">
+      </div>
+      <div class="process-editor-group">
+        <label for="workflowDetailObjectiveInput">Objetivo</label>
+        ${renderWorkflowRichTextEditor("workflowDetailObjectiveInput", entry.objective || "", "Describe el objetivo")}
+      </div>
+      <div class="process-editor-group">
+        <label for="workflowDetailRolesInput">Roles y responsabilidades</label>
+        ${renderWorkflowRichTextEditor("workflowDetailRolesInput", entry.roles || "", "Detalla responsables y funciones")}
+      </div>
+      <div class="process-editor-group">
+        <label for="workflowDetailDescriptionInput">Descripción</label>
+        ${renderWorkflowRichTextEditor("workflowDetailDescriptionInput", entry.description || "", "Agrega pasos, bullets o numerales")}
+      </div>
+      <div class="process-editor-group">
+        <label for="workflowDetailPoliciesInput">Políticas y reglas</label>
+        ${renderWorkflowRichTextEditor("workflowDetailPoliciesInput", entry.policies || "", "Documenta políticas y reglas")}
+      </div>
+      <div class="process-editor-group">
+        <label for="workflowDetailRecordsInput">Registros</label>
+        ${renderWorkflowRichTextEditor("workflowDetailRecordsInput", entry.records || "", "Detalla registros o entregables")}
+      </div>
+      <div class="process-editor-group">
+        <label for="workflowDetailFiles">Archivos asociados</label>
+        <div class="process-file-dropzone is-editor">
+          <div class="process-file-dropzone-copy">
+            <strong>Biblioteca de archivos</strong>
+            <span>Sube, renombra y elimina archivos asociados a esta actividad.</span>
+          </div>
+          <label class="process-file-picker" for="workflowDetailFiles">Seleccionar</label>
+        </div>
+        <input class="process-file-input" id="workflowDetailFiles" type="file" multiple>
+        <div class="process-files" id="workflowEditorFilesList"><div class="process-editor-note">Cargando archivos...</div></div>
+      </div>
+      <div class="content-panel-actions">
+        <button class="diagram-button" id="closeWorkflowDetailPanelButton" type="button">Cerrar</button>
+        <div class="content-panel-actions-right">
+          <button class="diagram-button" id="viewWorkflowDetailButton" type="button">Modo lectura</button>
+          <button class="diagram-button" id="saveWorkflowDetailDraftButton" type="button">Guardar cambios</button>
+        </div>
+      </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderWorkflowPublicationPanel(){
   const panelEl = document.getElementById("workflowPublicationPanel");
   const contentEl = document.getElementById("workflowPublicationContent");
   if(!panelEl || !contentEl){
     return;
   }
-  contentEl.innerHTML = rendered;
-  panelEl.dataset.currentStep = normalizedStep;
+  if(!workflowPublicationDetailKey){
+    closeWorkflowPublicationPanel();
+    return;
+  }
+  const titleEl = panelEl.querySelector(".panel-title");
+  const panelContentEl = panelEl.querySelector(".panel-content");
+  if(titleEl){
+    titleEl.textContent = workflowPublicationPanelMode === "edit" ? "Edición de actividad" : "Detalle de actividad";
+  }
+  if(panelContentEl){
+    panelContentEl.classList.toggle("is-editor-mode", workflowPublicationPanelMode === "edit");
+  }
+  contentEl.innerHTML = workflowPublicationPanelMode === "edit"
+    ? renderWorkflowDetailEditor(workflowPublicationDetailKey)
+    : renderWorkflowDetailView(workflowPublicationDetailKey);
+  panelEl.dataset.currentStep = workflowPublicationDetailKey;
   panelEl.classList.add("is-open");
   document.body.classList.add("panel-open");
+  wireWorkflowPublicationPanelActions();
+  if(workflowPublicationPanelMode === "edit"){
+    renderWorkflowDetailFiles("workflowEditorFilesList", true);
+  }else{
+    renderWorkflowDetailFiles("workflowDetailFilesList", false);
+  }
+}
+
+function openWorkflowDetailPanel(itemOrStep, options){
+  const settings = options || {};
+  const item = typeof itemOrStep === "string" ? getWorkflowItemById(itemOrStep) : itemOrStep;
+  const detailKey = item ? getWorkflowPublicationStepId(item) : String(itemOrStep || "").trim();
+  if(!detailKey){
+    return;
+  }
+  workflowDetailsState = loadWorkflowDetailsDefinitionFromRepo(workflowId || "wf-cotizaciones", { bypassCache: true });
+  workflowPublicationDetailKey = detailKey;
+  workflowPublicationDetailItemId = item ? item.id : "";
+  workflowPublicationPanelMode = settings.mode === "edit" ? "edit" : "view";
+  renderWorkflowPublicationPanel();
+}
+
+async function saveWorkflowDetailsToFile(){
+  const serialized = JSON.stringify(serializeWorkflowDetailsState(), null, 2);
+  const filename = (workflowId || workflowToken || "workflow") + ".details.json";
+  if(window.showSaveFilePicker){
+    const handle = await window.showSaveFilePicker({
+      suggestedName: filename,
+      types: [{ description: "Workflow details JSON", accept: { "application/json": [".json"] } }]
+    });
+    const writable = await handle.createWritable();
+    await writable.write(serialized);
+    await writable.close();
+    updateWorkflowStatus("Detalle guardado en archivo JSON local.");
+    return;
+  }
+  const blob = new Blob([serialized], { type: "application/json;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+  updateWorkflowStatus("Detalle exportado a JSON.");
+}
+
+async function compareWorkflowDetailsWithPublished(){
+  const detailPath = getWorkflowDetailRepoPath(workflowId);
+  if(!detailPath){
+    updateWorkflowStatus("Este workflow no tiene archivo de detalle publicado.");
+    return;
+  }
+  const publishedUrl = new URL(detailPath, WORKFLOW_DETAIL_PUBLISHED_ROOT).toString();
+  try{
+    const response = await fetch(publishedUrl, { cache: "no-store" });
+    if(!response.ok){
+      throw new Error("fetch-failed");
+    }
+    const remote = normalizeWorkflowDetailsDefinition(workflowId, await response.json());
+    const localDetails = (workflowDetailsState && workflowDetailsState.details) || {};
+    const remoteDetails = remote.details || {};
+    const keys = Array.from(new Set(Object.keys(localDetails).concat(Object.keys(remoteDetails))));
+    let differences = 0;
+    keys.forEach(function(key){
+      if(JSON.stringify(localDetails[key] || null) !== JSON.stringify(remoteDetails[key] || null)){
+        differences += 1;
+      }
+    });
+    updateWorkflowStatus(differences ? ("Comparación lista: " + differences + " detalles difieren del publicado.") : "Comparación lista: el detalle coincide con el publicado.");
+  }catch(error){
+    updateWorkflowStatus("No se pudo comparar con el detalle publicado.");
+  }
+}
+
+function wireWorkflowPublicationPanelActions(){
+  if(workflowPublicationPanelMode === "edit"){
+    initWorkflowRichTextEditors(document.getElementById("workflowPublicationContent"));
+    const saveButton = document.getElementById("saveWorkflowDetailDraftButton");
+    const viewButton = document.getElementById("viewWorkflowDetailButton");
+    const closeButton = document.getElementById("closeWorkflowDetailPanelButton");
+    const topCloseButton = document.getElementById("closeWorkflowPublicationPanelButton");
+    const fileInput = document.getElementById("workflowDetailFiles");
+    if(saveButton){
+      saveButton.addEventListener("click", async function(){
+        const titleEl = document.getElementById("workflowDetailTitleInput");
+        const badgeEl = document.getElementById("workflowDetailBadgeInput");
+        const target = workflowPublicationDetailKey;
+        if(!target || !titleEl){
+          return;
+        }
+        workflowDetailsState.details[target] = {
+          title: titleEl.value.trim() || ("Detalle " + target),
+          objective: getWorkflowRichEditorValue("workflowDetailObjectiveInput", "paragraph"),
+          roles: getWorkflowRichEditorValue("workflowDetailRolesInput", "list"),
+          description: getWorkflowRichEditorValue("workflowDetailDescriptionInput", "list"),
+          policies: getWorkflowRichEditorValue("workflowDetailPoliciesInput", "list"),
+          records: getWorkflowRichEditorValue("workflowDetailRecordsInput", "list"),
+          link: ""
+        };
+        if(workflowPublicationDetailItemId){
+          const detailItem = getWorkflowItemById(workflowPublicationDetailItemId);
+          if(detailItem){
+            if(detailItem.kind){
+              detailItem.html = String(titleEl.value.trim() || detailItem.html || "").replace(/\n/g, "<br>");
+            }else{
+              detailItem.title = titleEl.value.trim() || detailItem.title || "";
+            }
+            if(badgeEl && detailItem.badge !== undefined){
+              detailItem.badge = badgeEl.value.trim() || detailItem.badge || "";
+            }
+            saveWorkflowState();
+            renderWorkflowCanvas();
+          }
+        }
+        try{
+          await persistWorkflowDetailsToApi();
+          await persistWorkflowBaseToApi();
+          updateWorkflowStatus("Detalle y layout guardados en archivos JSON.");
+        }catch(error){
+          updateWorkflowStatus("Detalle actualizado en memoria. Si quieres versionarlo sin servidor, exporta el JSON.");
+        }
+      });
+    }
+    if(viewButton){
+      viewButton.addEventListener("click", function(){
+        workflowPublicationPanelMode = "view";
+        renderWorkflowPublicationPanel();
+      });
+    }
+    if(closeButton){
+      closeButton.addEventListener("click", closeWorkflowPublicationPanel);
+    }
+    if(topCloseButton){
+      topCloseButton.addEventListener("click", closeWorkflowPublicationPanel);
+    }
+    if(fileInput){
+      fileInput.addEventListener("change", function(){
+        handleWorkflowDetailFileUpload().then(function(){
+          renderWorkflowDetailFiles("workflowEditorFilesList", true);
+        }).catch(function(){
+          updateWorkflowStatus("No se pudieron adjuntar archivos.");
+        });
+      });
+    }
+    return;
+  }
+  const editButton = document.getElementById("editWorkflowDetailButton");
+  if(editButton && isEditingWorkflow && workflowPublicationDetailItemId){
+    editButton.addEventListener("click", function(){
+      workflowPublicationPanelMode = "edit";
+      renderWorkflowPublicationPanel();
+    });
+  }
+}
+
+function openStep(step){
+  const normalizedStep = String(step || "").trim();
+  const linkedItem = workflowState.items.find(function(item){
+    return getWorkflowPublicationStepId(item) === normalizedStep;
+  });
+  openWorkflowDetailPanel(linkedItem || normalizedStep, { mode: "view" });
 }
 
 function closeWorkflowPublicationPanel(event){
@@ -1990,7 +2949,11 @@ function closeWorkflowPublicationPanel(event){
   const panelEl = document.getElementById("workflowPublicationPanel");
   if(panelEl){
     panelEl.classList.remove("is-open");
+    panelEl.dataset.currentStep = "";
   }
+  workflowPublicationPanelMode = "view";
+  workflowPublicationDetailKey = "";
+  workflowPublicationDetailItemId = "";
   document.body.classList.remove("panel-open");
 }
 
@@ -2698,41 +3661,15 @@ function getWorkflowItemPublicationBounds(item){
 }
 
 function getPublicationBounds(){
-  const publicationPadding = 72;
-  let contentMinX = Infinity;
-  let contentMinY = Infinity;
-  let contentMaxX = -Infinity;
-  let contentMaxY = -Infinity;
-  workflowState.items.forEach(function(item){
-    const bounds = getWorkflowItemPublicationBounds(item);
-    contentMinX = Math.min(contentMinX, bounds.minX);
-    contentMinY = Math.min(contentMinY, bounds.minY);
-    contentMaxX = Math.max(contentMaxX, bounds.maxX);
-    contentMaxY = Math.max(contentMaxY, bounds.maxY);
-  });
-  workflowState.connectors.forEach(function(connector){
-    buildWorkflowConnectorPoints(connector).forEach(function(point){
-      contentMinX = Math.min(contentMinX, point.x);
-      contentMinY = Math.min(contentMinY, point.y);
-      contentMaxX = Math.max(contentMaxX, point.x);
-      contentMaxY = Math.max(contentMaxY, point.y);
-    });
-  });
-  if(!Number.isFinite(contentMinX) || !Number.isFinite(contentMinY) || !Number.isFinite(contentMaxX) || !Number.isFinite(contentMaxY)){
-    return {
-      width: PUBLICATION_WIDTH,
-      height: PUBLICATION_HEIGHT,
-      offsetX: 0,
-      offsetY: 0
-    };
-  }
-  const width = Math.max(PUBLICATION_WIDTH, Math.ceil((contentMaxX - contentMinX) + (publicationPadding * 2)));
-  const height = Math.max(PUBLICATION_HEIGHT, Math.ceil((contentMaxY - contentMinY) + (publicationPadding * 2)));
   return {
-    width: width,
-    height: height,
-    offsetX: Math.round(publicationPadding - contentMinX),
-    offsetY: Math.round(publicationPadding - contentMinY)
+    width: EDITOR_WIDTH,
+    height: EDITOR_HEIGHT,
+    offsetX: 0,
+    offsetY: 0,
+    contentLeft: 0,
+    contentTop: 0,
+    contentWidth: EDITOR_WIDTH,
+    contentHeight: EDITOR_HEIGHT
   };
 }
 
@@ -2744,6 +3681,23 @@ function getCanvasBounds(){
     width: EDITOR_WIDTH,
     height: EDITOR_HEIGHT
   };
+}
+
+function getWorkflowPublicationShellHeight(shellEl){
+  if(!shellEl){
+    return 680;
+  }
+  const rect = shellEl.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 900;
+  const bottomGap = 18;
+  return Math.max(320, Math.floor(viewportHeight - rect.top - bottomGap));
+}
+
+function getWorkflowRenderZoom(bounds, canvasShellEl){
+  if(isEditingWorkflow){
+    return workflowZoom;
+  }
+  return workflowPublicationZoom;
 }
 
 function renderWorkflowCanvas(){
@@ -2763,13 +3717,12 @@ function renderWorkflowCanvas(){
   const inspectorEl = document.getElementById("workflowInspector");
   const undoButtonEl = document.getElementById("undoWorkflowButton");
   const redoButtonEl = document.getElementById("redoWorkflowButton");
-  const sourceJsonButtonEl = document.getElementById("workflowSourceJsonButton");
-  const sourceStorageButtonEl = document.getElementById("workflowSourceStorageButton");
   const selectedItem = getSelectedWorkflowItem();
   const selectedConnector = getSelectedWorkflowConnector();
   const bounds = getCanvasBounds();
-  const scaledWidth = Math.ceil(bounds.width * workflowZoom);
-  const scaledHeight = Math.ceil(bounds.height * workflowZoom);
+  const renderZoom = getWorkflowRenderZoom(bounds, canvasShellEl);
+  const scaledWidth = Math.ceil(bounds.width * renderZoom);
+  const scaledHeight = Math.ceil(bounds.height * renderZoom);
   const isDraggingObject = Boolean(activeDrag && (
     activeDrag.mode === "item" ||
     activeDrag.mode === "selection-move" ||
@@ -2783,6 +3736,7 @@ function renderWorkflowCanvas(){
 
   const totalSelected = selectedWorkflowItemIds.length + selectedWorkflowConnectorIds.length;
   diagramEl.dataset.editing = isEditingWorkflow ? "true" : "false";
+  diagramEl.dataset.panning = isWorkflowPanning ? "true" : "false";
   diagramEl.dataset.connecting = activeDrag && activeDrag.mode === "connector-create" ? "true" : "false";
   diagramEl.dataset.draggingObject = isDraggingObject ? "true" : "false";
   diagramEl.dataset.multiselect = totalSelected > 1 ? "true" : "false";
@@ -2790,14 +3744,6 @@ function renderWorkflowCanvas(){
   toggleButtonEl.textContent = isEditingWorkflow ? "Volver a publicación" : "Editar mapa";
   toggleButtonEl.classList.toggle("is-active", isEditingWorkflow);
   floatingEditButtonEl.classList.toggle("is-active", isEditingWorkflow);
-  if(sourceJsonButtonEl){
-    sourceJsonButtonEl.classList.toggle("is-active", workflowStateSource === "json");
-    sourceJsonButtonEl.setAttribute("aria-pressed", workflowStateSource === "json" ? "true" : "false");
-  }
-  if(sourceStorageButtonEl){
-    sourceStorageButtonEl.classList.toggle("is-active", workflowStateSource === "storage");
-    sourceStorageButtonEl.setAttribute("aria-pressed", workflowStateSource === "storage" ? "true" : "false");
-  }
   const isFullscreen = document.fullscreenElement === document.getElementById("workflowFullscreenTarget");
   fullscreenButtonEl.textContent = isFullscreen ? "⤢" : "⛶";
   fullscreenButtonEl.title = isFullscreen ? "Volver a vista normal" : "Pantalla completa";
@@ -2827,16 +3773,12 @@ function renderWorkflowCanvas(){
   zoomLayerEl.style.height = scaledHeight + "px";
   canvasEl.style.width = bounds.width + "px";
   canvasEl.style.height = bounds.height + "px";
-  canvasEl.style.setProperty("--workflow-zoom", String(workflowZoom));
-  canvasEl.style.transform = `scale(${workflowZoom})`;
-  viewportEl.style.transform = isEditingWorkflow ? "" : `translate(${bounds.offsetX || 0}px, ${bounds.offsetY || 0}px)`;
+  canvasEl.style.setProperty("--workflow-zoom", String(renderZoom));
+  canvasEl.style.transform = `scale(${renderZoom})`;
+  viewportEl.style.transform = "";
   viewportEl.style.transformOrigin = "top left";
-  canvasShellEl.style.height = isEditingWorkflow ? "" : scaledHeight + "px";
-  if(!isEditingWorkflow){
-    canvasShellEl.scrollLeft = 0;
-    canvasShellEl.scrollTop = 0;
-  }
-  zoomValueEl.textContent = Math.round(workflowZoom * 100) + "%";
+  canvasShellEl.style.height = "";
+  zoomValueEl.textContent = Math.round((isEditingWorkflow ? workflowZoom : workflowPublicationZoom) * 100) + "%";
   selectedWorkflowItemIds = selectedWorkflowItemIds.filter(function(id){ return Boolean(getWorkflowItemById(id)); });
   selectedWorkflowConnectorIds = selectedWorkflowConnectorIds.filter(function(id){
     return workflowState.connectors.some(function(connector){ return connector.id === id; });
@@ -2849,13 +3791,6 @@ function renderWorkflowCanvas(){
     openWorkflowConnectorToolbarId = "";
   }
   viewportEl.innerHTML = "";
-  let publicationLimitEl = canvasEl.querySelector(".workflow-publication-limit");
-  if(!publicationLimitEl){
-    publicationLimitEl = document.createElement("div");
-    publicationLimitEl.className = "workflow-publication-limit";
-    canvasEl.appendChild(publicationLimitEl);
-  }
-  publicationLimitEl.style.display = isEditingWorkflow ? "none" : "block";
   if(isEditingWorkflow){
     viewportEl.onclick = function(event){
       if(suppressWorkflowViewportClick){
@@ -3304,6 +4239,14 @@ function selectWorkflowConnector(connectorId, options){
 function editWorkflowItem(itemId){
   const item = workflowState.items.find(function(entry){ return entry.id === itemId; });
   if(!item){
+    return;
+  }
+  if(isWorkflowDetailEditableItem(item)){
+    selectedWorkflowItemId = item.id;
+    openWorkflowTransformMenuItemId = "";
+    renderWorkflowCanvas();
+    openWorkflowDetailPanel(item, { mode: "edit" });
+    updateWorkflowStatus("Panel de detalle abierto para edición.");
     return;
   }
   if(item.kind && item.kind !== "flow-card"){
@@ -3934,6 +4877,11 @@ function renderWorkflowInspector(){
       <div class="workflow-inspector-metric"><strong>Ancho</strong><span id="workflowObjectWidthValue">${Math.round(item.width)} px</span></div>
       <div class="workflow-inspector-metric"><strong>Alto</strong><span id="workflowObjectHeightValue">${Math.round(item.height)} px</span></div>
     </div>` : ""}
+    ${isWorkflowDetailEditableItem(item) ? `
+    <div class="workflow-inspector-actions">
+      <button class="workflow-inspector-button" id="openWorkflowDetailEditorButton" type="button">Editar detalle</button>
+      <button class="workflow-inspector-button" id="openWorkflowDetailViewButton" type="button">Ver detalle</button>
+    </div>` : ""}
     <div class="workflow-inspector-actions is-apply-row">
       <button class="workflow-inspector-button is-primary" id="applyWorkflowInspectorButton" type="button">Aplicar</button>
     </div>
@@ -3948,6 +4896,8 @@ function renderWorkflowInspector(){
   const textColorEl = document.getElementById("workflowObjectTextColor");
   const iconVariantEl = document.getElementById("workflowIconVariant");
   const applyButton = document.getElementById("applyWorkflowInspectorButton");
+  const openDetailEditorButton = document.getElementById("openWorkflowDetailEditorButton");
+  const openDetailViewButton = document.getElementById("openWorkflowDetailViewButton");
   function applyInspectorDraft(live){
     mutateSelectedWorkflowItem(function(target){
       if(target.kind){
@@ -4025,6 +4975,18 @@ function renderWorkflowInspector(){
     iconVariantEl.addEventListener("change", function(){
       draft.iconVariant = iconVariantEl.value;
       applyInspectorDraft(true);
+    });
+  }
+  if(openDetailEditorButton){
+    openDetailEditorButton.addEventListener("click", function(){
+      openWorkflowDetailPanel(item, { mode: "edit" });
+      updateWorkflowStatus("Panel de detalle abierto para edición.");
+    });
+  }
+  if(openDetailViewButton){
+    openDetailViewButton.addEventListener("click", function(){
+      openWorkflowDetailPanel(item, { mode: "view" });
+      updateWorkflowStatus("Detalle de actividad abierto.");
     });
   }
   applyButton.addEventListener("click", function(){
@@ -4715,16 +5677,21 @@ function onWorkflowPointerUp(){
   isWorkflowPanning = false;
   window.removeEventListener("pointermove", onWorkflowPointerMove);
   window.removeEventListener("pointerup", onWorkflowPointerUp);
-  saveWorkflowState();
+  if(activeDrag && activeDrag.mode !== "canvas-pan"){
+    saveWorkflowState();
+  }
   renderWorkflowCanvas();
 }
 
 function startWorkflowCanvasPan(event){
-  if(!isEditingWorkflow || event.button !== 2){
-    return;
-  }
   const shellEl = document.getElementById("workflowCanvasShell");
   if(!shellEl){
+    return;
+  }
+  const startedFromInteractiveTarget = Boolean(event.target.closest(".canvas-item, .workflow-connector-segment, .workflow-connector-handle, .workflow-connector-bend-handle, .connector-toolbar, .node-toolbar, button, a, input, textarea, select, [contenteditable=\"true\"]"));
+  const allowPublicationPan = !isEditingWorkflow && event.button === 0 && !startedFromInteractiveTarget;
+  const allowEditPan = isEditingWorkflow && event.button === 2;
+  if(!allowPublicationPan && !allowEditPan){
     return;
   }
   event.preventDefault();
@@ -4766,7 +5733,7 @@ function toggleWorkflowMode(){
 }
 
 function setWorkflowStateSource(nextSource){
-  const normalized = nextSource === "storage" ? "storage" : "json";
+  const normalized = "json";
   if(workflowStateSource === normalized){
     renderWorkflowCanvas();
     return;
@@ -4784,7 +5751,7 @@ function setWorkflowStateSource(nextSource){
   selectedWorkflowItemId = isEditingWorkflow && workflowState.items[0] ? workflowState.items[0].id : "";
   selectedWorkflowConnectorId = "";
   renderWorkflowCanvas();
-  updateWorkflowStatus("Workflow cargado desde " + getWorkflowStateOriginLabel(workflowLastResolvedStateOrigin) + ".");
+  updateWorkflowStatus("Workflow cargado desde archivo JSON.");
 }
 
 async function copyWorkflowLayoutToClipboard(){
@@ -4837,7 +5804,7 @@ function importWorkflowLayoutFromFile(file){
         preferLocalStorage: false,
         initialState: normalized
       });
-      workflowLastResolvedStateOrigin = workflowStateSource === "json" ? "json-draft" : "storage";
+      workflowLastResolvedStateOrigin = "json-draft";
       workflowLastSavedSnapshot = JSON.stringify(workflowState);
       workflowUndoStack = [];
       workflowRedoStack = [];
@@ -4862,43 +5829,27 @@ function importWorkflowLayoutFromFile(file){
 }
 
 function resetWorkflow(){
-  if(workflowStateSource === "json"){
-    const hasSavedJsonBase = Boolean(window.localStorage.getItem(getActiveWorkflowBaseStorageKey()));
-    if(hasSavedJsonBase){
-      const savedJsonBase = loadWorkflowBaseState();
-      workflowState = savedJsonBase;
-      workflowLastSavedSnapshot = JSON.stringify(workflowState);
-      workflowUndoStack = [];
-      workflowRedoStack = [];
-      clearWorkflowSelectionState();
-      activeWorkflowSelectionBox = null;
-      activeWorkflowAnchorPreview = null;
-      activeDrag = null;
-      renderWorkflowCanvas();
-      updateWorkflowStatus("Workflow restablecido a la base guardada del JSON.");
-      return;
-    }
-    workflowState = getDefaultWorkflowStateSnapshot();
-    workflowLastSavedSnapshot = JSON.stringify(workflowState);
-    workflowUndoStack = [];
-    workflowRedoStack = [];
-    clearWorkflowSelectionState();
-    activeWorkflowSelectionBox = null;
-    activeWorkflowAnchorPreview = null;
-    activeDrag = null;
-    renderWorkflowCanvas();
-    updateWorkflowStatus("Workflow restablecido desde " + getWorkflowStateOriginLabel(workflowLastResolvedStateOrigin) + ".");
-    return;
-  }
   workflowState = loadWorkflowBaseState();
-  saveWorkflowState();
+  workflowLastSavedSnapshot = JSON.stringify(workflowState);
+  workflowUndoStack = [];
+  workflowRedoStack = [];
+  clearWorkflowSelectionState();
+  activeWorkflowSelectionBox = null;
+  activeWorkflowAnchorPreview = null;
+  activeDrag = null;
+  saveWorkflowState({ trackHistory: false });
   renderWorkflowCanvas();
-  updateWorkflowStatus("Workflow restablecido a la base guardada.");
+  updateWorkflowStatus("Workflow restablecido desde el archivo JSON.");
 }
 
-function saveCurrentWorkflowAsBase(){
+async function saveCurrentWorkflowAsBase(){
   saveWorkflowBaseState();
-  updateWorkflowStatus("Base del workflow guardada. Restablecer volvera a este punto.");
+  try{
+    await persistWorkflowBaseToApi();
+    updateWorkflowStatus("Base del workflow guardada en archivo JSON.");
+  }catch(error){
+    updateWorkflowStatus("Base del workflow guardada localmente. Si usas servidor local, revisa la API.");
+  }
 }
 
 function applyWorkflowSnapshot(snapshot){
@@ -5251,17 +6202,24 @@ function startWorkflowConnectorBendDrag(event){
 }
 
 function setWorkflowZoom(nextZoom){
-  workflowZoom = clamp(Math.round(nextZoom * 100) / 100, ZOOM_MIN, ZOOM_MAX);
-  saveWorkflowZoom();
+  if(isEditingWorkflow){
+    workflowZoom = clamp(Math.round(nextZoom * 100) / 100, ZOOM_MIN, ZOOM_MAX);
+    saveWorkflowZoom();
+  }else{
+    workflowPublicationZoom = clamp(Math.round(nextZoom * 100) / 100, ZOOM_MIN, ZOOM_MAX);
+    saveWorkflowPublicationZoom();
+  }
   renderWorkflowCanvas();
 }
 
 function zoomWorkflowIn(){
-  setWorkflowZoom(workflowZoom + ZOOM_STEP);
+  const currentZoom = isEditingWorkflow ? workflowZoom : workflowPublicationZoom;
+  setWorkflowZoom(currentZoom + ZOOM_STEP);
 }
 
 function zoomWorkflowOut(){
-  setWorkflowZoom(workflowZoom - ZOOM_STEP);
+  const currentZoom = isEditingWorkflow ? workflowZoom : workflowPublicationZoom;
+  setWorkflowZoom(currentZoom - ZOOM_STEP);
 }
 
 function resetWorkflowZoom(){
@@ -5356,12 +6314,6 @@ document.getElementById("workflowPaletteOrangeButton").addEventListener("click",
 });
 document.getElementById("workflowPaletteBlueButton").addEventListener("click", function(){
   setWorkflowPalette("blue");
-});
-document.getElementById("workflowSourceJsonButton").addEventListener("click", function(){
-  setWorkflowStateSource("json");
-});
-document.getElementById("workflowSourceStorageButton").addEventListener("click", function(){
-  setWorkflowStateSource("storage");
 });
 document.getElementById("undoWorkflowButton").addEventListener("click", undoWorkflow);
 document.getElementById("redoWorkflowButton").addEventListener("click", redoWorkflow);

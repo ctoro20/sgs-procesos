@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@thednp/dommatrix": "^3.0.3",
+    "pdf-parse": "^2.4.5"
+  }
+}

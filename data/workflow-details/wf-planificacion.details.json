@@ -1,0 +1,87 @@
+{
+  "workflowId": "wf-planificacion",
+  "title": "Workflow Planificación",
+  "details": {
+    "1": {
+      "title": "Asignar Administrador de Contrato",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "2": {
+      "title": "Revisar la OL",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "3": {
+      "title": "Planificar Servicios de Muestreo y Análisis",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "4": {
+      "title": "Coordinar los servicios con Cliente",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "5": {
+      "title": "Calendarizar Servicios",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "6": {
+      "title": "Crear Órdenes de Inspecciones",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "7": {
+      "title": "Asignar Muestreador Ambiental",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "6.1": {
+      "title": "Modificar fechas en sistema",
+      "objective": "<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    },
+    "p2-1": {
+      "title": "Asignar Administrador de Contrato",
+      "objective": "jhgbnnnmmm<p></p>",
+      "roles": "<ul><li></li></ul>",
+      "description": "<ul><li></li></ul>",
+      "policies": "<ul><li></li></ul>",
+      "records": "<ul><li></li></ul>",
+      "link": ""
+    }
+  }
+}
