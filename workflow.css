@@ -827,10 +827,11 @@ text-align:center;
 
 .workflow-process{
 --workflow-process-stroke:var(--process-stroke);
+--workflow-process-border-width:2px;
 padding:18px 28px;
 min-width:0;
 min-height:0;
-border:3px solid var(--workflow-process-stroke);
+border:var(--workflow-process-border-width) solid var(--workflow-process-stroke);
 border-radius:10px;
 background:var(--process-fill);
 color:var(--process-text);
@@ -851,12 +852,12 @@ pointer-events:none;
 
 .workflow-process::before{
 left:14px;
-border-left:3px solid var(--workflow-process-stroke);
+border-left:var(--workflow-process-border-width) solid var(--workflow-process-stroke);
 }
 
 .workflow-process::after{
 right:14px;
-border-right:3px solid var(--workflow-process-stroke);
+border-right:var(--workflow-process-border-width) solid var(--workflow-process-stroke);
 }
 
 .workflow-process .workflow-item-label{
@@ -1005,6 +1006,11 @@ display:none !important;
 
 .diagram[data-dragging-object="true"] .workflow-item-toolbar,
 .diagram[data-dragging-object="true"] .workflow-connector-toolbar{
+display:none !important;
+}
+
+.diagram[data-multiselect="true"] .workflow-item-toolbar,
+.diagram[data-multiselect="true"] .workflow-connector-toolbar{
 display:none !important;
 }
 
@@ -1781,32 +1787,34 @@ width:145px;
 padding:14px 14px 10px;
 border:1px dashed var(--orange-soft);
 border-radius:4px;
-font-size:12px;
+font-size:11px;
 line-height:1.45;
 color:var(--text);
 }
 
 .canvas-item .workflow-dashed-box-row{
-display:grid;
-grid-template-columns:minmax(0, 1fr) 16px;
+display:flex;
 align-items:center;
+justify-content:center;
 gap:8px;
-min-height:18px;
+min-height:20px;
+margin-bottom:4px;
 }
 
 .canvas-item .workflow-dashed-box-label{
 display:block;
 text-align:center;
+line-height:1.25;
 }
 
 .canvas-item .workflow-dashed-box-icon{
-width:16px;
-height:16px;
-justify-self:end;
+width:18px;
+height:18px;
+flex:0 0 auto;
 background-repeat:no-repeat;
 background-position:center;
 background-size:contain;
-opacity:.95;
+opacity:1;
 }
 
 .canvas-item.soft-icon{
@@ -1822,7 +1830,7 @@ align-items:center;
 justify-content:center;
 min-height:24px;
 padding:4px 10px;
-background:color-mix(in srgb, var(--node-fill) 72%, #ffffff 28%);
+background:#ffffff;
 border:1px solid color-mix(in srgb, var(--node-border) 78%, #bfc7cf 22%);
 border-radius:4px;
 font-size:10px;

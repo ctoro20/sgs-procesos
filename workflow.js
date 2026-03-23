@@ -163,6 +163,38 @@ const WORKFLOW_ICON_PRESETS = {
     label: "Alerta",
     markup: '<svg class="workflow-icon-filled" viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffc107" d="M10.5 3.9a1.8 1.8 0 0 1 3 0l7 11.9A2.1 2.1 0 0 1 18.7 19H5.3a2.1 2.1 0 0 1-1.8-3.2Z"></path><path fill="#687282" d="M12 7.8c.9 0 1.4.6 1.4 1.5l-.4 4.5a1 1 0 0 1-2 0l-.4-4.5c0-.9.5-1.5 1.4-1.5Z"></path><circle cx="12" cy="16.8" r="1.35" fill="#687282"></circle></svg>'
   },
+  excel: {
+    label: "Excel",
+    markup: '<svg class="workflow-icon-filled" viewBox="0 0 256 256" aria-hidden="true"><defs><linearGradient id="excelG1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#33C481"></stop><stop offset="100%" stop-color="#21A366"></stop></linearGradient><linearGradient id="excelG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2DB978"></stop><stop offset="100%" stop-color="#107C41"></stop></linearGradient><linearGradient id="excelG3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#185C37"></stop><stop offset="100%" stop-color="#0E5A33"></stop></linearGradient></defs><rect x="96" y="24" width="120" height="160" rx="8" fill="url(#excelG1)"></rect><rect x="112" y="40" width="120" height="160" rx="8" fill="url(#excelG2)"></rect><g opacity="0.20"><rect x="124" y="36" width="14" height="150" fill="#ffffff"></rect><rect x="144" y="36" width="14" height="150" fill="#ffffff"></rect><rect x="164" y="36" width="14" height="150" fill="#ffffff"></rect><rect x="184" y="36" width="14" height="150" fill="#ffffff"></rect></g><rect x="24" y="56" width="120" height="120" rx="10" fill="url(#excelG3)"></rect><g transform="translate(84 116)"><polygon points="-30,-40 -10,-40 0,-15 10,-40 30,-40 10,0 30,40 10,40 0,15 -10,40 -30,40 -10,0" fill="#ffffff"></polygon></g></svg>'
+  },
+  documentStack: {
+    label: "Documento doble",
+    markup: '<svg class="workflow-icon-filled" viewBox="0 0 24 24" aria-hidden="true"><path fill="#d8e1ec" stroke="#7f90a4" stroke-width="1.2" d="M8.3 4.7h7l2.8 2.8V18a1.7 1.7 0 0 1-1.7 1.7H8.3A1.7 1.7 0 0 1 6.6 18V6.4a1.7 1.7 0 0 1 1.7-1.7Z"></path><path fill="#ffffff" stroke="#6f8298" stroke-width="1.2" d="M5.5 3.2h7.1l2.9 2.9v11a1.7 1.7 0 0 1-1.7 1.7H5.5a1.7 1.7 0 0 1-1.7-1.7V4.9a1.7 1.7 0 0 1 1.7-1.7Z"></path><path fill="#dbe4ef" stroke="#6f8298" stroke-width=".8" d="M12.6 3.2v2.9h2.9Z"></path><path fill="#7f90a4" d="M6.8 8.7h6.2V10H6.8zm0 3h6.2V13H6.8zm0 3h4.1V16H6.8z"></path></svg>'
+  },
+  documentOk: {
+    label: "Documento OK",
+    markup: '<svg class="workflow-icon-filled" viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffffff" stroke="#6f8298" stroke-width="1.2" d="M5.2 3.2h7.1l2.9 2.9v11.6a1.7 1.7 0 0 1-1.7 1.7H5.2a1.7 1.7 0 0 1-1.7-1.7V4.9a1.7 1.7 0 0 1 1.7-1.7Z"></path><path fill="#dbe4ef" stroke="#6f8298" stroke-width=".8" d="M12.3 3.2v2.9h2.9Z"></path><path fill="#7f90a4" d="M6.5 8.7h5.9V10H6.5zm0 3h4.2V13H6.5z"></path><circle cx="16.7" cy="16.8" r="3.9" fill="#21a366" stroke="#157a46" stroke-width=".8"></circle><path d="m14.9 16.8 1.2 1.2 2.4-2.6" stroke="#ffffff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg>'
+  },
+  labFlask: {
+    label: "Laboratorio",
+    markup: '<svg class="workflow-icon-filled" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6" stroke="#5a6575" stroke-width="1.6" stroke-linecap="round" fill="none"></path><path fill="#dfe7f1" stroke="#6f7f91" stroke-width="1.2" d="M10 3.8v4.5l-4 6.6A2.3 2.3 0 0 0 8 18.4h8a2.3 2.3 0 0 0 2-3.5l-4-6.6V3.8"></path><path fill="#69c6dd" d="M8.4 12.8h7.2l1.3 2.2a1.3 1.3 0 0 1-1.1 2H8.2a1.3 1.3 0 0 1-1.1-2Z"></path><path d="M8.8 9.3h6.4" stroke="#8a99aa" stroke-width="1" stroke-linecap="round" fill="none"></path><circle cx="10.2" cy="14.4" r=".7" fill="#b8f0ff"></circle><circle cx="13.1" cy="15.3" r=".55" fill="#b8f0ff"></circle></svg>'
+  },
+  microscope: {
+    label: "Microscopio",
+    markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 4.2 18 6.5l-3.2 3.2-2.3-2.3Z"></path><path d="m13.7 7.2-3.5 3.5"></path><circle cx="15.7" cy="10.8" r="1.6"></circle><path d="M16.9 12.1a6.6 6.6 0 0 1 1.8 4.5 4.5 4.5 0 0 1-9 0"></path><path d="M6.2 13.2h5.4a1 1 0 0 1 0 2H6.2a1 1 0 0 1 0-2Z"></path><path d="M5.2 19.4h13.6a1.2 1.2 0 0 1 0 2.4H5.2a1.2 1.2 0 0 1 0-2.4Z"></path><path d="M11.5 17.8h3.6l1.2 1.6h-6Z"></path></svg>'
+  },
+  airplane: {
+    label: "Avión",
+    markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 11.2-7.1 1.8-3.8-7.2-2 .5 1.7 6-3.2.8-2.1-1.6-1.4.4 1.3 2.5-1.3 2.5 1.4.4 2.1-1.6 3.2.8-1.7 6 2 .5 3.8-7.2 7.1 1.8c.8.2 1.6-.3 1.8-1.1.2-.8-.3-1.6-1.1-1.8Z"></path></svg>'
+  },
+  inspector: {
+    label: "Inspector",
+    markup: '<svg class="workflow-icon-filled" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="4.6" fill="#ffffff" stroke="#6f7f91" stroke-width="1.4"></circle><path d="M13.4 13.4 18.5 18.5" stroke="#6f7f91" stroke-width="2" stroke-linecap="round"></path><path d="M8.2 10h3.6" stroke="#21a366" stroke-width="1.6" stroke-linecap="round"></path><path d="M10 8.2v3.6" stroke="#21a366" stroke-width="1.6" stroke-linecap="round"></path></svg>'
+  },
+  inspectorsGroup: {
+    label: "Grupo inspectores",
+    markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="6.1" r="2.6"></circle><circle cx="6.6" cy="11" r="2.2"></circle><circle cx="17.4" cy="11" r="2.2"></circle><path d="M9 18.8v-2.2a2.6 2.6 0 0 1 2.6-2.6h.8a2.6 2.6 0 0 1 2.6 2.6v2.2"></path><path d="M3.3 18.8v-1.8a2.4 2.4 0 0 1 2.4-2.4h1.8a2.4 2.4 0 0 1 2.4 2.4v1.8"></path><path d="M14.1 18.8v-1.8a2.4 2.4 0 0 1 2.4-2.4h1.8a2.4 2.4 0 0 1 2.4 2.4v1.8"></path></svg>'
+  },
   role: {
     label: "Rol",
     markup: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 19a6.5 6.5 0 0 1 13 0"></path></svg>'
@@ -210,19 +242,34 @@ function getThemedWorkflowColorToken(value, role){
   if(role === "node-text" && ["#30424d", "#28507a"].includes(normalized)){
     return "var(--node-text)";
   }
-  if(role === "process-stroke" && ["#355fb8", "#3d78b8"].includes(normalized)){
+  if(role === "process-stroke" && normalized && normalized !== "transparent"){
     return "var(--process-stroke)";
   }
-  if(role === "process-fill" && ["#ffffff", "#eef5fb"].includes(normalized)){
+  if(role === "process-fill" && normalized && normalized !== "transparent"){
     return "var(--process-fill)";
   }
-  if(role === "process-text" && ["#5b5b5b", "#28507a"].includes(normalized)){
+  if(role === "process-text" && normalized && normalized !== "transparent"){
     return "var(--process-text)";
   }
   if(role === "accent-text" && ["#eb7a07", "#1f6fb2"].includes(normalized)){
     return "var(--accent-text)";
   }
   return value;
+}
+
+function getWorkflowTextColorRole(item, fallbackRole){
+  const baseRole = fallbackRole || "node-text";
+  const normalized = normalizeThemeComparableColor(item && item.textColor);
+  if(item && (item.kind === "note" || item.kind === "tag")){
+    return "accent-text";
+  }
+  if(item && item.type === "text" && ["#eb7a07", "#1f6fb2"].includes(normalized)){
+    return "accent-text";
+  }
+  if(item && item.type === "process"){
+    return "process-text";
+  }
+  return baseRole;
 }
 
 function isInspectorEditableItem(item){
@@ -297,7 +344,7 @@ function getWorkflowDashedBoxLineIcon(label){
     return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='2.5'/%3E%3Cpath d='M4.5 18a4.5 4.5 0 0 1 9 0'/%3E%3Cpath d='M15.5 8.5h4'/%3E%3Cpath d='M17.5 6.5v4'/%3E%3C/svg%3E";
   }
   if(normalized === "equipos/insumos"){
-    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3 4.5 7 12 11l7.5-4Z'/%3E%3Cpath d='M4.5 7v10L12 21l7.5-4V7'/%3E%3Cpath d='M12 11v10'/%3E%3C/svg%3E";
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15.7 4.2 18 6.5l-3.2 3.2-2.3-2.3Z'/%3E%3Cpath d='m13.7 7.2-3.5 3.5'/%3E%3Ccircle cx='15.7' cy='10.8' r='1.6'/%3E%3Cpath d='M16.9 12.1a6.6 6.6 0 0 1 1.8 4.5 4.5 4.5 0 0 1-9 0'/%3E%3Cpath d='M6.2 13.2h5.4a1 1 0 0 1 0 2H6.2a1 1 0 0 1 0-2Z'/%3E%3Cpath d='M5.2 19.4h13.6a1.2 1.2 0 0 1 0 2.4H5.2a1.2 1.2 0 0 1 0-2.4Z'/%3E%3Cpath d='M11.5 17.8h3.6l1.2 1.6h-6Z'/%3E%3C/svg%3E";
   }
   if(normalized === "logística" || normalized === "logistica"){
     return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d47a1f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7h10v8H3Z'/%3E%3Cpath d='M13 10h4l3 3v2h-7Z'/%3E%3Ccircle cx='8' cy='18' r='1.8'/%3E%3Ccircle cx='18' cy='18' r='1.8'/%3E%3C/svg%3E";
@@ -315,7 +362,7 @@ function buildWorkflowDashedBoxMarkup(html){
   }
   return lines.map(function(line){
     const icon = getWorkflowDashedBoxLineIcon(line);
-    return `<div class="workflow-dashed-box-row"><span class="workflow-dashed-box-label">${escapeHtml(line)}</span>${icon ? `<span class="workflow-dashed-box-icon" style="background-image:url('${icon}')"></span>` : ""}</div>`;
+    return `<div class="workflow-dashed-box-row">${icon ? `<span class="workflow-dashed-box-icon" style="background-image:url('${icon}')"></span>` : ""}<span class="workflow-dashed-box-label">${escapeHtml(line)}</span></div>`;
   }).join("");
 }
 
@@ -400,6 +447,7 @@ function getCotizacionesWorkflowTemplate(){
       { id:"actor-2", kind:"actor", x:301, y:204, width:150, html:"Ejecutivo<br>Comercial" },
       { id:"step-1-1", kind:"flow-card", x:387, y:182, width:102, html:"Validar Técnica y<br>Operativamente", badge:"1.1", badgeClass:"small", step:"1.1" },
       { id:"soft-1", kind:"subactivity", x:377, y:272, width:132, height:26, html:"Consultas a las áreas" },
+      { id:"icon-lab-etfa", type:"icon", x:206, y:326, width:20, height:20, iconVariant:"labFlask", title:"", labelOffsetX:0, labelOffsetY:0, labelWidth:0, labelHeight:0 },
       { id:"dash-1", kind:"dashed-box", x:225, y:313, width:145, html:"Laboratorios/ETFA<br>Permisología<br>Inspectores/Otros<br>Equipos/Insumos<br>Logística" },
       { id:"soft-2", kind:"soft-icon", x:486, y:266, width:82, html:"Operaciones" },
       { id:"soft-3", kind:"soft-icon", x:486, y:286, width:82, html:"Técnicas" },
@@ -408,6 +456,7 @@ function getCotizacionesWorkflowTemplate(){
       { id:"soft-6", kind:"soft-icon", x:505, y:362, width:92, height:28, html:"Jefe Técnico" },
       { id:"actor-3", kind:"actor", x:542, y:62, width:150, html:"Ejecutivo<br>Comercial" },
       { id:"step-2", kind:"flow-card", x:575, y:122, width:102, html:"Elaborar<br>Cotización", badge:"2", step:"2" },
+      { id:"icon-excel-step-2", type:"icon", x:686, y:136, width:20, height:20, iconVariant:"excel", title:"", labelOffsetX:0, labelOffsetY:0, labelWidth:0, labelHeight:0 },
       { id:"tag-1", kind:"tag", x:671, y:146, html:"Qcotizador" },
       { id:"tag-2", kind:"tag", x:683, y:166, width:54, html:"QETFA" },
       { id:"note-1", kind:"note", x:620, y:175, width:165, height:54, html:"Se adjunta archivo de costeo y se especifican los servicios ETFA, el sistema realiza la validación." },
@@ -424,6 +473,8 @@ function getCotizacionesWorkflowTemplate(){
       { id:"mini-8", kind:"mini-icon", x:1044, y:120, width:82, height:28, html:"Cotización<br>Aprobada" },
       { id:"actor-5", kind:"actor", x:1115, y:60, width:150, html:"Ejecutivo<br>Comercial" },
       { id:"step-4", kind:"flow-card", x:1148, y:122, width:102, html:"Notificar al<br>Cliente", badge:"4", step:"4" },
+      { id:"icon-doc-stack-step-4", type:"icon", x:1264, y:120, width:20, height:20, iconVariant:"documentStack", title:"", labelOffsetX:0, labelOffsetY:0, labelWidth:0, labelHeight:0 },
+      { id:"icon-doc-ok-step-4", type:"icon", x:1264, y:144, width:20, height:20, iconVariant:"documentOk", title:"", labelOffsetX:0, labelOffsetY:0, labelWidth:0, labelHeight:0 },
       { id:"tag-4", kind:"tag", x:1254, y:146, html:"Qcotizador" },
       { id:"icon-warning-note-2", type:"icon", x:1174, y:184, width:20, height:20, iconVariant:"warning", title:"", labelOffsetX:0, labelOffsetY:0, labelWidth:0, labelHeight:0 },
       { id:"note-2", kind:"note", x:1201, y:177, width:155, html:"Se realiza correo personalizado al Cliente." },
@@ -882,6 +933,110 @@ function loadWorkflowState(){
         labelHeight: 0
       });
     }
+    if(workflowId === "wf-cotizaciones" && !parsed.items.some(function(item){ return item.id === "icon-lab-etfa"; })){
+      parsed.items.push({
+        id: "icon-lab-etfa",
+        type: "icon",
+        kind: "",
+        title: "",
+        html: "",
+        badge: "",
+        badgeClass: "",
+        step: "",
+        x: 206,
+        y: 326,
+        width: 20,
+        height: 20,
+        fontSize: 12,
+        borderColor: "transparent",
+        backgroundColor: "transparent",
+        textColor: "#30424d",
+        iconVariant: "system",
+        groupId: "",
+        labelOffsetX: 0,
+        labelOffsetY: 0,
+        labelWidth: 0,
+        labelHeight: 0
+      });
+    }
+    if(workflowId === "wf-cotizaciones" && !parsed.items.some(function(item){ return item.id === "icon-doc-stack-step-4"; })){
+      parsed.items.push({
+        id: "icon-doc-stack-step-4",
+        type: "icon",
+        kind: "",
+        title: "",
+        html: "",
+        badge: "",
+        badgeClass: "",
+        step: "",
+        x: 1264,
+        y: 120,
+        width: 20,
+        height: 20,
+        fontSize: 12,
+        borderColor: "transparent",
+        backgroundColor: "transparent",
+        textColor: "#30424d",
+        iconVariant: "documentStack",
+        groupId: "",
+        labelOffsetX: 0,
+        labelOffsetY: 0,
+        labelWidth: 0,
+        labelHeight: 0
+      });
+    }
+    if(workflowId === "wf-cotizaciones" && !parsed.items.some(function(item){ return item.id === "icon-doc-ok-step-4"; })){
+      parsed.items.push({
+        id: "icon-doc-ok-step-4",
+        type: "icon",
+        kind: "",
+        title: "",
+        html: "",
+        badge: "",
+        badgeClass: "",
+        step: "",
+        x: 1264,
+        y: 144,
+        width: 20,
+        height: 20,
+        fontSize: 12,
+        borderColor: "transparent",
+        backgroundColor: "transparent",
+        textColor: "#30424d",
+        iconVariant: "documentOk",
+        groupId: "",
+        labelOffsetX: 0,
+        labelOffsetY: 0,
+        labelWidth: 0,
+        labelHeight: 0
+      });
+    }
+    if(workflowId === "wf-cotizaciones" && !parsed.items.some(function(item){ return item.id === "icon-excel-step-2"; })){
+      parsed.items.push({
+        id: "icon-excel-step-2",
+        type: "icon",
+        kind: "",
+        title: "",
+        html: "",
+        badge: "",
+        badgeClass: "",
+        step: "",
+        x: 686,
+        y: 136,
+        width: 20,
+        height: 20,
+        fontSize: 12,
+        borderColor: "transparent",
+        backgroundColor: "transparent",
+        textColor: "#30424d",
+        iconVariant: "excel",
+        groupId: "",
+        labelOffsetX: 0,
+        labelOffsetY: 0,
+        labelWidth: 0,
+        labelHeight: 0
+      });
+    }
     parsed.items = parsed.items.map(function(item){
       if(workflowId === "wf-cotizaciones" && item && item.id === "icon-warning-note-2"){
         return Object.assign({}, item, {
@@ -890,6 +1045,42 @@ function loadWorkflowState(){
           width: 20,
           height: 20,
           iconVariant: "warning"
+        });
+      }
+      if(workflowId === "wf-cotizaciones" && item && item.id === "icon-lab-etfa"){
+        return Object.assign({}, item, {
+          x: Number.isFinite(item.x) ? item.x : 206,
+          y: Number.isFinite(item.y) ? item.y : 326,
+          width: Number.isFinite(item.width) ? item.width : 20,
+          height: Number.isFinite(item.height) ? item.height : 20,
+          iconVariant: "labFlask"
+        });
+      }
+      if(workflowId === "wf-cotizaciones" && item && item.id === "icon-doc-stack-step-4"){
+        return Object.assign({}, item, {
+          x: Number.isFinite(item.x) ? item.x : 1264,
+          y: Number.isFinite(item.y) ? item.y : 120,
+          width: Number.isFinite(item.width) ? item.width : 20,
+          height: Number.isFinite(item.height) ? item.height : 20,
+          iconVariant: "documentStack"
+        });
+      }
+      if(workflowId === "wf-cotizaciones" && item && item.id === "icon-doc-ok-step-4"){
+        return Object.assign({}, item, {
+          x: Number.isFinite(item.x) ? item.x : 1264,
+          y: Number.isFinite(item.y) ? item.y : 144,
+          width: Number.isFinite(item.width) ? item.width : 20,
+          height: Number.isFinite(item.height) ? item.height : 20,
+          iconVariant: "documentOk"
+        });
+      }
+      if(workflowId === "wf-cotizaciones" && item && item.id === "icon-excel-step-2"){
+        return Object.assign({}, item, {
+          x: Number.isFinite(item.x) ? item.x : 686,
+          y: Number.isFinite(item.y) ? item.y : 136,
+          width: Number.isFinite(item.width) ? item.width : 20,
+          height: Number.isFinite(item.height) ? item.height : 20,
+          iconVariant: "excel"
         });
       }
       return item;
@@ -1673,9 +1864,11 @@ function renderWorkflowCanvas(){
     activeDrag.mode === "connector-move"
   ));
 
+  const totalSelected = selectedWorkflowItemIds.length + selectedWorkflowConnectorIds.length;
   diagramEl.dataset.editing = isEditingWorkflow ? "true" : "false";
   diagramEl.dataset.connecting = activeDrag && activeDrag.mode === "connector-create" ? "true" : "false";
   diagramEl.dataset.draggingObject = isDraggingObject ? "true" : "false";
+  diagramEl.dataset.multiselect = totalSelected > 1 ? "true" : "false";
   modeChipEl.textContent = isEditingWorkflow ? "Modo edición" : "Modo publicación";
   toggleButtonEl.textContent = isEditingWorkflow ? "Volver a publicación" : "Editar mapa";
   toggleButtonEl.classList.toggle("is-active", isEditingWorkflow);
@@ -1770,7 +1963,7 @@ function renderWorkflowCanvas(){
       el.style.height = item.height + "px";
     }
     el.style.fontSize = (item.fontSize || getDefaultWorkflowItem(item.type).fontSize) + "px";
-    el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, item.type === "process" ? "process-text" : "node-text");
+    el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, getWorkflowTextColorRole(item, "node-text"));
     if(item.type === "process"){
       el.style.setProperty("--workflow-process-stroke", getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem("process").borderColor, "process-stroke"));
     }
@@ -1824,7 +2017,7 @@ function renderWorkflowCanvas(){
       }else if(item.kind === "dashed-box"){
         el.innerHTML = buildWorkflowDashedBoxMarkup(item.html);
       }else{
-        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("text").textColor, item.kind === "note" ? "accent-text" : "node-text");
+        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("text").textColor, getWorkflowTextColorRole(item, "node-text"));
         el.innerHTML = item.html || "";
       }
     }else{
@@ -2693,7 +2886,7 @@ function renderWorkflowInspector(){
     });
     return;
   }
-  const minFontSize = item.type === "icon" ? 16 : 12;
+  const minFontSize = 8;
   const maxFontSize = item.type === "icon" ? 40 : 32;
   const defaultBackgroundColor = item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor;
   const initialBackgroundInputColor = normalizeColorValue(
@@ -2960,7 +3153,7 @@ function applySelectedWorkflowItemPreview(item){
       el.style.width = item.width + "px";
       el.style.height = item.height + "px";
     }
-    el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, item.type === "process" ? "process-text" : "node-text");
+    el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, getWorkflowTextColorRole(item, "node-text"));
     if(item.type === "process"){
       el.style.setProperty("--workflow-process-stroke", getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem("process").borderColor, "process-stroke"));
     }
@@ -2983,7 +3176,7 @@ function applySelectedWorkflowItemPreview(item){
         el.style.borderColor = getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem("activity").borderColor, "node-border");
         el.style.background = getThemedWorkflowColorToken(item.backgroundColor || getDefaultWorkflowItem("activity").backgroundColor, "node-fill");
         el.style.fontSize = (item.fontSize || getDefaultWorkflowItem("activity").fontSize) + "px";
-        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("activity").textColor, "node-text");
+        el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem("activity").textColor, getWorkflowTextColorRole(item, "node-text"));
         el.innerHTML = `${item.badge ? `<div class="badge${item.badgeClass ? " " + item.badgeClass : ""}">${escapeHtml(item.badge)}</div>` : ""}<div class="canvas-item-flow-content">${item.html || ""}</div>`;
       }else if(item.kind === "tag"){
         el.style.color = getThemedWorkflowColorToken(item.textColor || "#eb7a07", "accent-text");
@@ -2999,7 +3192,7 @@ function applySelectedWorkflowItemPreview(item){
       el.style.fontSize = (item.fontSize || getDefaultWorkflowItem(item.type).fontSize) + "px";
       el.style.borderColor = getThemedWorkflowColorToken(item.borderColor || getDefaultWorkflowItem(item.type).borderColor, item.type === "process" ? "process-stroke" : "node-border");
       el.style.background = getThemedWorkflowColorToken(item.backgroundColor || getDefaultWorkflowItem(item.type).backgroundColor, item.type === "process" ? "process-fill" : "node-fill");
-      el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, item.type === "process" ? "process-text" : "node-text");
+      el.style.color = getThemedWorkflowColorToken(item.textColor || getDefaultWorkflowItem(item.type).textColor, getWorkflowTextColorRole(item, "node-text"));
       const labelEl = el.querySelector(".workflow-item-label");
       const labelShellEl = el.querySelector(".workflow-entry-label-shell");
       if(labelShellEl && hasWorkflowFloatingLabel(item.type)){
