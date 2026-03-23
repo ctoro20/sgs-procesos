@@ -304,18 +304,18 @@ pointer-events:none;
 
 .workflow-connectors line,
 .workflow-connectors polyline{
-stroke:#7d7d7d;
-stroke-width:1.25;
 stroke-linecap:round;
 stroke-linejoin:round;
 fill:none;
-marker-end:url(#workflow-arrow);
 pointer-events:auto;
 cursor:grab;
 }
 
 .workflow-connectors polyline.is-dashed{
 stroke-dasharray:4 4;
+stroke-linecap:butt;
+stroke-linejoin:miter;
+filter:drop-shadow(0 0 0.7px rgba(255,255,255,.95));
 }
 
 .workflow-connectors-draft polyline.is-draft{

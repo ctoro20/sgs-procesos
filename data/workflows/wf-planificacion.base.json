@@ -1,0 +1,891 @@
+{
+  "templateVersion": "planificacion-html-20260323-scaled",
+  "scaleFactor": 0.9,
+  "items": [
+    {
+      "id": "entry-p2",
+      "type": "entry",
+      "title": "Cotización\nAceptada",
+      "x": 42,
+      "y": 160,
+      "width": 16,
+      "height": 16,
+      "fontSize": 12,
+      "labelOffsetX": -28,
+      "labelOffsetY": 8,
+      "labelWidth": 96,
+      "labelHeight": 32
+    },
+    {
+      "id": "actor-p2-1",
+      "type": "activity",
+      "kind": "actor",
+      "x": 124,
+      "y": 26,
+      "width": 150,
+      "height": 44,
+      "html": "Ejecutivo<br>Comercial",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -6,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "step-p2-1",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 132,
+      "y": 88,
+      "width": 102,
+      "height": 54,
+      "html": "Asignar Administrador<br>de Contrato",
+      "badge": "1",
+      "step": "p2-1",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-p2-1",
+      "type": "activity",
+      "kind": "tag",
+      "x": 240,
+      "y": 112,
+      "width": 82,
+      "height": 18,
+      "html": "Qinspecciones",
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "icon-p2-1",
+      "type": "icon",
+      "x": 192,
+      "y": 147,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "warning",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "note-p2-1",
+      "type": "text",
+      "x": 196,
+      "y": 152,
+      "width": 260,
+      "height": 48,
+      "title": "Asignar tareas, plazos, responsables\ny plan, según corresponda.",
+      "fontSize": 13,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "icon-p2-email",
+      "type": "icon",
+      "x": 216,
+      "y": 208,
+      "width": 18,
+      "height": 18,
+      "iconVariant": "documentOk",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "text-p2-info",
+      "type": "text",
+      "x": 128,
+      "y": 226,
+      "width": 212,
+      "height": 40,
+      "title": "Informar al Coordinador de\nContrato la OL asignada",
+      "fontSize": 13,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#5d6470"
+    },
+    {
+      "id": "actor-p2-2",
+      "type": "activity",
+      "kind": "actor",
+      "x": 270,
+      "y": 196,
+      "width": 150,
+      "height": 44,
+      "html": "Ejecutivo<br>Comercial",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -4,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "actor-p2-3",
+      "type": "activity",
+      "kind": "actor",
+      "x": 286,
+      "y": 282,
+      "width": 150,
+      "height": 44,
+      "html": "Asistente<br>Técnico",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -6,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "step-p2-2",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 132,
+      "y": 328,
+      "width": 102,
+      "height": 54,
+      "html": "Revisar la OL",
+      "badge": "2",
+      "step": "p2-2",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-p2-2",
+      "type": "activity",
+      "kind": "tag",
+      "x": 200,
+      "y": 382,
+      "width": 82,
+      "height": 18,
+      "html": "Qinspecciones",
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "step-p2-3",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 116,
+      "y": 454,
+      "width": 102,
+      "height": 54,
+      "html": "Planificar Servicios de<br>Muestreo y Análisis",
+      "badge": "3",
+      "step": "p2-3",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "icon-p2-doc",
+      "type": "icon",
+      "x": 222,
+      "y": 544,
+      "width": 24,
+      "height": 24,
+      "iconVariant": "documentStack",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "text-p2-doc",
+      "type": "text",
+      "x": 252,
+      "y": 536,
+      "width": 250,
+      "height": 62,
+      "title": "Subcontratos\nde laboratorios\nSe debe indicar si los servicios\nsolicitados son ETFA.",
+      "fontSize": 12,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "icon-p2-doc2",
+      "type": "icon",
+      "x": 222,
+      "y": 614,
+      "width": 24,
+      "height": 24,
+      "iconVariant": "documentOk",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "text-p2-doc2",
+      "type": "text",
+      "x": 252,
+      "y": 606,
+      "width": 250,
+      "height": 48,
+      "title": "Documentación\nSe genera la documentación para\nterreno y se revisan los permisos.",
+      "fontSize": 12,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "icon-p2-team",
+      "type": "icon",
+      "x": 220,
+      "y": 676,
+      "width": 24,
+      "height": 24,
+      "iconVariant": "inspectorsGroup",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#6f7f91"
+    },
+    {
+      "id": "text-p2-team",
+      "type": "text",
+      "x": 252,
+      "y": 668,
+      "width": 270,
+      "height": 52,
+      "title": "Equipo de Trabajo\nSe asigna al Asistente Muestreador y\nal Inspector Ambiental, según aplique.",
+      "fontSize": 12,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "icon-p2-micro",
+      "type": "icon",
+      "x": 220,
+      "y": 738,
+      "width": 24,
+      "height": 24,
+      "iconVariant": "microscope",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#6f7f91"
+    },
+    {
+      "id": "text-p2-micro",
+      "type": "text",
+      "x": 252,
+      "y": 730,
+      "width": 280,
+      "height": 52,
+      "title": "Equipos de muestreo\nSe revisa la disponibilidad de equipos y si\nestán en condiciones óptimas (calibración).",
+      "fontSize": 12,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "icon-p2-log",
+      "type": "icon",
+      "x": 220,
+      "y": 804,
+      "width": 24,
+      "height": 24,
+      "iconVariant": "airplane",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#6f7f91"
+    },
+    {
+      "id": "text-p2-log",
+      "type": "text",
+      "x": 252,
+      "y": 796,
+      "width": 280,
+      "height": 50,
+      "title": "Logística (FXR)\nSe coordina transporte, hospedaje, alimentación,\nropa de trabajo y otros requerimientos.",
+      "fontSize": 12,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "actor-p2-4",
+      "type": "activity",
+      "kind": "actor",
+      "x": 432,
+      "y": 382,
+      "width": 150,
+      "height": 44,
+      "html": "Asistente<br>Técnico",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -6,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "step-p2-4",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 392,
+      "y": 454,
+      "width": 102,
+      "height": 54,
+      "html": "Coordinar los servicios<br>con Cliente",
+      "badge": "4",
+      "step": "p2-4",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "actor-p2-5",
+      "type": "activity",
+      "kind": "actor",
+      "x": 632,
+      "y": 382,
+      "width": 150,
+      "height": 44,
+      "html": "Asistente<br>Técnico",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -6,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "step-p2-5",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 594,
+      "y": 454,
+      "width": 102,
+      "height": 54,
+      "html": "Calendarizar Servicios",
+      "badge": "5",
+      "step": "p2-5",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-p2-5",
+      "type": "activity",
+      "kind": "tag",
+      "x": 700,
+      "y": 470,
+      "width": 82,
+      "height": 18,
+      "html": "Qinspecciones",
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "actor-p2-6",
+      "type": "activity",
+      "kind": "actor",
+      "x": 854,
+      "y": 382,
+      "width": 150,
+      "height": 44,
+      "html": "Asistente<br>Técnico",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -6,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "step-p2-6",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 818,
+      "y": 454,
+      "width": 102,
+      "height": 54,
+      "html": "Crear Órdenes de<br>Inspecciones",
+      "badge": "6",
+      "step": "p2-6",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-p2-6",
+      "type": "activity",
+      "kind": "tag",
+      "x": 924,
+      "y": 470,
+      "width": 82,
+      "height": 18,
+      "html": "Qinspecciones",
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "icon-p2-warn2",
+      "type": "icon",
+      "x": 832,
+      "y": 528,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "warning",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "note-p2-6",
+      "type": "text",
+      "x": 836,
+      "y": 534,
+      "width": 250,
+      "height": 70,
+      "title": "Asignar supervisor por localidad y\noperación. Se asignan las fechas\ntentativas para ejecutar los\nservicios de muestreo y mediciones.",
+      "fontSize": 12,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "actor-p2-j1",
+      "type": "activity",
+      "kind": "actor",
+      "x": 1082,
+      "y": 388,
+      "width": 150,
+      "height": 44,
+      "html": "Jefe de<br>Operaciones",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -4,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "mini-p2-ols",
+      "type": "activity",
+      "kind": "mini-icon",
+      "x": 1080,
+      "y": 484,
+      "width": 108,
+      "height": 28,
+      "html": "Revisar el sistema (OIs)",
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "decision-p2-1",
+      "type": "decision",
+      "x": 1292,
+      "y": 476,
+      "width": 24,
+      "height": 24,
+      "title": "?",
+      "fontSize": 12,
+      "borderColor": "#d9c1a3",
+      "backgroundColor": "#ffffff",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "text-p2-q",
+      "type": "text",
+      "x": 1234,
+      "y": 420,
+      "width": 160,
+      "height": 40,
+      "title": "¿Es factible ejecutar\nla planificación?",
+      "fontSize": 13,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#5d6470"
+    },
+    {
+      "id": "actor-p2-j2",
+      "type": "activity",
+      "kind": "actor",
+      "x": 1512,
+      "y": 382,
+      "width": 150,
+      "height": 44,
+      "html": "Jefe de<br>Operaciones",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -4,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "step-p2-7",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 1480,
+      "y": 454,
+      "width": 102,
+      "height": 54,
+      "html": "Asignar Muestreador<br>Ambiental",
+      "badge": "7",
+      "step": "p2-7",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "icon-p2-warn3",
+      "type": "icon",
+      "x": 1564,
+      "y": 520,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "warning",
+      "title": "",
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "note-p2-7",
+      "type": "text",
+      "x": 1568,
+      "y": 526,
+      "width": 180,
+      "height": 44,
+      "title": "Se pone en firme la\nfecha de ejecución.",
+      "fontSize": 12,
+      "borderColor": "transparent",
+      "backgroundColor": "transparent",
+      "textColor": "#1f6fb2"
+    },
+    {
+      "id": "tag-p2-7a",
+      "type": "activity",
+      "kind": "tag",
+      "x": 1588,
+      "y": 494,
+      "width": 82,
+      "height": 18,
+      "html": "Qinspecciones",
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "tag-p2-7b",
+      "type": "activity",
+      "kind": "tag",
+      "x": 1604,
+      "y": 516,
+      "width": 54,
+      "height": 18,
+      "html": "QETFA",
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "output-p2",
+      "type": "output",
+      "title": "Planificación aceptada\ne Inspector asignado",
+      "x": 1820,
+      "y": 474,
+      "width": 16,
+      "height": 16,
+      "fontSize": 12,
+      "labelOffsetX": 20,
+      "labelOffsetY": 8,
+      "labelWidth": 170,
+      "labelHeight": 36
+    },
+    {
+      "id": "actor-p2-j3",
+      "type": "activity",
+      "kind": "actor",
+      "x": 1338,
+      "y": 616,
+      "width": 150,
+      "height": 44,
+      "html": "Jefe de<br>Operaciones",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelWidth": 150,
+      "labelHeight": 32,
+      "labelOffsetX": -4,
+      "labelOffsetY": 18
+    },
+    {
+      "id": "step-p2-6-1",
+      "type": "activity",
+      "kind": "flow-card",
+      "x": 1248,
+      "y": 684,
+      "width": 102,
+      "height": 54,
+      "html": "Modificar fechas en<br>sistema",
+      "badge": "6.1",
+      "badgeClass": "small",
+      "step": "p2-6.1",
+      "fontSize": 12,
+      "borderColor": "#f3a454",
+      "backgroundColor": "#f7f2ed",
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-p2-6-1",
+      "type": "activity",
+      "kind": "tag",
+      "x": 1354,
+      "y": 708,
+      "width": 82,
+      "height": 18,
+      "html": "Qinspecciones",
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    }
+  ],
+  "lines": [
+    {
+      "id": "p2-line-1",
+      "from": {
+        "itemId": "entry-p2",
+        "side": "right-middle"
+      },
+      "via": [
+        {
+          "x": 58,
+          "y": 115
+        }
+      ],
+      "to": {
+        "itemId": "step-p2-1",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-2",
+      "from": {
+        "itemId": "step-p2-1",
+        "side": "bottom-middle"
+      },
+      "to": {
+        "itemId": "step-p2-2",
+        "side": "top-middle"
+      }
+    },
+    {
+      "id": "p2-line-3",
+      "from": {
+        "itemId": "step-p2-2",
+        "side": "bottom-middle"
+      },
+      "to": {
+        "itemId": "step-p2-3",
+        "side": "top-middle"
+      }
+    },
+    {
+      "id": "p2-line-4",
+      "from": {
+        "itemId": "step-p2-3",
+        "side": "right-middle"
+      },
+      "to": {
+        "itemId": "step-p2-4",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-5",
+      "from": {
+        "itemId": "step-p2-4",
+        "side": "right-middle"
+      },
+      "to": {
+        "itemId": "step-p2-5",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-6",
+      "from": {
+        "itemId": "step-p2-5",
+        "side": "right-middle"
+      },
+      "to": {
+        "itemId": "step-p2-6",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-7",
+      "from": {
+        "itemId": "step-p2-6",
+        "side": "right-middle"
+      },
+      "to": {
+        "itemId": "mini-p2-ols",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-8",
+      "from": {
+        "itemId": "mini-p2-ols",
+        "side": "right-middle"
+      },
+      "to": {
+        "itemId": "decision-p2-1",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-9",
+      "from": {
+        "itemId": "decision-p2-1",
+        "side": "right-middle"
+      },
+      "to": {
+        "itemId": "step-p2-7",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-10",
+      "from": {
+        "itemId": "step-p2-7",
+        "side": "right-middle"
+      },
+      "to": {
+        "itemId": "output-p2",
+        "side": "left-middle"
+      }
+    },
+    {
+      "id": "p2-line-11",
+      "from": {
+        "itemId": "decision-p2-1",
+        "side": "bottom-middle"
+      },
+      "via": [
+        {
+          "x": 1304,
+          "y": 711
+        }
+      ],
+      "to": {
+        "itemId": "step-p2-6-1",
+        "side": "top-middle"
+      }
+    },
+    {
+      "id": "p2-line-12",
+      "from": {
+        "itemId": "step-p2-6-1",
+        "side": "right-middle"
+      },
+      "via": [
+        {
+          "x": 1582,
+          "y": 711
+        },
+        {
+          "x": 1582,
+          "y": 508
+        }
+      ],
+      "to": {
+        "itemId": "step-p2-7",
+        "side": "bottom-middle"
+      }
+    },
+    {
+      "id": "p2-support-1",
+      "from": {
+        "itemId": "step-p2-3",
+        "side": "bottom-middle"
+      },
+      "via": [
+        {
+          "x": 167,
+          "y": 846
+        }
+      ],
+      "dashed": true,
+      "arrow": false,
+      "color": "#989898",
+      "strokeWidth": 1.4
+    },
+    {
+      "id": "p2-support-2",
+      "x1": 167,
+      "y1": 556,
+      "x2": 220,
+      "y2": 556,
+      "dashed": true,
+      "arrow": false,
+      "color": "#989898",
+      "strokeWidth": 1.4
+    },
+    {
+      "id": "p2-support-3",
+      "x1": 167,
+      "y1": 626,
+      "x2": 220,
+      "y2": 626,
+      "dashed": true,
+      "arrow": false,
+      "color": "#989898",
+      "strokeWidth": 1.4
+    },
+    {
+      "id": "p2-support-4",
+      "x1": 167,
+      "y1": 688,
+      "x2": 218,
+      "y2": 688,
+      "dashed": true,
+      "arrow": false,
+      "color": "#989898",
+      "strokeWidth": 1.4
+    },
+    {
+      "id": "p2-support-5",
+      "x1": 167,
+      "y1": 750,
+      "x2": 218,
+      "y2": 750,
+      "dashed": true,
+      "arrow": false,
+      "color": "#989898",
+      "strokeWidth": 1.4
+    },
+    {
+      "id": "p2-support-6",
+      "x1": 167,
+      "y1": 816,
+      "x2": 218,
+      "y2": 816,
+      "dashed": true,
+      "arrow": false,
+      "color": "#989898",
+      "strokeWidth": 1.4
+    }
+  ]
+}

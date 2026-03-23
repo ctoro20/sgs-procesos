@@ -7,6 +7,11 @@ const WORKFLOW_BASE_LAYOUT_STORAGE_KEY_PREFIX = "conemi-workflow-layout-base-v1:
 const WORKFLOW_PALETTE_STORAGE_KEY_PREFIX = "conemi-workflow-palette-v1:";
 const COTIZACIONES_WORKFLOW_TEMPLATE_VERSION = "cotizaciones-html-20260321-roles";
 const PLANIFICACION_WORKFLOW_TEMPLATE_VERSION = "planificacion-html-20260323-scaled";
+const WORKFLOW_TEMPLATE_REPO_PATHS = {
+  "wf-cotizaciones": "data/workflows/wf-cotizaciones.base.json",
+  "wf-planificacion": "data/workflows/wf-planificacion.base.json"
+};
+const workflowTemplateRepoCache = Object.create(null);
 const params = new URLSearchParams(window.location.search);
 const processId = params.get("process") || "";
 const itemId = params.get("item") || "";
@@ -471,8 +476,84 @@ function normalizeCotizacionesWorkflowItems(items){
   });
 }
 
+function getWorkflowTemplateVersionForId(targetWorkflowId){
+  if(targetWorkflowId === "wf-cotizaciones"){
+    return COTIZACIONES_WORKFLOW_TEMPLATE_VERSION;
+  }
+  if(targetWorkflowId === "wf-planificacion"){
+    return PLANIFICACION_WORKFLOW_TEMPLATE_VERSION;
+  }
+  return "";
+}
+
+function getWorkflowAnchorResolverForId(targetWorkflowId){
+  if(targetWorkflowId === "wf-cotizaciones"){
+    return getCotizacionesWorkflowAnchorPoint;
+  }
+  return function(item, side){
+    const geometry = getWorkflowAnchorGeometryFromRect(item.x, item.y, item.width || 0, item.height || 0, item);
+    return getWorkflowAnchorPointFromGeometry(geometry, side);
+  };
+}
+
+function normalizeWorkflowTemplateDefinition(targetWorkflowId, template){
+  if(!template || !Array.isArray(template.items)){
+    return null;
+  }
+  const normalizedTemplate = structuredClone(template);
+  normalizedTemplate.templateVersion = normalizedTemplate.templateVersion || getWorkflowTemplateVersionForId(targetWorkflowId);
+  if(targetWorkflowId === "wf-cotizaciones"){
+    normalizedTemplate.items = normalizeCotizacionesWorkflowItems(normalizedTemplate.items);
+  }
+  return normalizedTemplate;
+}
+
+function loadWorkflowTemplateDefinitionFromRepo(targetWorkflowId){
+  const templatePath = WORKFLOW_TEMPLATE_REPO_PATHS[targetWorkflowId];
+  if(!templatePath){
+    return null;
+  }
+  if(Object.prototype.hasOwnProperty.call(workflowTemplateRepoCache, targetWorkflowId)){
+    const cached = workflowTemplateRepoCache[targetWorkflowId];
+    return cached ? structuredClone(cached) : null;
+  }
+  try{
+    const request = new XMLHttpRequest();
+    request.open("GET", templatePath, false);
+    request.send();
+    const hasSuccessfulStatus = (request.status >= 200 && request.status < 300) || (request.status === 0 && request.responseText);
+    if(hasSuccessfulStatus && request.responseText){
+      const parsed = JSON.parse(request.responseText);
+      const normalized = normalizeWorkflowTemplateDefinition(targetWorkflowId, parsed);
+      workflowTemplateRepoCache[targetWorkflowId] = normalized ? structuredClone(normalized) : null;
+      return normalized ? structuredClone(normalized) : null;
+    }
+  }catch(error){
+  }
+  workflowTemplateRepoCache[targetWorkflowId] = null;
+  return null;
+}
+
+function createWorkflowStateFromTemplateDefinition(targetWorkflowId, template){
+  const normalizedTemplate = normalizeWorkflowTemplateDefinition(targetWorkflowId, template);
+  if(!normalizedTemplate){
+    return null;
+  }
+  const baseState = createWorkflowStateFromTemplate(normalizedTemplate, getWorkflowAnchorResolverForId(targetWorkflowId));
+  if(Number.isFinite(normalizedTemplate.scaleFactor) && normalizedTemplate.scaleFactor > 0 && normalizedTemplate.scaleFactor !== 1){
+    return scaleWorkflowState(baseState, normalizedTemplate.scaleFactor);
+  }
+  return baseState;
+}
+
+function createWorkflowStateFromRepoTemplate(targetWorkflowId){
+  const repoTemplate = loadWorkflowTemplateDefinitionFromRepo(targetWorkflowId);
+  return repoTemplate ? createWorkflowStateFromTemplateDefinition(targetWorkflowId, repoTemplate) : null;
+}
+
 function getCotizacionesWorkflowTemplate(){
   return {
+    templateVersion: COTIZACIONES_WORKFLOW_TEMPLATE_VERSION,
     items: normalizeCotizacionesWorkflowItems([
       { id:"start-1", kind:"start-dot", x:48, y:133 },
       { id:"label-1", kind:"label", x:12, y:150, width:90, html:"Necesidad del<br>Cliente" },
@@ -780,8 +861,12 @@ function getWorkflowAnchorSidesForItem(item){
 }
 
 function createCotizacionesWorkflowState(){
+  const repoState = createWorkflowStateFromRepoTemplate("wf-cotizaciones");
+  if(repoState){
+    return repoState;
+  }
   const template = getCotizacionesWorkflowTemplate();
-  return createWorkflowStateFromTemplate(template, getCotizacionesWorkflowAnchorPoint);
+  return createWorkflowStateFromTemplateDefinition("wf-cotizaciones", template);
 }
 
 function createWorkflowStateFromTemplate(template, anchorResolver){
@@ -891,6 +976,7 @@ function scaleWorkflowState(state, factor){
 function getPlanificacionWorkflowTemplate(){
   return {
     templateVersion: PLANIFICACION_WORKFLOW_TEMPLATE_VERSION,
+    scaleFactor: 0.9,
     items: [
       { id: "entry-p2", type: "entry", title: "Cotización\nAceptada", x: 42, y: 160, width: 16, height: 16, fontSize: 12, labelOffsetX: -28, labelOffsetY: 8, labelWidth: 96, labelHeight: 32 },
       { id: "actor-p2-1", type: "activity", kind: "actor", x: 124, y: 26, width: 150, height: 44, html: "Ejecutivo<br>Comercial", fontSize: 11, textColor: "#777", labelWidth: 150, labelHeight: 32, labelOffsetX: -6, labelOffsetY: 18 },
@@ -964,12 +1050,12 @@ function getPlanificacionWorkflowTemplate(){
 }
 
 function createPlanificacionWorkflowState(){
+  const repoState = createWorkflowStateFromRepoTemplate("wf-planificacion");
+  if(repoState){
+    return repoState;
+  }
   const template = getPlanificacionWorkflowTemplate();
-  const baseState = createWorkflowStateFromTemplate(template, function(item, side){
-    const geometry = getWorkflowAnchorGeometryFromRect(item.x, item.y, item.width || 0, item.height || 0, item);
-    return getWorkflowAnchorPointFromGeometry(geometry, side);
-  });
-  return scaleWorkflowState(baseState, 0.9);
+  return createWorkflowStateFromTemplateDefinition("wf-planificacion", template);
 }
 
 function getInitialWorkflowState(){

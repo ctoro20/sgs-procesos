@@ -1,0 +1,1263 @@
+{
+  "templateVersion": "cotizaciones-html-20260321-roles",
+  "items": [
+    {
+      "id": "start-1",
+      "kind": "start-dot",
+      "x": 48,
+      "y": 133,
+      "width": 14,
+      "height": 14
+    },
+    {
+      "id": "label-1",
+      "kind": "label",
+      "x": 12,
+      "y": 150,
+      "width": 90,
+      "html": "Necesidad del<br>Cliente",
+      "height": 28,
+      "fontSize": 13,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "actor-1",
+      "kind": "actor",
+      "x": 124,
+      "y": 60,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-1",
+      "kind": "flow-card",
+      "x": 128,
+      "y": 122,
+      "width": 102,
+      "html": "Recepcionar<br>Requerimiento",
+      "badge": "1",
+      "step": "1",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "mini-1",
+      "kind": "mini-icon",
+      "x": 142,
+      "y": 175,
+      "html": "Llamado telefónico",
+      "width": 84,
+      "height": 18,
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "mini-2",
+      "kind": "mini-icon",
+      "x": 142,
+      "y": 198,
+      "html": "Email",
+      "width": 84,
+      "height": 18,
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "mini-3",
+      "kind": "mini-icon",
+      "x": 142,
+      "y": 221,
+      "width": 110,
+      "html": "Portal Licitaciones",
+      "height": 18,
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "mini-4",
+      "kind": "mini-icon",
+      "x": 264,
+      "y": 120,
+      "width": 92,
+      "height": 28,
+      "html": "Documentos<br>de soporte",
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "decision-label-1",
+      "kind": "decision-label",
+      "x": 389,
+      "y": 104,
+      "width": 110,
+      "height": 30,
+      "html": "¿Requerimiento<br>corresponde a Licitación?",
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-1",
+      "kind": "decision",
+      "x": 424,
+      "y": 132,
+      "width": 18,
+      "height": 18
+    },
+    {
+      "id": "decision-label-2",
+      "kind": "decision-label",
+      "x": 405,
+      "y": 168,
+      "width": 50,
+      "html": "Si",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-label-3",
+      "kind": "decision-label",
+      "x": 470,
+      "y": 135,
+      "width": 44,
+      "html": "No",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "actor-2",
+      "kind": "actor",
+      "x": 301,
+      "y": 204,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-1-1",
+      "kind": "flow-card",
+      "x": 387,
+      "y": 182,
+      "width": 102,
+      "html": "Validar Técnica y<br>Operativamente",
+      "badge": "1.1",
+      "badgeClass": "small",
+      "step": "1.1",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "soft-1",
+      "kind": "subactivity",
+      "x": 377,
+      "y": 272,
+      "width": 132,
+      "height": 26,
+      "html": "Consultas a las áreas",
+      "fontSize": 10,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "icon-lab-etfa",
+      "type": "icon",
+      "x": 206,
+      "y": 326,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "labFlask",
+      "title": "",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 0,
+      "labelHeight": 0
+    },
+    {
+      "id": "dash-1",
+      "kind": "dashed-box",
+      "x": 225,
+      "y": 313,
+      "width": 145,
+      "html": "Laboratorios/ETFA<br>Permisología<br>Inspectores/Otros<br>Equipos/Insumos<br>Logística",
+      "height": 112,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "soft-2",
+      "kind": "soft-icon",
+      "x": 486,
+      "y": 266,
+      "width": 82,
+      "html": "Operaciones",
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#6d7680"
+    },
+    {
+      "id": "soft-3",
+      "kind": "soft-icon",
+      "x": 486,
+      "y": 286,
+      "width": 82,
+      "html": "Técnicas",
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#6d7680"
+    },
+    {
+      "id": "soft-4",
+      "kind": "subactivity",
+      "x": 382,
+      "y": 372,
+      "width": 126,
+      "height": 26,
+      "html": "Entrega de la información",
+      "fontSize": 10,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "soft-5",
+      "kind": "actor",
+      "x": 505,
+      "y": 332,
+      "width": 92,
+      "height": 28,
+      "html": "Jefe<br>Operaciones",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "soft-6",
+      "kind": "actor",
+      "x": 505,
+      "y": 362,
+      "width": 92,
+      "height": 28,
+      "html": "Jefe Técnico",
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "actor-3",
+      "kind": "actor",
+      "x": 542,
+      "y": 62,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-2",
+      "kind": "flow-card",
+      "x": 575,
+      "y": 122,
+      "width": 102,
+      "html": "Elaborar<br>Cotización",
+      "badge": "2",
+      "step": "2",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "icon-excel-step-2",
+      "type": "icon",
+      "x": 686,
+      "y": 136,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "excel",
+      "title": "",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 0,
+      "labelHeight": 0
+    },
+    {
+      "id": "tag-1",
+      "kind": "tag",
+      "x": 671,
+      "y": 146,
+      "html": "Qcotizador",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "tag-2",
+      "kind": "tag",
+      "x": 683,
+      "y": 166,
+      "width": 54,
+      "html": "QETFA",
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "note-1",
+      "kind": "note",
+      "x": 620,
+      "y": 175,
+      "width": 165,
+      "height": 54,
+      "html": "Se adjunta archivo de costeo y se especifican los servicios ETFA, el sistema realiza la validación.",
+      "fontSize": 11,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "actor-4",
+      "kind": "actor",
+      "x": 738,
+      "y": 56,
+      "width": 180,
+      "html": "Gerente de Desarrollo de<br>Negocios",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-3",
+      "kind": "flow-card",
+      "x": 742,
+      "y": 122,
+      "width": 102,
+      "html": "Aprobar<br>Cotización",
+      "badge": "3",
+      "step": "3",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-3",
+      "kind": "tag",
+      "x": 796,
+      "y": 166,
+      "html": "Qcotizador",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "decision-label-4",
+      "kind": "decision-label",
+      "x": 866,
+      "y": 104,
+      "width": 110,
+      "height": 30,
+      "html": "¿Se aprueba la<br>Cotización?",
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-2",
+      "kind": "decision",
+      "x": 906,
+      "y": 132,
+      "width": 18,
+      "height": 18
+    },
+    {
+      "id": "decision-label-5",
+      "kind": "decision-label",
+      "x": 892,
+      "y": 168,
+      "width": 46,
+      "html": "No",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-label-6",
+      "kind": "decision-label",
+      "x": 964,
+      "y": 135,
+      "width": 44,
+      "html": "Si",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "mini-5",
+      "kind": "mini-icon",
+      "x": 866,
+      "y": 182,
+      "width": 92,
+      "html": "Corregir",
+      "height": 18,
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "mini-6",
+      "kind": "mini-icon",
+      "x": 900,
+      "y": 202,
+      "width": 85,
+      "height": 28,
+      "html": "Solicitar<br>Correcciones",
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "mini-7",
+      "kind": "mini-icon",
+      "x": 970,
+      "y": 205,
+      "width": 70,
+      "html": "Email",
+      "height": 18,
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "mini-8",
+      "kind": "mini-icon",
+      "x": 1044,
+      "y": 120,
+      "width": 82,
+      "height": 28,
+      "html": "Cotización<br>Aprobada",
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "actor-5",
+      "kind": "actor",
+      "x": 1115,
+      "y": 60,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-4",
+      "kind": "flow-card",
+      "x": 1148,
+      "y": 122,
+      "width": 102,
+      "html": "Notificar al<br>Cliente",
+      "badge": "4",
+      "step": "4",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "icon-doc-stack-step-4",
+      "type": "icon",
+      "x": 1264,
+      "y": 120,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "documentStack",
+      "title": "",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 0,
+      "labelHeight": 0
+    },
+    {
+      "id": "icon-doc-ok-step-4",
+      "type": "icon",
+      "x": 1264,
+      "y": 144,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "documentOk",
+      "title": "",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 0,
+      "labelHeight": 0
+    },
+    {
+      "id": "tag-4",
+      "kind": "tag",
+      "x": 1254,
+      "y": 146,
+      "html": "Qcotizador",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "icon-warning-note-2",
+      "type": "icon",
+      "x": 1174,
+      "y": 184,
+      "width": 20,
+      "height": 20,
+      "iconVariant": "warning",
+      "title": "",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 0,
+      "labelHeight": 0
+    },
+    {
+      "id": "note-2",
+      "kind": "note",
+      "x": 1201,
+      "y": 177,
+      "width": 155,
+      "html": "Se realiza correo personalizado al Cliente.",
+      "height": 36,
+      "fontSize": 11,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "mini-9",
+      "kind": "mini-icon",
+      "x": 1146,
+      "y": 196,
+      "width": 108,
+      "height": 28,
+      "html": "Cotización<br>Enviada",
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "mini-10",
+      "kind": "mini-icon",
+      "x": 1220,
+      "y": 208,
+      "width": 54,
+      "html": "Email",
+      "height": 18,
+      "fontSize": 9,
+      "textColor": "#555"
+    },
+    {
+      "id": "actor-6",
+      "kind": "actor",
+      "x": 1244,
+      "y": 275,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-5",
+      "kind": "flow-card",
+      "x": 1148,
+      "y": 286,
+      "width": 102,
+      "html": "Realizar seguimiento",
+      "badge": "5",
+      "step": "5",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-4b",
+      "kind": "tag",
+      "x": 1201,
+      "y": 332,
+      "html": "Qcotizador",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "note-3",
+      "kind": "note",
+      "x": 1200,
+      "y": 349,
+      "width": 180,
+      "html": "Al tercer día si no se obtiene respuesta aún.",
+      "height": 36,
+      "fontSize": 11,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "actor-7",
+      "kind": "actor",
+      "x": 1244,
+      "y": 381,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-6",
+      "kind": "flow-card",
+      "x": 1148,
+      "y": 389,
+      "width": 102,
+      "html": "Realizar Negociación",
+      "badge": "6",
+      "step": "6",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-4c",
+      "kind": "tag",
+      "x": 1201,
+      "y": 435,
+      "html": "Qcotizador",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "note-4",
+      "kind": "note",
+      "x": 1200,
+      "y": 452,
+      "width": 192,
+      "height": 44,
+      "html": "Ajustar precios, plazos y condiciones según las necesidades del cliente.",
+      "fontSize": 11,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "decision-label-7",
+      "kind": "decision-label",
+      "x": 1088,
+      "y": 543,
+      "width": 95,
+      "height": 28,
+      "html": "¿Cotización<br>aceptada?",
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-3",
+      "kind": "decision",
+      "x": 1191,
+      "y": 545,
+      "width": 18,
+      "height": 18
+    },
+    {
+      "id": "decision-label-8",
+      "kind": "decision-label",
+      "x": 1178,
+      "y": 584,
+      "width": 45,
+      "html": "Si",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-label-9",
+      "kind": "decision-label",
+      "x": 1247,
+      "y": 548,
+      "width": 44,
+      "html": "No",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "actor-8",
+      "kind": "actor",
+      "x": 1294,
+      "y": 493,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-6-1",
+      "kind": "flow-card",
+      "x": 1282,
+      "y": 535,
+      "width": 102,
+      "html": "Rechazar Cotización",
+      "badge": "7",
+      "step": "7",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-5",
+      "kind": "tag",
+      "x": 1357,
+      "y": 576,
+      "html": "Qcotizador",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "end-1",
+      "kind": "end-dot",
+      "x": 1468,
+      "y": 548,
+      "width": 14,
+      "height": 14
+    },
+    {
+      "id": "label-2",
+      "kind": "label",
+      "x": 1428,
+      "y": 566,
+      "width": 92,
+      "html": "Cotización<br>Rechazada",
+      "height": 28,
+      "fontSize": 13,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-label-10",
+      "kind": "decision-label",
+      "x": 1080,
+      "y": 640,
+      "width": 110,
+      "height": 30,
+      "html": "¿Cotización de<br>Cliente prospecto?",
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-4",
+      "kind": "decision",
+      "x": 1191,
+      "y": 645,
+      "width": 18,
+      "height": 18
+    },
+    {
+      "id": "decision-label-11",
+      "kind": "decision-label",
+      "x": 1177,
+      "y": 684,
+      "width": 45,
+      "html": "No",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "decision-label-12",
+      "kind": "decision-label",
+      "x": 1246,
+      "y": 648,
+      "width": 44,
+      "html": "Si",
+      "height": 18,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "boss-1",
+      "type": "process",
+      "x": 1304,
+      "y": 626,
+      "width": 170,
+      "height": 92,
+      "title": "Creación de\nCliente en\nBOSS"
+    },
+    {
+      "id": "note-5",
+      "kind": "note",
+      "x": 1348,
+      "y": 684,
+      "width": 160,
+      "height": 44,
+      "html": "Se debe tener el cliente creado en BOSS para aceptar la cotización en sistema.",
+      "fontSize": 11,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "actor-9",
+      "kind": "actor",
+      "x": 1046,
+      "y": 698,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-6-2",
+      "kind": "flow-card",
+      "x": 1148,
+      "y": 718,
+      "width": 102,
+      "html": "Aceptar Cotización",
+      "badge": "7.2",
+      "badgeClass": "small",
+      "step": "7.2",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-6",
+      "kind": "tag",
+      "x": 1201,
+      "y": 759,
+      "html": "Qcotizador",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "actor-10",
+      "kind": "actor",
+      "x": 1257,
+      "y": 798,
+      "width": 150,
+      "html": "Ejecutivo<br>Comercial",
+      "height": 44,
+      "fontSize": 11,
+      "textColor": "#777",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWidth": 110,
+      "labelHeight": 24
+    },
+    {
+      "id": "step-7",
+      "kind": "flow-card",
+      "x": 1148,
+      "y": 816,
+      "width": 102,
+      "html": "Crear o Actualizar<br>OL",
+      "badge": "8",
+      "step": "8",
+      "height": 54,
+      "fontSize": 12,
+      "textColor": "#30424d"
+    },
+    {
+      "id": "tag-7",
+      "kind": "tag",
+      "x": 1201,
+      "y": 857,
+      "html": "Syscom",
+      "width": 74,
+      "height": 18,
+      "fontSize": 10,
+      "textColor": "#eb7a07"
+    },
+    {
+      "id": "end-2",
+      "kind": "end-dot",
+      "x": 1193,
+      "y": 889,
+      "width": 14,
+      "height": 14
+    },
+    {
+      "id": "label-3",
+      "kind": "label",
+      "x": 1142,
+      "y": 907,
+      "width": 118,
+      "html": "OL creada o<br>actualizada",
+      "height": 28,
+      "fontSize": 13,
+      "textColor": "#30424d"
+    }
+  ],
+  "lines": [
+    {
+      "id": "line-1",
+      "from": {
+        "itemId": "start-1",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "step-1",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-2",
+      "from": {
+        "itemId": "step-1",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "decision-1",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-3",
+      "from": {
+        "itemId": "decision-1",
+        "side": "bottom"
+      },
+      "to": {
+        "itemId": "step-1-1",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-4",
+      "from": {
+        "itemId": "decision-1",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "step-2",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-5",
+      "from": {
+        "itemId": "step-1-1",
+        "side": "bottom"
+      },
+      "to": {
+        "itemId": "soft-1",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-6",
+      "from": {
+        "itemId": "soft-1",
+        "side": "left"
+      },
+      "via": [
+        {
+          "x": 356,
+          "y": 285
+        }
+      ],
+      "to": {
+        "itemId": "dash-1",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-7",
+      "from": {
+        "itemId": "dash-1",
+        "side": "right"
+      },
+      "via": [
+        {
+          "x": 438,
+          "y": 349
+        }
+      ],
+      "to": {
+        "itemId": "soft-4",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-8",
+      "from": {
+        "itemId": "soft-4",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "step-2",
+        "side": "bottom"
+      }
+    },
+    {
+      "id": "line-9",
+      "from": {
+        "itemId": "step-2",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "step-3",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-10",
+      "from": {
+        "itemId": "step-3",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "decision-2",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-11",
+      "from": {
+        "itemId": "decision-2",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "step-4",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-12",
+      "from": {
+        "itemId": "decision-2",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 915,
+          "y": 235
+        },
+        {
+          "x": 540,
+          "y": 235
+        },
+        {
+          "x": 540,
+          "y": 178
+        }
+      ],
+      "to": {
+        "itemId": "step-2",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-13",
+      "from": {
+        "itemId": "step-4",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 1200,
+          "y": 225
+        }
+      ],
+      "to": {
+        "itemId": "step-5",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-14",
+      "from": {
+        "itemId": "step-5",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 1200,
+          "y": 389
+        }
+      ],
+      "to": {
+        "itemId": "step-6",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-15",
+      "from": {
+        "itemId": "step-6",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 1200,
+          "y": 553
+        }
+      ],
+      "to": {
+        "itemId": "decision-3",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-16",
+      "from": {
+        "itemId": "decision-3",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "step-6-1",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-17",
+      "from": {
+        "itemId": "step-6-1",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "end-1",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-18",
+      "from": {
+        "itemId": "decision-3",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 1200,
+          "y": 652
+        }
+      ],
+      "to": {
+        "itemId": "decision-4",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-19",
+      "from": {
+        "itemId": "decision-4",
+        "side": "right"
+      },
+      "to": {
+        "itemId": "boss-1",
+        "side": "left"
+      }
+    },
+    {
+      "id": "line-20",
+      "from": {
+        "itemId": "boss-1",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 1350,
+          "y": 700
+        },
+        {
+          "x": 1250,
+          "y": 700
+        }
+      ],
+      "to": {
+        "itemId": "step-6-2",
+        "side": "right"
+      }
+    },
+    {
+      "id": "line-21",
+      "from": {
+        "itemId": "decision-4",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 1200,
+          "y": 700
+        }
+      ],
+      "to": {
+        "itemId": "step-6-2",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-22",
+      "from": {
+        "itemId": "step-6-2",
+        "side": "bottom"
+      },
+      "via": [
+        {
+          "x": 1200,
+          "y": 816
+        }
+      ],
+      "to": {
+        "itemId": "step-7",
+        "side": "top"
+      }
+    },
+    {
+      "id": "line-23",
+      "from": {
+        "itemId": "step-7",
+        "side": "bottom"
+      },
+      "to": {
+        "itemId": "end-2",
+        "side": "top"
+      }
+    }
+  ]
+}
