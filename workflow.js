@@ -1150,6 +1150,9 @@ function saveWorkflowStateSource(){
 }
 
 function shouldLoadWorkflowDraft(){
+  if(window.location.protocol !== "file:" && !isEditingWorkflow){
+    return false;
+  }
   return workflowStateSource === "storage" || workflowStateSource === "json";
 }
 
