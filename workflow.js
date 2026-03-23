@@ -837,10 +837,8 @@ const workflowFloatingToolsHome = document.getElementById("floatingWorkflowTools
 
 document.title = workflowTitle + " | Workflow";
 document.getElementById("workflowTitle").textContent = workflowTitle;
-document.getElementById("workflowSubtitle").textContent = workflowSubtitle;
 document.getElementById("workflowPill").textContent = workflowToken;
 document.getElementById("workflowHeading").textContent = workflowTitle;
-document.getElementById("workflowHint").textContent = "Canvas persistido por workflow. En edición puedes mover y renombrar la actividad base de " + workflowTitle + ".";
 renderSidebarTree();
 
 function loadWorkflowState(){
@@ -1203,6 +1201,224 @@ function setWorkflowPalette(nextPalette){
   saveWorkflowPalette();
   applyWorkflowPalette();
   updateWorkflowStatus(normalized === "blue" ? "Paleta azul PDF aplicada." : "Paleta naranjo aplicada.");
+}
+
+const WORKFLOW_STEP_CONTENT = {
+  "1": `
+<h2>Recepción de Requerimiento</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: QCotizador</span></p>
+<h3>Objetivo</h3>
+<p>Establecer el proceso mediante el cual el área comercial recibe y revisa preliminarmente los requerimientos del cliente para iniciar la evaluación y elaboración de cotizaciones.</p>
+<h3>Roles y responsabilidades</h3>
+<ol>
+<li>Recibir el requerimiento del cliente por los distintos canales disponibles.</li>
+<li>Revisar preliminarmente la información proporcionada.</li>
+<li>Solicitar antecedentes adicionales cuando la información sea insuficiente.</li>
+<li>Registrar el requerimiento en el sistema comercial.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-001 Solicitud de Cliente</a>
+<a class="doc-link" href="#" download>RG-CC-002 Respaldo de Comunicaciones Comerciales</a>
+</div>
+`,
+  "1.1": `
+<h2>Validar Técnica y Operativamente</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span></p>
+<h3>Consultas</h3>
+<ol>
+<li>Operaciones y áreas técnicas.</li>
+<li>Laboratorios / ETFA.</li>
+<li>Permisología, inspectores, equipos, insumos y logística.</li>
+</ol>
+<h3>Objetivo</h3>
+<p>Levantar la factibilidad técnica y operativa antes de elaborar la cotización.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-004 Matriz de Validación Técnica</a>
+<a class="doc-link" href="#" download>RG-CC-005 Respuesta de Áreas de Apoyo</a>
+</div>
+`,
+  "2": `
+<h2>Elaborar Cotización</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistemas: Qcotizador / QETFA</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Analizar el requerimiento y la información levantada.</li>
+<li>Seleccionar servicios ETFA aplicables.</li>
+<li>Adjuntar el archivo de costeo.</li>
+<li>Registrar la propuesta y validar su estructura en sistema.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-006 Archivo de Costeo</a>
+<a class="doc-link" href="#" download>RG-CC-007 Borrador de Cotización</a>
+</div>
+`,
+  "3": `
+<h2>Aprobar Cotización</h2>
+<p><span class="pill">Responsable: Gerente de Desarrollo de Negocios</span></p>
+<h3>Revisión</h3>
+<ol>
+<li>Validar estructura técnica y comercial.</li>
+<li>Revisar precios, alcances y condiciones.</li>
+<li>Aprobar o devolver para corrección.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-008 Registro de Aprobación Comercial</a>
+<a class="doc-link" href="#" download>RG-CC-009 Observaciones de Revisión</a>
+</div>
+`,
+  "4": `
+<h2>Notificar al Cliente</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+<h3>Acciones</h3>
+<ol>
+<li>Enviar correo personalizado al cliente.</li>
+<li>Adjuntar la cotización aprobada.</li>
+<li>Dejar registro del envío.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-010 Cotización Emitida al Cliente</a>
+<a class="doc-link" href="#" download>RG-CC-011 Comprobante de Envío</a>
+</div>
+`,
+  "5": `
+<h2>Realizar Seguimiento</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span></p>
+<h3>Regla</h3>
+<p>Se ejecuta seguimiento si al tercer día aún no existe respuesta del cliente.</p>
+<h3>Acciones</h3>
+<ol>
+<li>Confirmar recepción de la cotización.</li>
+<li>Resolver dudas comerciales y técnicas.</li>
+<li>Detectar interés o necesidad de ajuste.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-012 Bitácora de Seguimiento Comercial</a>
+<a class="doc-link" href="#" download>RG-CC-013 Respuesta del Cliente</a>
+</div>
+`,
+  "6": `
+<h2>Realizar Negociación</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span></p>
+<h3>Objetivo</h3>
+<p>Ajustar precios, plazos y condiciones comerciales según la necesidad del cliente.</p>
+<h3>Resultado</h3>
+<p>La cotización puede ser aceptada o rechazada.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-014 Registro de Negociación</a>
+<a class="doc-link" href="#" download>RG-CC-015 Condiciones Comerciales Ajustadas</a>
+</div>
+`,
+  "7": `
+<h2>Rechazar Cotización</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+<h3>Acción</h3>
+<p>Registrar el rechazo de la propuesta cuando el cliente no acepta la cotización.</p>
+<h3>Salida</h3>
+<p>Cotización rechazada y cerrada en el flujo.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-016 Registro de Rechazo de Cotización</a>
+</div>
+`,
+  "7.1": `
+<h2>Creación de Cliente en BOSS</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: BOSS</span></p>
+<h3>Condición</h3>
+<p>Aplica cuando la cotización aceptada corresponde a un cliente prospecto que aún no existe en los sistemas corporativos.</p>
+<h3>Acciones</h3>
+<ol>
+<li>Crear el cliente en BOSS.</li>
+<li>Validar que la información maestra quede disponible para el cierre comercial.</li>
+<li>Continuar con la aceptación y posterior creación o actualización de la OL.</li>
+</ol>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-018 Creación de Cliente Prospecto en BOSS</a>
+</div>
+`,
+  "7.2": `
+<h2>Aceptar Cotización</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Qcotizador</span></p>
+<h3>Validación previa</h3>
+<p>Si el cliente es prospecto, primero debe existir en BOSS antes de aceptar la cotización en sistema.</p>
+<h3>Salida</h3>
+<p>Cotización aceptada para crear o actualizar la OL.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-017 Aceptación de Cotización</a>
+<a class="doc-link" href="#" download>RG-CC-018 Creación de Cliente Prospecto en BOSS</a>
+</div>
+`,
+  "8": `
+<h2>Crear o Actualizar OL</h2>
+<p><span class="pill">Responsable: Ejecutivo Comercial</span><span class="pill">Sistema: Syscom</span></p>
+<h3>Pasos</h3>
+<ol>
+<li>Confirmar aceptación comercial.</li>
+<li>Crear o actualizar la OL.</li>
+<li>Dejar la orden lista para continuar el proceso.</li>
+</ol>
+<h3>Salida</h3>
+<p>OL creada o actualizada.</p>
+<h3>Registros</h3>
+<div class="doc-links">
+<a class="doc-link" href="#" download>RG-CC-019 Orden de Laboratorio</a>
+<a class="doc-link" href="#" download>RG-CC-020 Confirmación de Actualización de OL</a>
+</div>
+`
+};
+
+function getWorkflowPublicationStepId(item){
+  if(!item){
+    return "";
+  }
+  if(item.kind === "flow-card" && item.step){
+    return String(item.step);
+  }
+  if(item.type === "process" && item.id === "boss-1"){
+    return "7.1";
+  }
+  return "";
+}
+
+function openStep(step){
+  const normalizedStep = String(step || "").trim();
+  const content = WORKFLOW_STEP_CONTENT[normalizedStep] || "<h2>Sin detalle</h2><p>No hay contenido configurado para esta actividad.</p>";
+  const titleMatch = content.match(/<h2>(.*?)<\/h2>/);
+  let rendered = content;
+  if(titleMatch){
+    rendered = content.replace(
+      titleMatch[0],
+      `<div class="content-title"><span class="content-step-badge">${escapeHtml(normalizedStep || "•")}</span><h2>${titleMatch[1]}</h2></div>`
+    );
+  }
+  const panelEl = document.getElementById("workflowPublicationPanel");
+  const contentEl = document.getElementById("workflowPublicationContent");
+  if(!panelEl || !contentEl){
+    return;
+  }
+  contentEl.innerHTML = rendered;
+  panelEl.dataset.currentStep = normalizedStep;
+  panelEl.classList.add("is-open");
+  document.body.classList.add("panel-open");
+}
+
+function closeWorkflowPublicationPanel(event){
+  if(event){
+    event.stopPropagation();
+  }
+  const panelEl = document.getElementById("workflowPublicationPanel");
+  if(panelEl){
+    panelEl.classList.remove("is-open");
+  }
+  document.body.classList.remove("panel-open");
 }
 
 function updateWorkflowStatus(message){
@@ -2098,12 +2314,13 @@ function renderWorkflowCanvas(){
         }
         selectWorkflowItem(item.id);
       });
-    }else if(item.kind === "flow-card" && item.step){
-      el.addEventListener("click", function(){
-        if(typeof window.openStep === "function"){
-          window.openStep(item.step);
-        }
-      });
+    }else{
+      const publicationStep = getWorkflowPublicationStepId(item);
+      if(publicationStep){
+        el.addEventListener("click", function(){
+          openStep(publicationStep);
+        });
+      }
     }
     viewportEl.appendChild(el);
   });
@@ -4276,6 +4493,14 @@ document.getElementById("addWorkflowIconButton").addEventListener("click", addWo
 document.getElementById("groupWorkflowSelectionButton").addEventListener("click", groupWorkflowSelection);
 document.getElementById("ungroupWorkflowSelectionButton").addEventListener("click", ungroupWorkflowSelection);
 document.getElementById("workflowCanvasShell").addEventListener("pointerdown", startWorkflowCanvasPan);
+document.getElementById("workflowPublicationPanel").addEventListener("click", closeWorkflowPublicationPanel);
+document.getElementById("closeWorkflowPublicationPanelButton").addEventListener("click", closeWorkflowPublicationPanel);
+document.getElementById("workflowPublicationContent").addEventListener("click", function(event){
+  const link = event.target.closest(".doc-link");
+  if(link){
+    event.preventDefault();
+  }
+});
 document.getElementById("workflowCanvasShell").addEventListener("contextmenu", function(event){
   if(isEditingWorkflow){
     event.preventDefault();

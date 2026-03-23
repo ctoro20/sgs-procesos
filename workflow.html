@@ -10,7 +10,6 @@
 <div class="app-shell">
   <aside class="sidebar">
     <div class="brand">
-      <img class="brand-logo" src="logo.png" alt="Logo CONEMI">
       <div class="brand-copy">
         <strong>Portal de Procesos</strong>
         <span>Publicacion institucional CONEMI</span>
@@ -37,8 +36,10 @@
   <div class="app-main">
     <header class="topbar">
       <div class="topbar-copy">
-        <h1 id="workflowTitle">Workflow</h1>
-        <p id="workflowSubtitle">Mapa asociado al proceso seleccionado.</p>
+        <div class="topbar-title-row">
+          <img class="topbar-logo" src="logo.png" alt="Logo CONEMI">
+          <h1 id="workflowTitle">Workflow</h1>
+        </div>
       </div>
       <div class="topbar-tools">
         <div class="status-chip">
@@ -85,7 +86,6 @@
             </div>
           </div>
         </div>
-        <p class="hint" id="workflowHint">Canvas persistido por workflow. En edición puedes mover y renombrar la actividad base.</p>
         <div class="diagram-shell">
           <div class="workflow-editor-shell" id="workflowFullscreenTarget">
             <div class="diagram" id="workflowDiagram" data-editing="false">
@@ -121,6 +121,15 @@
             <aside class="workflow-inspector" id="workflowInspector">
               <div class="workflow-inspector-empty">Selecciona un objeto en modo edición para personalizarlo.</div>
             </aside>
+            <div class="side-panel" id="workflowPublicationPanel">
+              <div class="panel-content" onclick="event.stopPropagation()">
+                <div class="panel-header">
+                  <div class="panel-title">Detalle de actividad</div>
+                  <button class="close" id="closeWorkflowPublicationPanelButton" type="button" aria-label="Cerrar panel">×</button>
+                </div>
+                <div id="workflowPublicationContent"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
