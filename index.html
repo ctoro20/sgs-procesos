@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Macroprocesos CONEMI</title>
+<link rel="stylesheet" href="app-shell.css">
 <style>
 :root{
 --bg:#ececec;
@@ -14,6 +15,30 @@
 --orange-soft:#e9c59d;
 --gray:#7c7c7c;
 --card:#f4f4f4;
+--node-fill:#efefef;
+--node-border:#ababab;
+--main-fill:#d4d4d4;
+--main-border:#9a9a9a;
+--process-fill:#f5f5f5;
+--process-hover:#fbf7f2;
+--arrow:#7d7d7d;
+}
+
+body[data-palette="blue"]{
+--bg:#eef2f6;
+--text:#35516b;
+--muted:#62798d;
+--orange:#1f6fb2;
+--orange-soft:#6fa8d8;
+--gray:#6f8192;
+--card:#e8f0f8;
+--node-fill:#eef5fb;
+--node-border:#6fa8d8;
+--main-fill:#dbe8f4;
+--main-border:#8eaac3;
+--process-fill:#eef5fb;
+--process-hover:#f6faff;
+--arrow:#71859a;
 }
 
 *{
@@ -31,199 +56,6 @@ min-height:100vh;
 body.panel-open{
 overflow:hidden;
 }
-
-.app-shell{
-display:flex;
-min-height:100vh;
-}
-
-.sidebar{
-width:280px;
-padding:24px 18px;
-background:linear-gradient(180deg, #20303d 0%, #18242d 100%);
-color:#dce4ea;
-border-right:1px solid rgba(255,255,255,.08);
-}
-
-.brand{
-display:flex;
-align-items:center;
-gap:12px;
-padding:0 8px 18px;
-margin-bottom:18px;
-border-bottom:1px solid rgba(255,255,255,.08);
-}
-
-.brand-logo{
-width:52px;
-height:52px;
-padding:8px;
-border-radius:14px;
-background:rgba(255,255,255,.96);
-object-fit:contain;
-box-shadow:0 8px 18px rgba(0,0,0,.16);
-}
-
-.brand-copy strong{
-display:block;
-font-size:16px;
-color:#fff;
-}
-
-.brand-copy span{
-font-size:12px;
-color:#a9b7c1;
-}
-
-.nav-section{
-margin-bottom:24px;
-}
-
-.nav-title{
-padding:0 8px;
-margin:0 0 10px;
-font-size:11px;
-letter-spacing:.12em;
-text-transform:uppercase;
-color:#8ea0ad;
-}
-
-.nav-list{
-display:flex;
-flex-direction:column;
-gap:6px;
-}
-
-.nav-tree{
-display:flex;
-flex-direction:column;
-gap:14px;
-}
-
-.nav-group{
-display:flex;
-flex-direction:column;
-gap:8px;
-}
-
-.nav-group-label{
-display:flex;
-align-items:center;
-gap:10px;
-padding:4px 4px 4px 0;
-color:#f3f7fa;
-font-size:12px;
-font-weight:700;
-letter-spacing:.04em;
-}
-
-.nav-group-children{
-display:flex;
-flex-direction:column;
-gap:4px;
-padding-left:14px;
-border-left:1px solid rgba(255,255,255,.06);
-margin-left:16px;
-}
-
-.nav-group .nav-pill{
-min-width:26px;
-height:20px;
-padding:0 6px;
-font-size:11px;
-background:rgba(255,255,255,.08);
-color:#fff;
-}
-
-.nav-group .nav-link{
-padding:8px 10px;
-border-radius:10px;
-font-size:13px;
-color:#cfd9df;
-}
-
-.nav-group .nav-link:hover,
-.nav-group .nav-link.active{
-background:rgba(255,255,255,.06);
-}
-
-.nav-link{
-display:flex;
-align-items:center;
-gap:10px;
-padding:10px 12px;
-border-radius:12px;
-color:#dce4ea;
-text-decoration:none;
-font-size:14px;
-}
-
-.nav-link:hover,
-.nav-link.active{
-background:rgba(255,255,255,.08);
-color:#fff;
-}
-
-.nav-pill{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-min-width:32px;
-height:24px;
-padding:0 8px;
-border-radius:999px;
-background:rgba(235,122,7,.18);
-color:#ffd9b3;
-font-size:12px;
-font-weight:700;
-}
-
-.sidebar-footer{
-margin-top:auto;
-padding:16px 8px 0;
-font-size:12px;
-line-height:1.5;
-color:#99a8b2;
-}
-
-.app-main{
-flex:1;
-min-width:0;
-display:flex;
-flex-direction:column;
-}
-
-.topbar{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:16px;
-padding:18px 26px 20px;
-background:linear-gradient(180deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.78) 100%);
-backdrop-filter:blur(14px);
-border-bottom:1px solid rgba(0,0,0,.06);
-}
-
-.topbar-copy h1{
-margin:0;
-font-size:20px;
-font-weight:700;
-color:#253441;
-}
-
-.topbar-copy p{
-margin:4px 0 0;
-font-size:13px;
-color:#71808a;
-}
-
-
-.topbar-tools{
-display:flex;
-align-items:center;
-gap:14px;
-}
-
 .status-chip,
 .user-chip{
 display:flex;
@@ -261,51 +93,12 @@ color:#31424f;
 width:36px;
 height:36px;
 border-radius:50%;
-background:linear-gradient(135deg, #344a5a 0%, #50687a 100%);
+display:grid;
+place-items:center;
+background:#20303d;
 color:#fff;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:700;
-}
-
-.workspace{
-flex:1;
-overflow:auto;
-position:relative;
-}
-
-.page{
-padding:28px 22px 34px;
-}
-
-.page-modebar{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-margin:0 0 14px;
-}
-
-.page-modechip{
-display:inline-flex;
-align-items:center;
-gap:8px;
-padding:9px 12px;
-border-radius:999px;
-background:rgba(32,48,61,.08);
-color:#32434f;
 font-size:13px;
 font-weight:700;
-}
-
-.page-modechip::before{
-content:"";
-width:9px;
-height:9px;
-border-radius:50%;
-background:#2fa36b;
-box-shadow:0 0 0 4px rgba(47,163,107,.14);
 }
 
 .diagram-shell{
@@ -457,55 +250,6 @@ background:#f6f8f9;
 background:#20303d;
 border-color:#20303d;
 color:#fff;
-}
-
-.floating-map-tools{
-display:flex;
-align-items:center;
-gap:8px;
-padding:6px;
-border-radius:14px;
-background:rgba(255,255,255,.96);
-border:1px solid rgba(32,48,61,.1);
-box-shadow:0 14px 28px rgba(25,42,53,.18);
-z-index:1100;
-}
-
-.floating-map-tools .diagram-zoom-value{
-min-width:46px;
-font-size:11px;
-}
-
-.floating-map-button{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-width:30px;
-height:30px;
-padding:0;
-border:1px solid rgba(32,48,61,.12);
-border-radius:9px;
-background:#fff;
-color:#31424f;
-font-size:14px;
-line-height:1;
-cursor:pointer;
-}
-
-.floating-map-button:hover{
-background:#f6f8f9;
-}
-
-.floating-map-button.is-active{
-background:#20303d;
-border-color:#20303d;
-color:#fff;
-}
-
-#zoomResetButton{
-font-size:10px;
-font-weight:700;
-letter-spacing:.01em;
 }
 
 .text-editor-modal{
@@ -1031,7 +775,7 @@ stroke-width:12;
 }
 
 .diagram-arrows .arrow-line{
-stroke:#7d7d7d;
+stroke:var(--arrow);
 stroke-width:1.3;
 marker-end:url(#arrow);
 }
@@ -1061,8 +805,8 @@ text-align:center;
 text-decoration:none;
 color:var(--text);
 border-radius:22px;
-background:#efefef;
-border:2px solid #ababab;
+background:var(--node-fill);
+border:2px solid var(--node-border);
 font-size:15px;
 line-height:1.15;
 padding:9px 12px;
@@ -1076,8 +820,8 @@ left:522px;
 top:24px;
 font-size:17px;
 border-radius:14px;
-background:#d4d4d4;
-border-color:#9a9a9a;
+background:var(--main-fill);
+border-color:var(--main-border);
 }
 
 .node.area{
@@ -1091,7 +835,7 @@ width:150px;
 height:62px;
 border-color:var(--orange-soft);
 font-size:13px;
-background:#f5f5f5;
+background:var(--process-fill);
 transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
 cursor:pointer;
 }
@@ -1099,13 +843,13 @@ cursor:pointer;
 .node.process:hover{
 transform:translateY(-2px);
 box-shadow:0 8px 18px rgba(0,0,0,.10);
-background:#fbf7f2;
+background:var(--process-hover);
 }
 
 .diagram[data-editing="true"] .node.process:hover{
 transform:none;
 box-shadow:none;
-background:#f5f5f5;
+background:var(--process-fill);
 }
 
 .diagram[data-editing="true"] .diagram-item{
@@ -1531,20 +1275,8 @@ font-size:14px;
 }
 
 @media (max-width: 900px){
-.app-shell{
-display:block;
-}
-
-.sidebar{
-width:auto;
-}
-
-.topbar{
-padding:16px;
-}
-
 .page{
-padding:14px 0 20px;
+gap:12px;
 }
 
 .hint{
@@ -1557,7 +1289,6 @@ margin-left:16px;
 <div class="app-shell">
 <aside class="sidebar">
 <div class="brand">
-<img class="brand-logo" src="logo.png" alt="CONEMI">
 <div class="brand-copy">
 <strong>Portal de Procesos</strong>
 <span>Publicacion institucional CONEMI</span>
@@ -1608,8 +1339,10 @@ Version publicada: Marzo 2026
 <div class="app-main">
 <header class="topbar">
 <div class="topbar-copy">
+<div class="topbar-title-row">
+<img class="topbar-logo" src="logo.png" alt="Logo CONEMI">
 <h1>Publicacion de Procesos</h1>
-<p>Consulta navegable de macroprocesos, trazabilidad y acceso a detalle operativo.</p>
+</div>
 </div>
 <div class="topbar-tools">
 <div class="status-chip">
@@ -1633,12 +1366,14 @@ Version publicada: Marzo 2026
 <div class="page">
 <div class="page-modebar">
 <div class="page-modechip" id="pageModeChip">Modo publicación</div>
+<div class="workflow-mode-tools">
 <div class="floating-map-tools" id="floatingMapTools">
 <button class="floating-map-button" id="floatingEditModeButton" type="button" title="Entrar a edición" aria-label="Entrar a edición">✎</button>
 <button class="floating-map-button" id="zoomOutButton" type="button" title="Reducir zoom" aria-label="Reducir zoom">-</button>
 <button class="floating-map-button" id="zoomResetButton" type="button" title="Volver a 100%" aria-label="Volver a 100%">100</button>
 <button class="floating-map-button" id="zoomInButton" type="button" title="Aumentar zoom" aria-label="Aumentar zoom">+</button>
 <div class="diagram-zoom-value" id="zoomValue">100%</div>
+</div>
 </div>
 </div>
 <p class="hint">Selecciona un macroproceso para ver su explicación. En `P1 Cotizaciones` también puedes abrir el flujo detallado.</p>
@@ -1650,6 +1385,10 @@ Version publicada: Marzo 2026
 <span>Activa edición para mover cajas, textos y flechas. El layout se guarda localmente como simulación persistente.</span>
 </div>
 <div class="diagram-actions">
+<div class="palette-switch" id="diagramPaletteSwitch" aria-label="Paleta de colores">
+<button class="palette-switch-button" id="diagramPaletteOrangeButton" type="button" data-palette-option="orange">Naranjo</button>
+<button class="palette-switch-button" id="diagramPaletteBlueButton" type="button" data-palette-option="blue">Azul PDF</button>
+</div>
 <button class="diagram-button" id="toggleEditButton" type="button">Editar mapa</button>
 <button class="diagram-button" id="copyLayoutButton" type="button">Copiar JSON</button>
 <button class="diagram-button" id="resetLayoutButton" type="button">Restablecer</button>
@@ -1697,6 +1436,7 @@ Version publicada: Marzo 2026
 <script>
 const DIAGRAM_STORAGE_KEY = "conemi-map-layout-v1";
 const DIAGRAM_ZOOM_STORAGE_KEY = "conemi-map-zoom-v1";
+const DIAGRAM_PALETTE_STORAGE_KEY = "conemi-map-palette-v1";
 const PROCESS_DETAILS_STORAGE_KEY = "conemi-process-details-v1";
 const ITEM_DETAILS_STORAGE_KEY = "conemi-item-details-v1";
 const WORKFLOW_CATALOG_STORAGE_KEY = "conemi-workflow-catalog-v1";
@@ -1750,6 +1490,7 @@ let diagramState = loadDiagramState();
 let isEditingDiagram = false;
 let activeDrag = null;
 let diagramZoom = loadDiagramZoom();
+let diagramPalette = loadDiagramPalette();
 let activeTextEditItemId = null;
 
 const processContent = {
@@ -2732,6 +2473,46 @@ return raw;
 return 1;
 }
 
+function loadDiagramPalette(){
+try{
+const raw = String(window.localStorage.getItem(DIAGRAM_PALETTE_STORAGE_KEY) || "").trim().toLowerCase();
+return raw === "blue" ? "blue" : "orange";
+}catch(error){
+return "orange";
+}
+}
+
+function saveDiagramPalette(){
+window.localStorage.setItem(DIAGRAM_PALETTE_STORAGE_KEY, diagramPalette);
+}
+
+function applyDiagramPalette(){
+document.body.dataset.palette = diagramPalette;
+const orangeButton = document.getElementById("diagramPaletteOrangeButton");
+const blueButton = document.getElementById("diagramPaletteBlueButton");
+if(orangeButton){
+orangeButton.classList.toggle("is-active", diagramPalette === "orange");
+orangeButton.setAttribute("aria-pressed", diagramPalette === "orange" ? "true" : "false");
+}
+if(blueButton){
+blueButton.classList.toggle("is-active", diagramPalette === "blue");
+blueButton.setAttribute("aria-pressed", diagramPalette === "blue" ? "true" : "false");
+}
+}
+
+function setDiagramPalette(nextPalette){
+const normalized = nextPalette === "blue" ? "blue" : "orange";
+if(normalized === diagramPalette){
+applyDiagramPalette();
+return;
+}
+diagramPalette = normalized;
+saveDiagramPalette();
+applyDiagramPalette();
+renderDiagram();
+updateDiagramStatus(normalized === "blue" ? "Paleta azul PDF aplicada." : "Paleta naranjo aplicada.");
+}
+
 function saveDiagramZoom(){
 window.localStorage.setItem(DIAGRAM_ZOOM_STORAGE_KEY, String(diagramZoom));
 }
@@ -3083,7 +2864,7 @@ return point.x + "," + point.y;
 return `<g data-arrow-id="${arrow.id}"><polyline class="arrow-hit" data-arrow-id="${arrow.id}" points="${points}"></polyline><polyline class="arrow-line" data-arrow-id="${arrow.id}" points="${points}"></polyline></g>`;
 }).join("");
 
-return `<svg viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7d7d7d"></path></marker></defs>${polylines}</svg>`;
+return `<svg viewBox="0 0 ${bounds.width} ${bounds.height}" aria-hidden="true" style="color:var(--arrow);"><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path></marker></defs>${polylines}</svg>`;
 }
 
 function createDiagramItemElement(item){
@@ -4045,9 +3826,16 @@ document.getElementById("resetLayoutButton").addEventListener("click", resetDiag
 document.getElementById("zoomInButton").addEventListener("click", zoomIn);
 document.getElementById("zoomOutButton").addEventListener("click", zoomOut);
 document.getElementById("zoomResetButton").addEventListener("click", resetZoom);
+document.getElementById("diagramPaletteOrangeButton").addEventListener("click", function(){
+setDiagramPalette("orange");
+});
+document.getElementById("diagramPaletteBlueButton").addEventListener("click", function(){
+setDiagramPalette("blue");
+});
 refreshAttachedFileOwners().catch(function(){
 itemsWithAttachedFiles = new Set();
 }).finally(function(){
+applyDiagramPalette();
 applyProcessNavigationLinks();
 renderDiagram();
 });
